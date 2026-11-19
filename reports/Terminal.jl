@@ -102,7 +102,17 @@ function print_terminal_detail(text::AbstractString; prefix::String="  ", width:
             # When text remains, break at the last space that has text before it -
             if stop < length(characters)
                 gap = findlast(isspace, characters[start:stop]);
-                if gap !== nothing && any(c -> !isspace(c), characters[start:start+gap-2])
+
+                # Check that some character before the space is not a space -
+                has_text = false;
+                if gap !== nothing
+                    for position in start:(start + gap - 2)
+                        if !isspace(characters[position])
+                            has_text = true;
+                        end
+                    end
+                end
+                if has_text
                     finish = start + gap - 2;
                     println(rstrip(prefix * join(characters[start:finish])));
                     start = finish + 2;
