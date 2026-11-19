@@ -1,0 +1,213 @@
+# PS6 market: the Farmer-Joshi market, written as a loop that calls your rung functions.
+# This file is supplied. Do not edit it.
+
+"""
+    build_market(settings::NamedTuple, seed::Int; value_number::Int = settings.value_number,
+        trend_number::Int = settings.trend_number) -> MyFarmerJoshiMarketModel
+
+Draw the traders of one market with the course `build` function.
+
+### Arguments
+
+- `settings`: The settings from `load_config`.
+- `seed`: The run number. The traders are drawn from a random generator seeded with `base_seed + seed`.
+- `value_number`: The number of value investors. The default is the number in `settings`.
+- `trend_number`: The number of trend followers. The default is the number in `settings`.
+
+### Returns
+
+- The market model, holding each trader's entry threshold, exit threshold, capital, offset or lag.
+"""
+function build_market(settings::NamedTuple, seed::Int; value_number::Int = settings.value_number,
+    trend_number::Int = settings.trend_number)::MyFarmerJoshiMarketModel
+
+    # Collect the settings under the names the course build function reads -
+    data = (value_number = value_number, trend_number = trend_number,
+        value_T_min = settings.value_T_min, value_T_max = settings.value_T_max,
+        value_τ_min = settings.value_tau_min, value_τ_max = settings.value_tau_max,
+        trend_T_min = settings.trend_T_min, trend_T_max = settings.trend_T_max,
+        trend_τ_min = settings.trend_tau_min, trend_τ_max = settings.trend_tau_max,
+        value_a = settings.capital_scale, trend_a = settings.capital_scale,
+        value_v_min = settings.value_v_min, value_v_max = settings.value_v_max,
+        trend_θ_min = settings.trend_lag_min, trend_θ_max = settings.trend_lag_max,
+        λ = settings.liquidity, σ_S = settings.sigma_S, σ_v = settings.sigma_v,
+        μ_v = settings.mu_v, Δt = settings.Δt, rng = MersenneTwister(settings.base_seed + seed));
+
+    # Draw the traders -
+    return build(MyFarmerJoshiMarketModel, data);
+end
+
+"""
+    rung_position(rung::Int, K::Int, c::Float64) -> Float64
+
+Convert a trader's rung into the position the market sees.
+
+### Arguments
+
+- `rung`: The trader's rung, a whole number from `-K` to `K`.
+- `K`: The top rung.
+- `c`: The trader's capital.
+
+### Returns
+
+- `c` on rung `K` (long), `-c` on rung `-K` (short), and `0.0` on every other rung.
+"""
+function rung_position(rung::Int, K::Int, c::Float64)::Float64
+
+    # Only the top and bottom rungs hold a position -
+    if rung == K
+        return c;
+    end
+    if rung == -K
+        return -c;
+    end
+    return 0.0;
+end
+
+"""
+    check_rung(rung, K::Int, name::String) -> Int
+
+Check that a function returned a rung.
+
+### Arguments
+
+- `rung`: The value the function returned.
+- `K`: The top rung.
+- `name`: The name of the function, used in the error message.
+
+### Returns
+
+- The rung, when it is an `Int` from `-K` to `K`. Otherwise throws an `ArgumentError` that names the function.
+"""
+function check_rung(rung, K::Int, name::String)::Int
+
+    # A rung is a whole number from -K to K -
+    if !(rung isa Int) || rung < -K || rung > K
+        throw(ArgumentError("$name returned $rung; a rung must be a whole number from -$K to $K."));
+    end
+    return rung;
+end
+
+"""
+    next_rung(rule::Symbol, rung::Int, z::Float64, T::Float64, τ::Float64, K::Int, p::Float64, u::Float64) -> Int
+
+Find one trader's rung for the next step.
+
+### Arguments
+
+- `rule`: `:three` calls `three_state_rung`, and `:conviction` calls `conviction_rung`.
+- `rung`: The trader's current rung.
+- `z`: The trader's signal, positive when the signal favors a long position.
+- `T`: The trader's entry threshold.
+- `τ`: The trader's exit threshold.
+- `K`: The top rung.
+- `p`: The probability that the trader acts on a proposed move.
+- `u`: A uniform random number on [0, 1) for this trader and this step.
+
+### Returns
+
+- The next rung. Calls `hesitant_rung` only when `p < 1.0`.
+"""
+function next_rung(rule::Symbol, rung::Int, z::Float64, T::Float64, τ::Float64, K::Int, p::Float64, u::Float64)::Int
+
+    # Ask the rule for the rung it proposes -
+    proposed = rung;
+    if rule == :three
+        proposed = check_rung(three_state_rung(rung, z, T, τ), K, "three_state_rung");
+    else
+        proposed = check_rung(conviction_rung(rung, z, T, τ, K), K, "conviction_rung");
+    end
+
+    # A trader that always acts takes the proposed rung -
+    if p >= 1.0
+        return proposed;
+    end
+
+    # A hesitant trader acts on the proposal only some of the time -
+    return check_rung(hesitant_rung(rung, proposed, p, u), K, "hesitant_rung");
+end
+
+"""
+    simulate_market(model::MyFarmerJoshiMarketModel, rule::Symbol, K::Int, p::Float64;
+        number_of_steps::Int, burn_in::Int, seed::Int) -> NamedTuple
+
+Run one Farmer-Joshi market, with each trader's next rung set by your functions.
+
+### Arguments
+
+- `model`: The market from `build_market`.
+- `rule`: `:three` (requires `K == 1`) or `:conviction`.
+- `K`: The top rung. The traders have `2K + 1` rungs.
+- `p`: The probability that a trader acts on a proposed move.
+- `number_of_steps`: The number of daily steps kept.
+- `burn_in`: The number of first daily steps dropped.
+- `seed`: The run number. The price and value noise come from `Xoshiro(seed + 1)`, and the
+  uniform numbers for `hesitant_rung` from `Xoshiro(seed + 2)`.
+
+### Returns
+
+- A `NamedTuple` with `log_price` and `log_value`, each `number_of_steps + 1` long.
+"""
+function simulate_market(model::MyFarmerJoshiMarketModel, rule::Symbol, K::Int, p::Float64;
+    number_of_steps::Int, burn_in::Int, seed::Int)::NamedTuple
+
+    # Check the rule and the top rung -
+    if rule != :three && rule != :conviction
+        throw(ArgumentError("The rule must be :three or :conviction."));
+    end
+    if rule == :three && K != 1
+        throw(ArgumentError("The rule :three needs K = 1."));
+    end
+
+    # Two random streams, one for the noise and one for the traders' actions -
+    noise_rng = Xoshiro(seed + 1);
+    action_rng = Xoshiro(seed + 2);
+
+    # Start every trader flat, at log price 0 and log value 0 -
+    total = burn_in + number_of_steps;
+    log_price = zeros(total + 1);
+    log_value = zeros(total + 1);
+    value_rungs = zeros(Int, length(model.value_entry));
+    trend_rungs = zeros(Int, length(model.trend_entry));
+    sqrt_dt = sqrt(model.Δt);
+
+    # One loop pass per daily step -
+    for k in 1:total
+
+        # The net demand of every trader this step -
+        net = 0.0;
+
+        # Value investors first. A positive signal means the price is below the value.
+        for i in eachindex(value_rungs)
+            z = -(log_price[k] - (log_value[k] + model.value_offset[i]));
+            u = rand(action_rng);
+            old_rung = value_rungs[i];
+            new_rung = next_rung(rule, old_rung, z, model.value_entry[i], model.value_exit[i], K, p, u);
+            c = model.value_capital[i];
+            net += rung_position(new_rung, K, c) - rung_position(old_rung, K, c);
+            value_rungs[i] = new_rung;
+        end
+
+        # Trend followers next. Each draws its number, then waits until it has a full lag of history.
+        for j in eachindex(trend_rungs)
+            u = rand(action_rng);
+            lag = model.trend_lag[j];
+            if k - 1 >= lag
+                z = log_price[k] - log_price[k - lag];
+                old_rung = trend_rungs[j];
+                new_rung = next_rung(rule, old_rung, z, model.trend_entry[j], model.trend_exit[j], K, p, u);
+                c = model.trend_capital[j];
+                net += rung_position(new_rung, K, c) - rung_position(old_rung, K, c);
+                trend_rungs[j] = new_rung;
+            end
+        end
+
+        # The net demand moves the price, and the value takes its own step -
+        log_price[k + 1] = log_price[k] + net / model.λ + model.σ_S * sqrt_dt * randn(noise_rng);
+        log_value[k + 1] = log_value[k] + model.μ_v * model.Δt + model.σ_v * sqrt_dt * randn(noise_rng);
+    end
+
+    # Keep the steps after the burn-in -
+    kept = (burn_in + 1):(total + 1);
+    return (log_price = log_price[kept], log_value = log_value[kept]);
+end
