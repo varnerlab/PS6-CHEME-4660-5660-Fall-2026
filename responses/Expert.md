@@ -15,8 +15,8 @@ place of the TODO.
 graded. The daily growth rates of SPY have fat tails, volatility clustering, and
 a weak autocorrelation. Which of these stylized facts will the market with both
 value investors and trend followers reproduce? Which group of traders do you
-expect to cause each stylized fact? Will a conviction ladder with 5 or 7 states,
-or hesitant traders, move the market closer to SPY? Why?
+expect to cause each stylized fact, and why? Will a conviction ladder with 5
+or 7 states, or hesitant traders, move the market closer to SPY, and why?
 
 **b. What are the stylized facts of SPY?** In **Farmer–Joshi and SPY**, use the
 row **SPY (daily closes)**. Cite the excess kurtosis, the clustering at
@@ -37,8 +37,7 @@ lag 1. Which stylized facts does each group produce alone? Explain each group's
 autocorrelation at lag 1 with the group's rule for buying and selling.
 
 **b. What changes when both groups trade?** Compare the row **both groups** with
-the rows of each group alone. Which values of the market with both groups lie
-between the values of the two groups alone, and which do not? How do the value
+the rows **value investors only** and **trend followers only**. How do the value
 investors change the autocorrelation at lag 1 and the gap spread, compared with
 the market of trend followers only? Explain the change with the value investors'
 rule.
@@ -65,9 +64,9 @@ enters? Use these answers to explain the changes in part a.
 **c. What do hesitant traders change?** In **Hesitant traders**, compare the
 rows **5 states, p = 1**, **5 states, p = 0.5**, and **5 states, p = 0.2** with
 SPY. Cite the excess kurtosis, the clustering at lags 1–10, and the
-autocorrelation at lag 1. Use the steps from flat to long, in the last column,
-to explain what the probability `p` does to the clustering at lags 1–10 and to
-the autocorrelation at lag 1.
+autocorrelation at lag 1. Use the expected steps from flat to long, in the last
+column, to explain what the probability `p` does to the clustering at lags 1–10
+and to the autocorrelation at lag 1.
 
 **d. What can we conclude?** Do hidden states, and random moves between them,
 help the Farmer–Joshi market reproduce the stylized facts of SPY? Was your

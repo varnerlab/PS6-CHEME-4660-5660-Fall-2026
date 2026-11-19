@@ -22,20 +22,21 @@ demand. As in the course example, we'll compare the growth rates of this market
 with the daily growth rates of SPY, an exchange-traded fund that tracks the
 S&P 500 index.
 
-PS6 gives the traders **hidden states**, which the market does not see: the
-market sees only each trader's position. The idea comes from a student project
-that gave traders internal states, and from our class discussion (L12a) of
-states like those of a hidden Markov model for the Farmer–Joshi traders.
+PS6 gives the traders **hidden states**: the market sees only each trader's
+position. The idea comes from a student project that gave traders internal
+states, and from our class discussion (L12a) of giving the Farmer–Joshi traders
+states like those of a hidden Markov model.
 
 > **Do hidden states, and random moves between them, help the Farmer–Joshi
 > market reproduce the stylized facts of the daily growth rates of SPY?**
 
-You will answer this question on one of three tracks. **Standard** studies the
-course example's market and compares the market with SPY. **Advanced** adds a
-**conviction ladder**: extra flat states in which a trader builds conviction
-before taking a position. Advanced compares markets with 3, 5, and 7 states.
-**Expert** adds **hesitant traders**, who move to a new state only with a fixed
-probability, and compares three probabilities.
+We'll explore this question on three tracks, and you will choose one.
+**Standard** measures the course example's market, which has no hidden states,
+and compares the market with SPY. **Advanced** adds a **conviction ladder**:
+extra flat states in which a trader builds conviction before taking a position.
+Advanced compares markets with 3, 5, and 7 states. **Expert** adds **hesitant
+traders**, who move to a new state only with a fixed probability, and compares
+three values of that probability.
 
 ## Logistics
 
@@ -111,26 +112,10 @@ document each function.
 
 ## The market and its states
 
-The supplied simulator, in `src/Market.jl`, runs the course package's
-Farmer–Joshi market one step at a time. One step is one trading day. Each market
-has 1,200 value investors and 1,200 trend followers. At each step, the simulator
-computes each trader's signal, calls your function for the trader's next state,
-and adds up the changes in the traders' positions, the net demand. The market
-maker then moves the log price in the direction of the net demand, and random
-noise moves both the log price and the log value.
-
-- A value investor's signal is the investor's estimate of the log value minus
-  the log price. The estimate is the log value plus the investor's fixed offset.
-- A trend follower's signal is the change in the log price over the trader's
-  lag, the fixed number of steps the trader looks back.
-
-Each trader draws a fixed entry threshold, a fixed exit threshold below the
-entry threshold, and a fixed position size. The graded settings are in
-`config/defaults.toml`.
-
-**The rungs.** We'll model a trader's state as a whole number, the **rung**. In
-the course example, a trader has three rungs: `-1` (short), `0` (flat), and `1`
-(long). We call the course example's rule the **three-state rule**:
+**The rungs.** We'll model a trader's state as an integer, the **rung**. In the
+course example, a trader has three states, which we number as rungs `-1`
+(short), `0` (flat), and `1` (long). We call the course example's rule the
+**three-state rule**:
 
 - A trader on rung `0` moves to rung `1` when the signal is above the entry
   threshold, and to rung `-1` when the signal is below minus the entry
@@ -141,37 +126,52 @@ the course example, a trader has three rungs: `-1` (short), `0` (flat), and `1`
 
 A **conviction ladder** has more rungs. With 5 states, the rungs run from `-2`
 to `2`. A trader holds a long position only on the top rung and a short position
-only on the bottom rung, and holds no position on any rung in between. The
-market cannot tell a trader on rung `1` from a trader on rung `0`, because
-neither trader holds a position: the rung is the trader's hidden state.
+only on the bottom rung, and holds no position on any rung in between. With 5
+states, the market cannot tell a trader on rung `1` from a trader on rung `0`,
+because neither trader holds a position: the rung is the trader's hidden state.
+
+**The simulator.** The supplied code in `src/Market.jl` runs the course
+package's Farmer–Joshi market one step at a time. One step is one trading day.
+Each group has 1,200 traders. At each step, the simulator computes each trader's
+signal, calls your function for the trader's next rung, and adds up the changes
+in the traders' positions, the net demand. The market maker then moves the log
+price in the direction of the net demand, and random noise moves both the log
+price and the log value.
+
+- A value investor's signal is the investor's estimate of the log value minus
+  the log price. The estimate is the log value plus the investor's fixed offset.
+- A trend follower's signal is the change in the log price over the trader's
+  lag, the fixed number of steps the trader looks back.
+
+Each trader draws an entry threshold and a lower exit threshold, which stay
+fixed while the market runs. The graded settings are in `config/defaults.toml`.
 
 **The stylized facts.** The **growth rate** of the price over one step is the
 change in the log price divided by the length of the step in years, in 1/yr. The
 report compares the growth rates of each simulated market with the daily growth
-rates of SPY, from the closing prices of 2014 to 2024 in the course data set.
-Each simulated row is the mean over 5 runs of 20,000 steps. Every table has
-these columns:
+rates of SPY, from the closing prices of 2014 to 2024 that come with the course
+package. Each simulated row is the mean over 5 runs of 20,000 steps. Every table
+has these columns:
 
 | Column | What the column measures |
 |:--|:--|
 | Excess kurtosis | Fat tails: `0` for a Normal distribution, and larger when large moves are more common than in a Normal distribution |
-| Clustering, lags 1–10 and lags 11–50 | Volatility clustering: the mean autocorrelation of the absolute growth rates over the lags, in steps |
+| Clustering, lags 1–10 and lags 11–50 | Volatility clustering: the mean autocorrelation of the absolute growth rates over lags 1 to 10 or 11 to 50, measured in steps |
 | Autocorrelation, lag 1 | The correlation of each growth rate with the growth rate one step later |
-| Volatility (1/sqrt(yr)) | The standard deviation of the growth rates, annualized: the size of the price moves |
-| Gap spread | The standard deviation of the log price minus the log value: how far the price wanders from the value. SPY has no value, so its gap spread is `n/a`. |
+| Volatility (1/sqrt(yr)) | The annualized volatility of the price, which measures the size of the price moves |
+| Gap spread | The standard deviation of the log price minus the log value: how far the price wanders from the value. The course package gives no value for SPY, so SPY's gap spread is `n/a`. |
 
-Below each table, the report gives the **white-noise band**: for a series with
-no autocorrelation, 95% of the autocorrelations fall inside this band. As in the
-course example, we compare the shapes of the growth rates, not the size of the
-moves: the excess kurtosis and the autocorrelations do not change when every
-growth rate is multiplied by the same positive number.
+Below each table, the report gives the half-width of the **white-noise band**:
+for a series with no autocorrelation, 95% of the autocorrelations lie between
+minus and plus this number. As in the course example, we compare the shapes of
+the growth rates, not the size of the moves.
 
 ## Standard: the three-state rule
 
 Complete these functions:
 
 1. **`three_state_rung`** returns a trader's next rung under the three-state
-   rule. The simulator calls this function for every trader at every step.
+   rule.
 2. **`excess_kurtosis`** returns the excess kurtosis of a market's growth rates,
    from population moments.
 3. **`volatility_clustering`** returns the mean autocorrelation of the absolute
@@ -180,7 +180,7 @@ Complete these functions:
 Run the checker, read the table **Farmer–Joshi and SPY** in `results/Report.md`,
 and answer Questions 1 and 2. The table compares SPY with three markets: **value
 investors only**, **trend followers only**, and **both groups**. Standard
-students also answer Question 3 from this table and write no more code.
+students also answer Question 3 from this table.
 
 ## Advanced: the conviction ladder
 
@@ -192,10 +192,11 @@ more function:
    rung, the trader is flat. A flat trader moves one rung up when the signal is
    above the entry threshold, and one rung down when the signal is below minus
    the entry threshold. Otherwise the trader's conviction fades, and the trader
-   moves one rung toward rung `0`, or stays on rung `0`. On the top rung, the
-   trader exits to the rung below when the signal falls below the exit
-   threshold, and the bottom rung mirrors the top rung. With 3 states, this rule
-   is the three-state rule.
+   moves one rung toward rung `0`, or stays on rung `0` if the trader is already
+   there. On the top rung, the trader exits to the rung below when the signal
+   falls below the exit threshold. On the bottom rung, the trader exits to the
+   rung above when the signal rises above minus the exit threshold. With 3
+   states, this rule is the three-state rule.
 
 Rerun the checker, read the table **Conviction ladders**, and answer Question 3.
 The table compares SPY with the market with both groups at 3, 5, and 7 states.
@@ -206,10 +207,10 @@ Complete the Expert copies of the four Advanced functions, then complete two
 more functions:
 
 5. **`hesitant_rung`** returns a hesitant trader's next rung. At each step, the
-   simulator draws one uniform random number for each trader. The trader moves
-   to the rung that `conviction_rung` proposes when that number is below the
-   probability `p`, and otherwise stays on the current rung. Entries and exits
-   are both hesitant.
+   simulator draws one random number for each trader, uniformly between `0` and
+   `1`. The trader moves to the rung that `conviction_rung` proposes when that
+   number is below the probability `p`, and otherwise stays on the current rung.
+   Entries and exits are both hesitant.
 6. **`transition_matrix`** returns the one-step transition matrix of one
    trader's rung at a fixed signal. Each entry of the matrix is the probability
    of moving from the rung of the entry's row to the rung of the entry's column
@@ -224,8 +225,8 @@ states, with `p` set to `1`, `0.5`, and `0.2`.
 
 ## Explore on your own
 
-You may edit `config/explore.toml`, a copy of the graded settings. Change any
-setting, then run:
+Change any setting in `config/explore.toml`, a copy of the graded settings, and
+run:
 
 ```text
 julia --project=. --startup-file=no explore.jl
@@ -233,10 +234,10 @@ julia --project=. --startup-file=no explore.jl
 
 The script `explore.jl` runs the report of your track with your functions and
 the settings in `config/explore.toml`, and writes
-`results/exploration/Exploration.md`. The exploration is not graded and not
-submitted. You could try other numbers of states (any odd number of 3 or more),
-other probabilities, other numbers of value investors and trend followers, other
-noise levels, or other seeds.
+`results/exploration/Exploration.md`. The exploration is not graded. You could
+try other numbers of states (any odd number of 3 or more), other probabilities,
+other numbers of value investors and trend followers, other noise levels, or
+other seeds.
 
 ## Check and submit your work
 

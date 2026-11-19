@@ -1,9 +1,8 @@
 # PS6 grading rules
 
-Your selected track is graded out of **4**. An Advanced score of 4, confirmed by
-the teaching team, also earns **one Magic Point**. An Expert score of 4,
-confirmed by the teaching team, earns **two Magic Points**. PS6 earns at most
-two Magic Points. Select your track in `TRACK.txt`.
+Your selected track is graded out of **4**. A confirmed Advanced score of 4 also
+earns **one Magic Point**, and a confirmed Expert score of 4 earns **two Magic
+Points**. PS6 earns at most two Magic Points. Select your track in `TRACK.txt`.
 
 | Score | Checks passed | Other requirements |
 |:--:|:--|:--|
@@ -19,12 +18,10 @@ plus four for `conviction_rung`. Expert has **24 checks**: the same 16 plus four
 for `hesitant_rung` and four for `transition_matrix`. Completing only the work
 of an earlier track therefore earns at most 2. The cutoffs for scores 1 and 2
 are 1–6 and 7–11 checks on Standard, 1–8 and 9–15 on Advanced, and 1–12
-and 13–23 on Expert. On every track, passing every check gives a 3 or a 4,
-depending on the requirements for a 4.
+and 13–23 on Expert.
 
 Checks run separately, so an unfinished function does not block the checks of
-the other functions. Failed checks do not cause a Frozen Zero: a readable ZIP
-with attempted work by the deadline still qualifies for revisions.
+the other functions.
 
 ## Requirements for a 4
 
@@ -32,9 +29,9 @@ with attempted work by the deadline still qualifies for revisions.
   docstring, with strict comparisons. `excess_kurtosis` uses population moments.
   `volatility_clustering` averages the autocorrelations of the absolute growth
   rates over exactly the lags passed in. Use the arguments passed in; do not
-  hard-code them, and leave the growth rates unchanged.
+  hard-code them, and do not modify the growth rates `g`.
 - **Advanced:** `conviction_rung` follows the rule in its docstring for every
-  top rung `K`. Complete the Advanced copies of the three Standard functions.
+  value of `K`. Complete the Advanced copies of the three Standard functions.
 - **Expert:** `hesitant_rung` follows the rule in its docstring.
   `transition_matrix` builds each row from `conviction_rung` and the probability
   `p`, as its docstring describes, and each row of the matrix sums to one.
@@ -63,9 +60,7 @@ not used. Helper files must not define functions with the same names as the
 track functions, the supplied functions, or course functions such as `build` and
 `sample_autocorrelation`.
 
-The checker gives feedback; the teaching team assigns the grade. For work that
-passes every check, the teaching team assigns 3 or 4 after reading the
-documentation and answers.
+The checker gives feedback; the teaching team assigns the grade.
 
 ## Initial submission and revisions
 
@@ -77,9 +72,10 @@ Magic Point. Incomplete attempted work and failed checks qualify for revisions.
 After a qualifying initial submission, revisions are allowed until
 **December 19, 2026 at 11:59 PM ET**, with no limit on attempts. Use **New
 Attempt** on the same Canvas assignment. Revisions have no late penalty, even if
-Canvas labels them late. We keep your highest score, even if you change tracks,
-and the Magic Points of the track that earned that score. An Advanced or Expert
-score of 4 confirmed through a revision also earns that track's Magic Points.
+Canvas labels them late. We keep your highest score, even if you change tracks.
+You keep the Magic Points of the track that earned that score. An Advanced or
+Expert score of 4 confirmed through a revision also earns that track's Magic
+Points.
 
 ## Independent work
 

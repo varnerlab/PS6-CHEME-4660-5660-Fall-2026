@@ -4,6 +4,9 @@
 Farmer–Joshi market reproduce the stylized facts of the daily growth rates of
 SPY?
 
+The Standard track measures the Farmer–Joshi market without hidden states, the
+baseline that the Advanced and Expert tracks change.
+
 Write a few sentences for each lettered part, and label each part with its
 letter. Cite numbers from `results/Report.md`. Put your answer between each
 question's `<!-- answer-N:start -->` and `<!-- answer-N:end -->` markers, in
@@ -36,8 +39,7 @@ lag 1. Which stylized facts does each group produce alone? Explain each group's
 autocorrelation at lag 1 with the group's rule for buying and selling.
 
 **b. What changes when both groups trade?** Compare the row **both groups** with
-the rows of each group alone. Which values of the market with both groups lie
-between the values of the two groups alone, and which do not? How do the value
+the rows **value investors only** and **trend followers only**. How do the value
 investors change the autocorrelation at lag 1 and the gap spread, compared with
 the market of trend followers only? Explain the change with the value investors'
 rule.
@@ -48,13 +50,13 @@ TODO: Answer parts a and b.
 
 ## 3. What can we conclude?
 
-**a. What does the Farmer–Joshi market capture and miss?** Compare the row
+**a. What does the Farmer–Joshi market reproduce and miss?** Compare the row
 **both groups** with SPY: the excess kurtosis, the clustering at both lag
 ranges, and the autocorrelation at lag 1. Which stylized facts of SPY does the
 market reproduce, and which does the market miss?
 
 **b. What causes the differences from SPY?** For each stylized fact that the
-market misses, explain which part of the traders' rule causes the difference.
+market misses, explain which part of the three-state rule causes the difference.
 Was your prediction in part 1a right?
 
 <!-- answer-3:start -->
