@@ -1,0 +1,80 @@
+# Exploration settings for explore.jl: you may edit this file freely, and it is never graded.
+# Each setting has a short note above it.
+
+# Number of trading days in one year. The time step of the market is one trading day, 1/252 of a year.
+steps_per_year = 252
+
+# Volatility of the noise in the log price, annualized (1/sqrt(yr)).
+sigma_S = 0.8
+
+# Volatility of the noise in the log value, annualized (1/sqrt(yr)).
+sigma_v = 0.16
+
+# Drift of the log value (1/yr).
+mu_v = 0.0
+
+# Number of value investors in the market.
+value_number = 1200
+
+# Number of trend followers in the market.
+trend_number = 1200
+
+# Value investors: range of the entry threshold T, from T_min to T_max. Each trader draws one T from the range.
+value_T_min = 0.2
+value_T_max = 4.0
+
+# Value investors: range of the exit threshold tau, from tau_min to tau_max. Each trader draws one tau from the range.
+value_tau_min = -0.2
+value_tau_max = 0.0
+
+# Trend followers: range of the entry threshold T, from T_min to T_max. Each trader draws one T from the range.
+trend_T_min = 0.2
+trend_T_max = 4.0
+
+# Trend followers: range of the exit threshold tau, from tau_min to tau_max. Each trader draws one tau from the range.
+trend_tau_min = -0.2
+trend_tau_max = 0.0
+
+# Value investors: range of the offset v, from v_min to v_max. Each investor draws one offset, and perceives the log value plus its offset.
+value_v_min = -2.0
+value_v_max = 2.0
+
+# Trend followers: shortest and longest lag (days) a trader can look back. Each trader draws one lag.
+trend_lag_min = 1
+trend_lag_max = 100
+
+# Capital scale a of every trader. A trader's position size is a times (T minus tau).
+capital_scale = 0.0025
+
+# Market liquidity, how strongly the net demand of the traders moves the price.
+liquidity = 1.0
+
+# Number of daily steps in one simulated market run.
+number_of_steps = 20000
+
+# Number of first daily steps dropped from every run before any statistic is computed.
+burn_in = 2000
+
+# Base seed of the random number generators. Run k uses the base seed plus k.
+base_seed = 5660
+
+# Run numbers k, one simulated market per number.
+seeds = [1, 2, 3, 4, 5]
+
+# Short lags in days, given as the first and the last lag. The loader fills in every lag between them.
+short_lags = [1, 10]
+
+# Long lags in days, given as the first and the last lag.
+long_lags = [11, 50]
+
+# Numbers of states the Advanced track compares. Any odd number of states of 3 or more works.
+number_of_states = [3, 5, 7]
+
+# Number of states the Expert track uses. Any odd number of states of 3 or more works.
+expert_states = 5
+
+# Probabilities of acting on a move to another state, compared in the Expert track.
+probabilities = [1.0, 0.5, 0.2]
+
+# Ticker of the benchmark market data.
+benchmark_ticker = "SPY"
