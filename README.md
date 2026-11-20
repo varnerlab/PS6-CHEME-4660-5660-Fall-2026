@@ -1,33 +1,28 @@
-# Problem Set 6 (PS6): Do Hidden States Make the Farmer–Joshi Market Look Real?
+# Problem Set 6 (PS6): Does a Synthetic Market Move Together Like the Real Market?
 
-The daily growth rates of real stock prices share a few patterns, called
-**stylized facts**. Large daily moves happen more often than a Normal
-distribution predicts (**fat tails**). Large moves come in clusters, so calm
-and turbulent periods alternate (**volatility clustering**). One day's
-growth rate says little about the next day's growth rate (a **weak
-autocorrelation**).
+A **jump hidden Markov model** generates synthetic daily growth rates of one
+asset. The L14a course example
+[A Synthetic Market of Many Stocks](https://github.com/varnerlab/CHEME-5660-CourseRepository-Fall-2026/blob/main/lectures/week-14/L14a/CHEME-5660-L14a-Example-JumpHMM-SectorFactor-Fall-2026.ipynb)
+builds a synthetic market from many single-asset models: one model for SPY, the
+exchange-traded fund that tracks the S&P 500 index, one model for each sector,
+and one model for the stock-specific part of each stock. Each model draws its
+own path, and a **factor model** adds the draws into the growth rates of each
+stock.
 
-The **Farmer–Joshi market**, from the L12a course example
-[The Farmer–Joshi Market](https://github.com/varnerlab/CHEME-5660-CourseRepository-Fall-2026/blob/main/lectures/week-12/L12a/CHEME-5660-L12a-Example-FarmerJoshi-Fall-2026.ipynb),
-is a model of one asset traded by two groups of traders. **Value investors**
-buy when the price is below their estimate of the asset's value, and sell when
-the price is above that estimate. **Trend followers** buy after the price has
-risen, and sell after the price has fallen. We'll compare the growth rates of
-this market with the daily growth rates of SPY, an exchange-traded fund that
-tracks the S&P 500 index.
+The example also shows a gap. The models draw the sector factors
+independently, so sectors whose factors move together in the real market, such
+as Real Estate and Utilities, do not move together in the synthetic market. In
+PS6, we'll use the **general factor model** of lecture L14a, which adds
+**economic factors**, such as the daily change in the 10-year Treasury yield,
+and a **Cholesky step**, which keeps the correlations between the factors.
 
-In PS6, each trader has a **hidden state**: the market sees the trader's
-position, but not the trader's state. The idea comes from a student project and
-from our discussion in L12a.
-
-> **Do hidden states, and random moves between them, help the Farmer–Joshi
-> market reproduce the stylized facts of the daily growth rates of SPY?**
+> **Does a synthetic market built from single-asset jump hidden Markov models
+> move together like the real market?**
 
 We'll explore this question on three tracks, and you will choose one.
-**Standard** measures the course example's market. **Advanced** adds extra
-states in which a trader holds nothing and builds conviction before buying or
-selling. **Expert** adds **hesitant traders**, who move to a new state only with
-a fixed probability.
+**Standard** fits the market and the sector factors. **Advanced** adds four
+economic factors from FRED, the economic database of the Federal Reserve Bank of
+St. Louis. **Expert** adds the Cholesky step.
 
 ## Logistics
 
@@ -39,7 +34,8 @@ a fixed probability.
   score, even if you change tracks. A missing, empty, or unreadable submission
   receives a **Frozen Zero** and cannot be revised.
 - **Grading:** See the [grading rubric](RUBRIC.md). You are graded on your
-  calculations and interpretation, not on whether the market matches SPY.
+  calculations and interpretation, not on whether the synthetic market matches
+  the real market.
 - **Reference solution:** Released after the deadline. Use the solution to
   understand your mistakes, but do not copy the solution. Copying results in a
   score of 0.
@@ -49,15 +45,17 @@ a fixed probability.
 
 ## Getting started
 
-Use Julia `1.12.7`. The SPY closing prices come with the course package, and the
-packages are the same as in PS5.
+Use Julia `1.12.7`. The daily prices of SPY and its stocks come with the course
+package, and the four FRED series come in
+[data/fred-levels-2014-2024.csv](data/fred-levels-2014-2024.csv).
 
 1. Download the `Source code (zip)` archive from the tagged
    [PS6 GitHub release](https://github.com/varnerlab/PS6-CHEME-4660-5660-Fall-2026/releases/tag/ps6-cheme-4660-5660-2026.1)
    and extract it.
 2. In VS Code, open the extracted folder containing
    [Project.toml](Project.toml), and open a terminal there.
-3. Install the packages. The installation needs internet access:
+3. Install the packages, including `JumpHMM`, the course package for jump hidden
+   Markov models. The installation needs internet access:
 
    ```text
    julia --project=. --startup-file=no -e 'using Pkg; Pkg.instantiate()'
@@ -67,9 +65,9 @@ packages are the same as in PS5.
 
    | Track | Functions to complete | Questions to answer |
    |:--|:--|:--|
-   | Standard | Three functions in [src/Standard.jl](src/Standard.jl): `three_state_rule`, `excess_kurtosis`, and `volatility_clustering` | [responses/Standard.md](responses/Standard.md) |
-   | Advanced | Four functions in [src/Advanced.jl](src/Advanced.jl): the same three plus `conviction_rule` | [responses/Advanced.md](responses/Advanced.md) |
-   | Expert | Six functions in [src/Expert.jl](src/Expert.jl): the same four plus `hesitant_rule` and `transition_matrix` | [responses/Expert.md](responses/Expert.md) |
+   | Standard | Three functions in [src/Standard.jl](src/Standard.jl): `least_squares_fit`, `sector_matrix`, and `compose_growth_rates` | [responses/Standard.md](responses/Standard.md) |
+   | Advanced | Four functions in [src/Advanced.jl](src/Advanced.jl): the same three plus `economic_factor` | [responses/Advanced.md](responses/Advanced.md) |
+   | Expert | Six functions in [src/Expert.jl](src/Expert.jl): the same four plus `unmix_factors` and `mix_factors` | [responses/Expert.md](responses/Expert.md) |
 
 5. Answer Question 1, your prediction, before you write any code.
 6. Replace each `error("Complete ...")` line with your calculation. Follow the
@@ -80,9 +78,9 @@ packages are the same as in PS5.
    julia --project=. --startup-file=no check_submission.jl
    ```
 
-   The checker runs your track's checks and writes `results/Report.md`. A table
-   that needs an unfinished function shows `UNAVAILABLE`. Once your functions
-   work, the checker takes up to two minutes.
+   The checker runs your track's checks and writes `results/Report.md`. A row
+   or a table that needs an unfinished function shows `UNAVAILABLE`. Once your
+   functions work, the checker takes less than a minute.
 
 Each function's docstring gives the rule, the course material that does the
 same calculation, and the slide of the [mathematical
@@ -90,75 +88,91 @@ companion](docs/PS6-Mathematical-Companion.pdf) with the formulas. Grading uses
 only `TRACK.txt`, your track's source and response files, `Include.jl`, and any
 helper files you add under [src](src).
 
-## The market
+## The model
 
-The simulator in `src/Market.jl` runs the Farmer–Joshi market one step at a
-time. One step is one trading day, and each group has 1,200 traders. Each trader
-computes a **signal**, a number that is positive when the trader favors a long
-position:
+The supplied code in `src/Model.jl` follows the fitting and sampling algorithms
+of lecture L14a step by step, and calls your functions for the calculations.
 
-- A value investor's signal is the investor's estimate of the log value minus
-  the log price.
-- A trend follower's signal is the change in the log price over the trader's
-  lag, the fixed number of steps the trader looks back.
+**The data.** The real market is SPY and 375 of its stocks in 11 sectors:
+every stock with daily prices from 2014 to 2024 and a GICS sector, with one
+ticker per company. The growth rates are daily, in units of 1/yr, as in the
+course examples.
 
-**States.** In the course example, each trader has three states: `-1`
-(short), `0` (flat), and `1` (long). A flat trader enters a position when the
-signal passes the trader's **entry threshold**. A trader with a position exits
-when the signal falls back past the trader's **exit threshold**. We call this
-rule the **three-state rule**.
+**The general factor model** explains the growth rate of each stock on each day
+as the sum of five parts: a baseline, a market part, an economic part, a sector
+part, and a stock-specific part. The market part is the growth rate of SPY times
+the stock's market sensitivity. The economic part adds up each economic factor
+times the stock's loading on that factor, and the sector part does the same for
+the sector factors.
 
-At each step, the simulator calls your function for each trader's next state.
-The changes in the traders' positions add up to the net demand, which moves the
-log price. Random noise moves both the log price and the log value.
+**Fitting.** The fitting algorithm has five steps:
 
-**The report.** The checker writes `results/Report.md`, which compares each
-simulated market with the daily growth rates of SPY from 2014 to 2024. Each
-simulated row is the mean over 5 runs of 20,000 steps. The columns measure fat
-tails (the excess kurtosis, `0` for a Normal distribution), volatility
-clustering at lags 1–10 and 11–50, the autocorrelation at lag 1, the volatility,
-and the **gap spread**, how far the price wanders from the value. As in the
-course example, we compare the patterns in the growth rates, not the size of the
-moves. Below each table, the report gives the **white-noise band**: for a series
-with no autocorrelation, about 95% of the autocorrelations fall between minus
-and plus this number.
+1. For each stock, fit the stock's growth rates to SPY and the economic
+   factors. The fit gives the baseline, the market sensitivity, and the
+   economic loadings, and leaves a residual.
+2. For each day, fit the residuals of all the stocks to the **sector matrix**,
+   which marks the sector of each stock. Each sector factor of that day is the
+   average residual of the stocks in that sector.
+3. For each stock, fit the residual to the sector factors. The fit gives the
+   sector loadings, and the rest of the residual is the stock-specific part.
+4. On the Expert track, unmix the factors (see the Expert section).
+5. Fit a single-asset jump hidden Markov model to each factor and to the
+   stock-specific part of each stock.
 
-## Standard: the three-state rule
+Steps 1, 2, and 3 are the same least-squares solve with different inputs, and
+your function `least_squares_fit` does that solve.
 
-Complete `three_state_rule`, `excess_kurtosis`, and `volatility_clustering`. Run
-the checker, and answer Questions 2 and 3 from the table **Farmer–Joshi and
-SPY**. The table compares SPY with three markets: **value investors only**,
-**trend followers only**, and **value investors and trend followers**. On the
-Advanced and Expert tracks, answer only Question 2 from this table.
+**Sampling.** Each jump hidden Markov model draws a path of 2,766 trading
+days, and your function `compose_growth_rates` adds the five parts into the
+growth rates of each synthetic stock. The checker draws 10 synthetic markets
+from a fixed seed, so every run draws the same synthetic markets.
 
-## Advanced: more states
+## Standard: the market and the sectors
+
+Complete `least_squares_fit`, `sector_matrix`, and `compose_growth_rates`. Run
+the checker, and answer Questions 2 and 3 from the table **Real and synthetic
+markets**. The table compares the real market with two synthetic markets: the
+**single index model**, which has the market part and the stock-specific part
+but no sector factors, and the **market and sectors**. On the Advanced and
+Expert tracks, answer only Question 2 from these rows.
+
+## Advanced: economic factors from FRED
 
 Complete the three Standard functions in `src/Advanced.jl`, then complete
-`conviction_rule`. With 5 states, the states run from `-2` to `2`. A trader
-holds a long position only in state `2` and a short position only in state
-`-2`, so the market cannot tell a trader in state `1` from a trader in state
-`0`. A strong signal moves a flat trader one state toward a position. Otherwise
-the trader's conviction fades one state back toward `0`. The docstring gives the
-full rule.
+`economic_factor`. The file `data/fred-levels-2014-2024.csv` holds the level of
+four FRED series on each trading day:
 
-Rerun the checker, and answer Question 3 from the table **More states**. The
-table compares SPY with the market of value investors and trend followers,
-with 3, 5, and 7 states per trader.
+| FRED series | Level | Economic factor |
+|:--|:--|:--|
+| `DGS10` | 10-year Treasury yield (percent) | daily change |
+| `T10YIE` | 10-year breakeven inflation rate, a market measure of expected inflation (percent) | daily change |
+| `DCOILBRENTEU` | Brent crude oil price (USD per barrel) | growth rate |
+| `DTWEXBGS` | US dollar index against a broad basket of currencies | growth rate |
 
-## Expert: hesitant traders
+We use the Brent oil price because the WTI oil price
+fell below zero on April 20, 2020, and a growth rate needs a positive price.
+
+Rerun the checker, and answer Question 3 from the row **market, FRED series,
+and sectors** and the table **FRED series**, which gives the R² and the
+loadings of fitting step 1 for each sector.
+
+This product uses the FRED® API but is not endorsed or certified by the Federal
+Reserve Bank of St. Louis.
+
+## Expert: the Cholesky step
 
 Complete the four Advanced functions in `src/Expert.jl`, then complete
-`hesitant_rule` and `transition_matrix`. A hesitant trader moves to the state
-that `conviction_rule` proposes only with probability `p`. Otherwise the trader
-stays in the current state. The transition matrix holds the probability of each
-one-step move between states. The report uses your matrix to compute the
-expected number of steps a flat trader takes to go long while the signal stays
-above the entry threshold.
+`unmix_factors` and `mix_factors`. The factors of the real market are
+correlated. Fitting step 4 unmixes the factors: `unmix_factors` computes the
+covariance matrix of the factors and its Cholesky factor, and turns the factors
+into uncorrelated factors. The supplied code fits a jump hidden Markov model to each
+uncorrelated factor, and `mix_factors` mixes the draws back into correlated
+factors. The L6a course example
+[Simulating a Portfolio with Multiple Asset Geometric Brownian Motion](https://github.com/varnerlab/CHEME-5660-CourseRepository-Fall-2026/blob/main/lectures/week-6/L6a/CHEME-5660-L6a-Example-MAGBM-Portfolio-Fall-2026.ipynb)
+uses the same mixing.
 
-Rerun the checker, and answer Question 3 from the tables **More states** and
-**Hesitant traders**. The table **Hesitant traders** compares SPY with the
-market of value investors and trend followers, with 5 states per trader and
-`p` set to `1`, `0.5`, and `0.2`.
+Rerun the checker, and answer Question 3 from the row **market, FRED series,
+and sectors, with the Cholesky step**.
 
 ## Explore on your own
 
@@ -169,17 +183,9 @@ run:
 julia --project=. --startup-file=no explore.jl
 ```
 
-The script writes `results/exploration/Exploration.md` with your functions. The
-exploration is not graded.
-
-**Just for fun.** This idea earns no points, and you do not need to try it. You
-could build a new agent-based model by adding a third kind of trader, **noise
-traders**, who buy and sell on private signals that the market cannot see. Each
-noise trader's signal is a new random number at each step. The code is already
-in `simulate_market` in `src/Market.jl`, commented out between `#=` and `=#`
-lines. Work in a copy of your PS6 folder, so that the checker still runs the
-supplied market. Delete those lines in the copy, and run `explore.jl` there.
-Which stylized facts do noise traders change?
+You can drop FRED series, choose other pairs of sectors, or draw more synthetic
+markets. The script writes `results/exploration/Exploration.md` with your
+functions. The exploration is not graded.
 
 ## Check and submit your work
 

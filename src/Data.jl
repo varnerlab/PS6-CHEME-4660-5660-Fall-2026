@@ -42,7 +42,14 @@ function load_universe(settings::NamedTuple)::NamedTuple
     tickers = String[];
     firms_seen = Int[];
     for ticker ∈ sort(collect(keys(dataset)))
-        if ticker != settings.benchmark_ticker && haskey(sector_of, ticker) && nrow(dataset[ticker]) == number_of_prices
+
+        # A ticker qualifies when it is not SPY, has a sector, and has a price on every day -
+        is_stock = ticker != settings.benchmark_ticker;
+        has_sector = haskey(sector_of, ticker);
+        has_history = nrow(dataset[ticker]) == number_of_prices;
+        if is_stock && has_sector && has_history
+
+            # Keep the first ticker of each firm -
             if !(firm_of[ticker] in firms_seen)
                 push!(tickers, ticker);
                 push!(firms_seen, firm_of[ticker]);

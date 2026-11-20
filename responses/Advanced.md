@@ -4,35 +4,39 @@ Answer each question in one or two short paragraphs, and cite numbers from
 `results/Report.md`. Replace each `TODO` line with your answer. Keep the marker
 lines around each answer, because the checker reads those lines.
 
-## 1. Which stylized facts will the market reproduce?
+## 1. Will the synthetic stocks move together like the real stocks?
 
 Answer this question before you write any code. Your prediction is not graded
-for accuracy. SPY's daily growth rates have fat tails, volatility clustering,
-and a weak autocorrelation. Which of these stylized facts do you expect the
-market with value investors and trend followers to reproduce? Explain why. Do
-you expect 5 or 7 states to move the market closer to SPY?
+for accuracy. The synthetic market draws SPY, each sector factor, and the
+stock-specific part of each stock from separate single-asset jump hidden Markov
+models. Will two synthetic stocks in the same sector move together as much as
+two real stocks in the same sector? Will two stocks in different sectors?
+Explain why. Which sectors do you expect to move with the 10-year Treasury
+yield, and in which direction?
 
 <!-- answer-1:start -->
 TODO: Answer Question 1.
 <!-- answer-1:end -->
 
-## 2. How does each group of traders shape the growth rates?
+## 2. What do the sector factors add?
 
-In the table **Farmer–Joshi and SPY**, compare each simulated market with SPY.
-Which group of traders creates the fat tails and the volatility clustering? Use
-each group's rule for buying and selling to explain the sign of the group's
-autocorrelation at lag 1.
+In the table **Real and synthetic markets**, compare the rows **single index
+model** and **market and sectors** with the row **real market**. What do the
+sector factors add to the synthetic market? Use the columns **Same sector** and
+**Different sectors** in your answer.
 
 <!-- answer-2:start -->
 TODO: Answer Question 2.
 <!-- answer-2:end -->
 
-## 3. Do hidden states move the market toward SPY?
+## 3. What do the FRED series add?
 
-In the table **More states**, which values move toward SPY as the number of
-states rises from 3 to 7? With 5 states, for how many steps in a row must a flat
-trader's signal stay above the entry threshold before the trader goes long? Use
-that number to explain the changes. Was your prediction in Question 1 right?
+In the table **FRED series**, which sectors have the largest loadings on the
+10-year Treasury yield, and which sector has the largest loading on the Brent
+oil price? Compare the sector-pair columns of the row **market, FRED series,
+and sectors** with the rows **market and sectors** and **real market**. Do the
+FRED series move these columns toward the real market? Was your prediction in
+Question 1 right?
 
 <!-- answer-3:start -->
 TODO: Answer Question 3.

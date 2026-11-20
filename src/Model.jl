@@ -47,7 +47,7 @@ Run fitting steps 1, 2, and 3 of the general factor model. Each step calls `leas
 ### Returns
 
 - A `NamedTuple` with the fields:
-  - `X`: The columns `[1, g_m, x_1, ..., x_K]`, days × columns.
+  - `X`: The design matrix `[1, g_m, x_1, ..., x_K]`, days × columns.
   - `Θ`: The baseline, market sensitivity, and economic loadings of each stock, columns × stocks.
   - `E`: The residual of each stock after step 1, days × stocks.
   - `F`: The sector factors, days × sectors (zero columns without sectors).
@@ -56,7 +56,7 @@ Run fitting steps 1, 2, and 3 of the general factor model. Each step calls `leas
 """
 function fit_factor_model(universe::NamedTuple, x::Matrix{Float64}; sectors::Bool = true)::NamedTuple
 
-    # Initialize: the growth rates, and the columns [1, g_m, x_1, ..., x_K] -
+    # Initialize: the growth rates, and the design matrix [1, g_m, x_1, ..., x_K] -
     G = universe.G;
     number_of_days = size(G, 1);
     number_of_stocks = size(G, 2);
@@ -205,7 +205,7 @@ function synthetic_markets(fit::NamedTuple, settings::NamedTuple; cholesky_step:
             Φ_synthetic = mix_factors(draws, μ, A);
         end
 
-        # The synthetic columns [1, g_m, x_1, ..., x_K], and the synthetic sector factors -
+        # The synthetic design matrix [1, g_m, x_1, ..., x_K], and the synthetic sector factors -
         X_synthetic = hcat(ones(number_of_days), Φ_synthetic[:, 1:number_of_market_columns]);
         F_synthetic = Φ_synthetic[:, (number_of_market_columns + 1):end];
 

@@ -17,9 +17,9 @@ Solve the least-squares problem `X'X θ = X'y` for `θ`. The answer is the pseud
 solution, `θ = pinv(X) * y`. The general factor model uses this one solve in fitting steps 1, 2,
 and 3, with a different `X` and `y` in each step:
 
-- Step 1, the market and economic loadings of stock `i`: `X` is `[1, g_m, x_1, ..., x_K]` (days ×
-  columns), `y` is the growth rates of stock `i`, and `θ` is `(α_i, β_i, η_i1, ..., η_iK)`. On the
-  Standard track, `X` is `[1, g_m]`.
+- Step 1, the market and economic loadings of stock `i`: `X` is the design matrix
+  `[1, g_m, x_1, ..., x_K]` (days × columns), `y` is the growth rates of stock `i`, and `θ` is
+  `(α_i, β_i, η_i1, ..., η_iK)`. On the Standard track, `X` is `[1, g_m]`.
 - Step 2, the sector factors on day `t`: `X` is the sector matrix `B` (stocks × sectors), `y` is the
   residual of every stock on day `t`, and `θ` is the sector factors on day `t`.
 - Step 3, the sector loadings of stock `i`: `X` is the sector factors `F` (days × sectors), `y` is the
@@ -123,8 +123,8 @@ Compose the growth rates of one synthetic stock (sampling step 3): the market an
 
 ### Arguments
 
-- `X`: The synthetic columns `[1, g_m, x_1, ..., x_K]`, days × columns. On the Standard track, `X`
-  is `[1, g_m]`.
+- `X`: The synthetic design matrix `[1, g_m, x_1, ..., x_K]`, days × columns. On the Standard
+  track, `X` is `[1, g_m]`.
 - `θ`: The baseline, market sensitivity, and economic loadings of the stock, `(α, β, η_1, ..., η_K)`.
 - `F`: The synthetic sector factors, days × sectors. `F` has zero columns when a market has no
   sector factors.
