@@ -1,226 +1,154 @@
-# The PS6 public checks for the Expert track: the sixteen Advanced checks, then eight checks of
-# hesitant_rule and transition_matrix. Each hesitant_rule check calls only hesitant_rule. The
-# transition_matrix checks also need a finished conviction_rule, because transition_matrix calls
-# conviction_rule.
-
-# --- hesitant_rule checks ---
+# The PS6 public checks for the Expert track: the sixteen Advanced checks, then four checks of
+# unmix_factors and four checks of mix_factors. Each check calls one student function, so an
+# unfinished function does not block the checks of the others.
 
 """
-    check_hesitant_accepts() -> Bool
+    ps6_correlated_factors() -> Matrix{Float64}
 
-`hesitant_rule` takes the proposed state when the draw `u` is below `p`.
+A fixed factor matrix: 600 days of four correlated factors with nonzero means.
 """
-function check_hesitant_accepts()::Bool
+function ps6_correlated_factors()::Matrix{Float64}
 
-    # Each case is (state, proposed, p, u, expected state) -
-    cases = ((0, 1, 0.5, 0.3, 1), (2, 1, 0.2, 0.1, 1));
-    for (state, proposed, p, u, expected) ∈ cases
-        if hesitant_rule(state, proposed, p, u) != expected
-            return false;
-        end
+    # Mix independent draws through a fixed matrix, then shift each column -
+    rng = Xoshiro(21);
+    M = [1.0 0.6 0.0 -0.3; 0.0 0.8 0.5 0.2; 0.0 0.0 0.7 0.4; 0.0 0.0 0.0 0.9];
+    Φ = randn(rng, 600, 4) * M;
+    shift = [0.1, -0.2, 0.05, 0.3];
+    for j ∈ 1:4
+        Φ[:, j] = Φ[:, j] .+ shift[j];
     end
-    return true;
+    return Φ;
+end
+
+# --- unmix_factors checks ---
+
+"""
+    check_unmix_identity_covariance() -> Bool
+
+The columns of `Z` are uncorrelated with variance one: `cov(Z)` is the identity matrix.
+"""
+function check_unmix_identity_covariance()::Bool
+    Z = unmix_factors(ps6_correlated_factors())[3];
+    return isapprox(cov(Z), Matrix{Float64}(I, 4, 4); atol = 1e-10);
 end
 
 """
-    check_hesitant_holds() -> Bool
+    check_unmix_cholesky() -> Bool
 
-`hesitant_rule` keeps the current state when the draw `u` is at least `p`, for entries and for exits.
+`A` is lower triangular, and `A A'` equals the covariance matrix of `Φ`.
 """
-function check_hesitant_holds()::Bool
-
-    # Each case is (state, proposed, p, u, expected state): two entries, then an exit from long and an exit from short -
-    cases = ((0, 1, 0.5, 0.5, 0), (0, 1, 0.5, 0.9, 0), (1, 0, 0.5, 0.7, 1), (-2, -1, 0.2, 0.5, -2));
-    for (state, proposed, p, u, expected) ∈ cases
-        if hesitant_rule(state, proposed, p, u) != expected
-            return false;
-        end
-    end
-    return true;
+function check_unmix_cholesky()::Bool
+    Φ = ps6_correlated_factors();
+    A = unmix_factors(Φ)[2];
+    return istril(A) && isapprox(A * A', cov(Φ); atol = 1e-10);
 end
 
 """
-    check_hesitant_certain() -> Bool
+    check_unmix_means() -> Bool
 
-With `p = 1.0`, `hesitant_rule` takes the proposed state for every draw `u` from 0 to 0.999.
+`μ` holds the column averages of `Φ`, and every column of `Z` has an average of zero.
 """
-function check_hesitant_certain()::Bool
-
-    # A trader in state -1 with the proposed state 0 must move for every draw -
-    for k ∈ 0:999
-        u = k / 1000;
-        if hesitant_rule(-1, 0, 1.0, u) != 0
-            return false;
-        end
-    end
-    return true;
+function check_unmix_means()::Bool
+    Φ = ps6_correlated_factors();
+    result = unmix_factors(Φ);
+    μ = result[1];
+    Z = result[3];
+    return isapprox(μ, vec(mean(Φ, dims = 1)); atol = 1e-12) && maximum(abs.(mean(Z, dims = 1))) < 1e-10;
 end
 
 """
-    check_hesitant_same_state() -> Bool
+    check_unmix_type_and_inputs() -> Bool
 
-When the proposed state equals the current state, `hesitant_rule` returns that state for any draw `u`.
+`unmix_factors` returns a `Vector{Float64}` and two `Matrix{Float64}` of the right sizes, and
+leaves `Φ` unchanged.
 """
-function check_hesitant_same_state()::Bool
-
-    # A draw below p and a draw above p must both keep state 1 -
-    for u ∈ (0.1, 0.9)
-        if hesitant_rule(1, 1, 0.5, u) != 1
-            return false;
-        end
-    end
-    return true;
+function check_unmix_type_and_inputs()::Bool
+    Φ = ps6_correlated_factors();
+    copy_of_Φ = copy(Φ);
+    (μ, A, Z) = unmix_factors(Φ);
+    types_ok = μ isa Vector{Float64} && A isa Matrix{Float64} && Z isa Matrix{Float64};
+    sizes_ok = length(μ) == 4 && size(A) == (4, 4) && size(Z) == (600, 4);
+    return types_ok && sizes_ok && Φ == copy_of_Φ;
 end
 
-# --- transition_matrix checks ---
+# --- mix_factors checks ---
 
 """
-    ps6_transition_entry(state::Int, proposed::Int, column_state::Int, p::Float64) -> Float64
+    check_mix_by_hand() -> Bool
 
-The probability that a trader in `state` is in `column_state` one step later, when `conviction_rule`
-proposes `proposed` and the trader acts on a proposed move with probability `p`.
+A hand case: `Z` is the 2 × 2 identity, so each row of the result is `μ` plus a column of `A`.
 """
-function ps6_transition_entry(state::Int, proposed::Int, column_state::Int, p::Float64)::Float64
-
-    # When the proposed state is the current state, the trader stays -
-    if proposed == state
-        if column_state == state
-            return 1.0;
-        end
-        return 0.0;
-    end
-
-    # Otherwise the trader moves with probability p and stays with probability 1 - p -
-    if column_state == proposed
-        return p;
-    end
-    if column_state == state
-        return 1.0 - p;
-    end
-    return 0.0;
+function check_mix_by_hand()::Bool
+    Z = [1.0 0.0; 0.0 1.0];
+    μ = [1.0, 2.0];
+    A = [2.0 0.0; 1.0 3.0];
+    return isapprox(mix_factors(Z, μ, A), [3.0 3.0; 1.0 5.0]; atol = 1e-12);
 end
 
 """
-    check_transition_rows() -> Bool
+    check_mix_undoes_unmix() -> Bool
 
-`transition_matrix` returns a `(2K+1) × (2K+1)` matrix whose rows each sum to 1, for `K` from 1 to 3,
-three values of `p`, and five signals.
+Mixing the uncorrelated factors back gives the original factors. The unmixing is done here,
+without the student function.
 """
-function check_transition_rows()::Bool
+function check_mix_undoes_unmix()::Bool
 
-    # The entry and exit thresholds of every case -
-    T = 1.0;
-    τ = -0.1;
-    for K ∈ 1:3
-        for p ∈ (1.0, 0.5, 0.2)
-            for z ∈ (-2.0, -0.5, 0.0, 0.5, 2.0)
-
-                # The matrix must have one row and one column for each state -
-                P = transition_matrix(z, T, τ, K, p);
-                if size(P) != (2 * K + 1, 2 * K + 1)
-                    return false;
-                end
-
-                # Each row must sum to 1 -
-                for i ∈ 1:(2 * K + 1)
-                    if !isapprox(sum(P[i, :]), 1.0, atol = 1e-12)
-                        return false;
-                    end
-                end
-            end
-        end
-    end
-    return true;
+    # Fitting step 4, solved here: the column averages, the Cholesky factor, and Z -
+    Φ = ps6_correlated_factors();
+    μ = vec(mean(Φ, dims = 1));
+    A = Matrix(cholesky(Symmetric(cov(Φ))).L);
+    Z = (Φ .- μ') / A';
+    return isapprox(mix_factors(Z, μ, A), Φ; atol = 1e-10);
 end
 
 """
-    check_transition_entries() -> Bool
+    check_mix_independent_draws() -> Bool
 
-Every entry of `transition_matrix` is `p` in the column of the state that `conviction_rule` proposes,
-`1 - p` in the column of the current state, and `0` in every other column, or `1` on the diagonal when
-the proposed state is the current state. The check covers `K` from 1 to 3, three values of `p`, and
-five signals.
+Independent draws, mixed through `A`, get the covariance `A A'`: mixing is how the synthetic
+factors move together.
 """
-function check_transition_entries()::Bool
+function check_mix_independent_draws()::Bool
 
-    # The entry and exit thresholds of every case -
-    T = 1.0;
-    τ = -0.1;
-    for K ∈ 1:3
-        for p ∈ (1.0, 0.5, 0.2)
-            for z ∈ (-2.0, -0.5, 0.0, 0.5, 2.0)
-                P = transition_matrix(z, T, τ, K, p);
-
-                # Row i must match the state that conviction_rule proposes for state i - K - 1 -
-                for i ∈ 1:(2 * K + 1)
-                    proposed = conviction_rule(i - K - 1, z, T, τ, K);
-                    for j ∈ 1:(2 * K + 1)
-                        expected = ps6_transition_entry(i - K - 1, proposed, j - K - 1, p);
-                        if !isapprox(P[i, j], expected, atol = 1e-12)
-                            return false;
-                        end
-                    end
-                end
-            end
-        end
-    end
-    return true;
+    # Fifty thousand days of three independent draws with variance one -
+    rng = Xoshiro(8);
+    Z = randn(rng, 50_000, 3);
+    A = [1.0 0.0 0.0; 0.6 0.8 0.0; -0.4 0.3 0.5];
+    Φ = mix_factors(Z, zeros(3), A);
+    return isapprox(cov(Φ), A * A'; atol = 0.03);
 end
 
 """
-    check_transition_by_hand() -> Bool
+    check_mix_type_and_inputs() -> Bool
 
-The hand-computed `transition_matrix` for `K = 1`, `z = 2.0`, and `p = 0.5`.
+`mix_factors` returns a `Matrix{Float64}` of the size of `Z`, and leaves its inputs unchanged.
 """
-function check_transition_by_hand()::Bool
-
-    # With z above T, each flat or short state moves up one state with probability 0.5 -
-    P = transition_matrix(2.0, 1.0, -0.1, 1, 0.5);
-    expected = [0.5 0.5 0.0; 0.0 0.5 0.5; 0.0 0.0 1.0];
-    return size(P) == (3, 3) && isapprox(P, expected, atol = 1e-12);
-end
-
-"""
-    check_transition_steps_to_long() -> Bool
-
-At a strong signal `z = 10.0`, the expected number of steps from state 0 to state `K`, computed
-from `transition_matrix` with the supplied `expected_steps_to_long`, is `K / p`.
-"""
-function check_transition_steps_to_long()::Bool
-
-    # The entry and exit thresholds of every case -
-    T = 1.0;
-    τ = -0.1;
-
-    # For every K and p, the expected steps from state 0 to state K must be K / p -
-    for K ∈ 1:3
-        for p ∈ (1.0, 0.5, 0.2)
-            P = transition_matrix(10.0, T, τ, K, p);
-            if !isapprox(expected_steps_to_long(P, K), K / p)
-                return false;
-            end
-        end
-    end
-    return true;
+function check_mix_type_and_inputs()::Bool
+    rng = Xoshiro(2);
+    Z = randn(rng, 30, 2);
+    μ = [0.1, 0.2];
+    A = [1.0 0.0; 0.5 2.0];
+    copies = (copy(Z), copy(μ), copy(A));
+    Φ = mix_factors(Z, μ, A);
+    return Φ isa Matrix{Float64} && size(Φ) == (30, 2) && (Z, μ, A) == copies;
 end
 
 """
     expert_public_checks() -> Vector{NamedTuple}
 
-The twenty-four Expert public checks: the sixteen Advanced checks, then four for `hesitant_rule`
-and four for `transition_matrix`.
+The twenty-four Expert public checks: the sixteen Advanced checks, then four for `unmix_factors`
+and four for `mix_factors`.
 """
 function expert_public_checks()::Vector{NamedTuple}
 
-    # The sixteen Advanced checks, then four hesitant checks and four transition checks -
+    # The sixteen Advanced checks, then the eight checks of the Cholesky step -
     checks = advanced_public_checks();
-    push!(checks, (name = "Hesitant rule: accepts the proposed state when u is below p", test = check_hesitant_accepts));
-    push!(checks, (name = "Hesitant rule: keeps the state when u is at least p", test = check_hesitant_holds));
-    push!(checks, (name = "Hesitant rule: p = 1 accepts every draw", test = check_hesitant_certain));
-    push!(checks, (name = "Hesitant rule: a proposal equal to the state returns the state", test = check_hesitant_same_state));
-    push!(checks, (name = "Transition matrix: size and row sums", test = check_transition_rows));
-    push!(checks, (name = "Transition matrix: every entry matches conviction_rule and p", test = check_transition_entries));
-    push!(checks, (name = "Transition matrix: hand-computed matrix for K = 1", test = check_transition_by_hand));
-    push!(checks, (name = "Transition matrix: expected steps from state 0 to state K", test = check_transition_steps_to_long));
+    push!(checks, (name = "Unmix factors: the columns of Z are uncorrelated with variance one", test = check_unmix_identity_covariance));
+    push!(checks, (name = "Unmix factors: A is lower triangular and A A' is the covariance of Φ", test = check_unmix_cholesky));
+    push!(checks, (name = "Unmix factors: μ holds the column averages, and Z has averages of zero", test = check_unmix_means));
+    push!(checks, (name = "Unmix factors: returns (μ, A, Z) of the right types and sizes", test = check_unmix_type_and_inputs));
+    push!(checks, (name = "Mix factors: hand case with Z equal to the identity", test = check_mix_by_hand));
+    push!(checks, (name = "Mix factors: mixing undoes the unmixing", test = check_mix_undoes_unmix));
+    push!(checks, (name = "Mix factors: independent draws get the covariance A A'", test = check_mix_independent_draws));
+    push!(checks, (name = "Mix factors: returns a Matrix{Float64} and leaves the inputs unchanged", test = check_mix_type_and_inputs));
     return checks;
 end

@@ -7,241 +7,231 @@
 # an unfinished function does not block the checks of the others.
 
 """
-    ps6_regime_growth_rates() -> Vector{Float64}
+    ps6_random_regression() -> Tuple{Matrix{Float64},Vector{Float64}}
 
-A fixed series of 5,000 growth rates with volatility regimes: blocks of 500 steps that alternate
-between a standard deviation of 0.5 and a standard deviation of 2.0.
+A fixed regression problem: 200 days, a column of ones and three random columns in `X`, and
+random values in `y`.
 """
-function ps6_regime_growth_rates()::Vector{Float64}
+function ps6_random_regression()::Tuple{Matrix{Float64},Vector{Float64}}
 
-    # Draw each block of 500 steps with the standard deviation of its regime -
-    rng = Xoshiro(11);
-    g = zeros(5000);
-    for k ∈ 1:5000
-        block = div(k - 1, 500);
-        if iseven(block)
-            g[k] = 0.5 * randn(rng);
-        else
-            g[k] = 2.0 * randn(rng);
-        end
-    end
-    return g;
-end
-
-# --- three_state_rule checks ---
-
-"""
-    check_three_state_matches_course() -> Bool
-
-`three_state_rule` matches the course `threshold_position` for three pairs of thresholds
-`(T, τ)`, every state, and a grid of signals that includes `T`, `-T`, `τ`, and `-τ`.
-"""
-function check_three_state_matches_course()::Bool
-
-    # Compare three_state_rule with the course function on every case -
-    for (T, τ) ∈ ((0.5, -0.1), (2.0, 0.0), (3.7, -0.2))
-        signals = vcat(collect(range(-5, 5, length = 201)), [T, -T, τ, -τ]);
-        for state ∈ -1:1
-            for z ∈ signals
-                expected = Int(threshold_position(Float64(state), z, T, τ, 1.0, 1));
-                if three_state_rule(state, z, T, τ) != expected
-                    return false;
-                end
-            end
-        end
-    end
-    return true;
-end
-
-"""
-    check_three_state_strict() -> Bool
-
-A signal exactly at a threshold does not move the trader: all comparisons are strict.
-"""
-function check_three_state_strict()::Bool
-
-    # From state 0, a signal exactly at T or at -T does not enter a position -
-    if three_state_rule(0, 2.0, 2.0, 0.0) != 0
-        return false;
-    end
-    if three_state_rule(0, -2.0, 2.0, 0.0) != 0
-        return false;
-    end
-
-    # From state 1, a signal exactly at τ does not exit -
-    if three_state_rule(1, -0.1, 2.0, -0.1) != 1
-        return false;
-    end
-
-    # From state -1, a signal exactly at -τ does not exit -
-    return three_state_rule(-1, 0.1, 2.0, -0.1) == -1;
-end
-
-"""
-    check_three_state_type() -> Bool
-
-`three_state_rule` returns an `Int` in `-1:1` for 1,000 random inputs, each with an exit threshold below
-its entry threshold.
-"""
-function check_three_state_type()::Bool
-
-    # Draw a random state, signal, entry threshold from 0.3 to 3.3, and exit threshold from -0.2 to 0.2 for each case -
+    # Draw the columns of X and the values of y from a fixed seed -
     rng = Xoshiro(5660);
-    for i ∈ 1:1000
-        state = rand(rng, -1:1);
-        result = three_state_rule(state, 6.0 * rand(rng) - 3.0, 3.0 * rand(rng) + 0.3, 0.4 * rand(rng) - 0.2);
+    X = hcat(ones(200), randn(rng, 200, 3));
+    y = randn(rng, 200);
+    return (X, y);
+end
 
-        # The next state must be an Int from -1 to 1 -
-        if !(result isa Int) || result < -1 || result > 1
-            return false;
-        end
+# --- least_squares_fit checks ---
+
+"""
+    check_fit_matches_pinv() -> Bool
+
+`least_squares_fit` matches the pseudo-inverse solution `pinv(X) * y` on a random problem.
+"""
+function check_fit_matches_pinv()::Bool
+    (X, y) = ps6_random_regression();
+    θ = least_squares_fit(X, y);
+    return isapprox(θ, pinv(X) * y; atol = 1e-10);
+end
+
+"""
+    check_fit_sector_averages() -> Bool
+
+Fitting step 2: with the 0/1 sector matrix `B` as `X` and one day's residuals as `y`,
+`least_squares_fit` returns the average residual of each sector.
+"""
+function check_fit_sector_averages()::Bool
+
+    # Five stocks in two sectors: stocks 1, 2, and 4 in the first sector, stocks 3 and 5 in the second -
+    B = [1.0 0.0; 1.0 0.0; 0.0 1.0; 1.0 0.0; 0.0 1.0];
+    residuals = [0.3, -0.1, 0.4, 0.4, -0.2];
+
+    # The averages of each sector: (0.3 - 0.1 + 0.4)/3 and (0.4 - 0.2)/2 -
+    expected = [0.2, 0.1];
+    return isapprox(least_squares_fit(B, residuals), expected; atol = 1e-12);
+end
+
+"""
+    check_fit_residual_orthogonal() -> Bool
+
+The residual `y - X θ` of a least-squares fit is orthogonal to every column of `X`.
+"""
+function check_fit_residual_orthogonal()::Bool
+    (X, y) = ps6_random_regression();
+    residual = y - X * least_squares_fit(X, y);
+    return maximum(abs.(X' * residual)) < 1e-8;
+end
+
+"""
+    check_fit_type_and_inputs() -> Bool
+
+`least_squares_fit` returns a `Vector{Float64}` with one entry per column of `X`, and leaves
+`X` and `y` unchanged.
+"""
+function check_fit_type_and_inputs()::Bool
+    (X, y) = ps6_random_regression();
+    copy_of_X = copy(X);
+    copy_of_y = copy(y);
+    θ = least_squares_fit(X, y);
+    return θ isa Vector{Float64} && length(θ) == size(X, 2) && X == copy_of_X && y == copy_of_y;
+end
+
+# --- sector_matrix checks ---
+
+"""
+    check_sector_matrix_by_hand() -> Bool
+
+A hand case: three stocks, two sectors, and the sectors listed in a different order from the stocks.
+"""
+function check_sector_matrix_by_hand()::Bool
+    sectors = ["Energy", "Utilities", "Energy"];
+    sector_names = ["Utilities", "Energy"];
+    expected = [0.0 1.0; 1.0 0.0; 0.0 1.0];
+    return sector_matrix(sectors, sector_names) == expected;
+end
+
+"""
+    check_sector_matrix_counts() -> Bool
+
+Each row of `B` holds exactly one `1`, and each column adds up to the number of stocks in its sector.
+"""
+function check_sector_matrix_counts()::Bool
+
+    # Twelve stocks spread over four sectors -
+    sector_names = ["Energy", "Financials", "Materials", "Utilities"];
+    sectors = ["Energy", "Utilities", "Energy", "Materials", "Financials", "Energy",
+        "Utilities", "Materials", "Energy", "Financials", "Energy", "Utilities"];
+    B = sector_matrix(sectors, sector_names);
+
+    # One 1 in each row, and the sector sizes 5, 2, 2, and 3 as the column sums -
+    return vec(sum(B, dims = 2)) == ones(12) && vec(sum(B, dims = 1)) == [5.0, 2.0, 2.0, 3.0];
+end
+
+"""
+    check_sector_matrix_unknown() -> Bool
+
+A stock whose sector is not in `sector_names` raises an `ArgumentError`.
+"""
+function check_sector_matrix_unknown()::Bool
+    try
+        sector_matrix(["Energy", "Bananas"], ["Energy", "Utilities"]);
+    catch caught
+        return caught isa ArgumentError;
     end
-    return true;
+    return false;
 end
 
 """
-    check_three_state_market() -> Bool
+    check_sector_matrix_type_and_inputs() -> Bool
 
-A small market with 50 value investors and 50 trend followers that uses `three_state_rule`
-reproduces the log price of the course `solve` function.
+`sector_matrix` returns a `Matrix{Float64}` of size stocks × sectors, and leaves its inputs unchanged.
 """
-function check_three_state_market()::Bool
-
-    # Run the same small market with three_state_rule and with the course solve function -
-    market = build_market(_SETTINGS, 1; value_number = 50, trend_number = 50);
-    ours = simulate_market(market, :three, 1, 1.0; number_of_steps = 500, burn_in = 100, seed = 1);
-    course = solve(market; number_of_steps = 500, burn_in = 100, rng = Xoshiro(2));
-
-    # The two log prices must be identical -
-    return ours.log_price == course.log_price;
+function check_sector_matrix_type_and_inputs()::Bool
+    sectors = ["Energy", "Utilities", "Energy", "Materials"];
+    sector_names = ["Energy", "Materials", "Utilities"];
+    copy_of_sectors = copy(sectors);
+    copy_of_names = copy(sector_names);
+    B = sector_matrix(sectors, sector_names);
+    return B isa Matrix{Float64} && size(B) == (4, 3) && sectors == copy_of_sectors && sector_names == copy_of_names;
 end
 
-# --- excess_kurtosis checks ---
+# --- compose_growth_rates checks ---
 
 """
-    check_kurtosis_by_hand() -> Bool
+    check_compose_by_hand() -> Bool
 
-For the growth rates `[1, 2, 3, 4, 10]`, the excess kurtosis is -0.212, from population moments.
+A hand case with two days, a market column, and two sector factors.
 """
-function check_kurtosis_by_hand()::Bool
-    return isapprox(excess_kurtosis([1.0, 2.0, 3.0, 4.0, 10.0]), -0.212; atol = 1e-12);
-end
+function check_compose_by_hand()::Bool
 
-"""
-    check_kurtosis_shift_scale() -> Bool
-
-Adding a constant to the growth rates and multiplying them by a positive constant does not
-change the excess kurtosis.
-"""
-function check_kurtosis_shift_scale()::Bool
-
-    # Compare the kurtosis of 1,000 Normal draws with the kurtosis of 3g + 7 -
-    g = randn(Xoshiro(7), 1000);
-    return isapprox(excess_kurtosis(3.0 .* g .+ 7.0), excess_kurtosis(g); rtol = 1e-10);
+    # Day 1: 0.5 + 2.0 * 2.0 + 3.0 * 1.0 + 0.1; day 2: 0.5 + 2.0 * 3.0 + 4.0 * 1.0 + 0.2 -
+    X = [1.0 2.0; 1.0 3.0];
+    θ = [0.5, 2.0];
+    F = [1.0 0.0; 0.0 1.0];
+    δ = [3.0, 4.0];
+    u = [0.1, 0.2];
+    return isapprox(compose_growth_rates(X, θ, F, δ, u), [7.6, 10.7]; atol = 1e-12);
 end
 
 """
-    check_kurtosis_normal() -> Bool
+    check_compose_rebuilds_stock() -> Bool
 
-The excess kurtosis of 200,000 Normal draws is within 0.05 of zero.
+The fitted pieces of a stock rebuild its growth rates exactly: `X θ + F δ + u` equals `y` when
+`θ`, `δ`, and `u` come from fitting steps 1 and 3.
 """
-function check_kurtosis_normal()::Bool
-    return abs(excess_kurtosis(randn(Xoshiro(5660), 200_000))) < 0.05;
+function check_compose_rebuilds_stock()::Bool
+
+    # A stock, its market and economic columns X, and three sector factors F -
+    rng = Xoshiro(14);
+    X = hcat(ones(300), randn(rng, 300, 2));
+    F = randn(rng, 300, 3);
+    y = randn(rng, 300);
+
+    # Fitting step 1, then fitting step 3, solved here without the student functions -
+    θ = (X' * X) \ (X' * y);
+    ε = y - X * θ;
+    δ = (F' * F) \ (F' * ε);
+    u = ε - F * δ;
+    return isapprox(compose_growth_rates(X, θ, F, δ, u), y; atol = 1e-10);
 end
 
 """
-    check_kurtosis_type_and_input() -> Bool
+    check_compose_no_sectors() -> Bool
 
-`excess_kurtosis` returns a `Float64` and leaves its input unchanged.
+With no sector factors (`F` with zero columns, `δ` empty), the growth rates are `X θ + u`. The
+single index model row of the report composes the stocks this way.
 """
-function check_kurtosis_type_and_input()::Bool
-
-    # Keep a copy of the input, then compute the kurtosis -
-    g = randn(Xoshiro(21), 100);
-    copy_of_g = copy(g);
-    result = excess_kurtosis(g);
-
-    # The result must be a Float64, and the input must be unchanged -
-    return result isa Float64 && g == copy_of_g;
-end
-
-# --- volatility_clustering checks ---
-
-"""
-    check_clustering_matches_course() -> Bool
-
-For a fixed series with volatility regimes, `volatility_clustering` equals the mean of the
-course `sample_autocorrelation` of the absolute growth rates over the lags 1 to 10.
-"""
-function check_clustering_matches_course()::Bool
-
-    # The expected value: the mean course autocorrelation of abs.(g) over the lags 1 to 10 -
-    g = ps6_regime_growth_rates();
-    lags = collect(1:10);
-    expected = mean(sample_autocorrelation(abs.(g), lags));
-
-    # The student's clustering must equal the expected value -
-    return isapprox(volatility_clustering(g, lags), expected; atol = 1e-12);
+function check_compose_no_sectors()::Bool
+    X = [1.0 0.5; 1.0 -0.5; 1.0 1.5];
+    θ = [0.1, 1.2];
+    u = [0.01, 0.02, 0.03];
+    expected = X * θ + u;
+    return isapprox(compose_growth_rates(X, θ, zeros(3, 0), Float64[], u), expected; atol = 1e-12);
 end
 
 """
-    check_clustering_white_noise() -> Bool
+    check_compose_type_and_inputs() -> Bool
 
-For 100,000 independent Normal draws, the clustering over the lags 1 to 10 is within 0.01 of zero.
+`compose_growth_rates` returns a `Vector{Float64}` with one growth rate per day, and leaves its
+inputs unchanged.
 """
-function check_clustering_white_noise()::Bool
-    return abs(volatility_clustering(randn(Xoshiro(3), 100_000), collect(1:10))) < 0.01;
-end
+function check_compose_type_and_inputs()::Bool
 
-"""
-    check_clustering_regimes() -> Bool
+    # Random pieces for 50 days, and copies of each -
+    rng = Xoshiro(3);
+    X = hcat(ones(50), randn(rng, 50));
+    θ = [0.2, 1.1];
+    F = randn(rng, 50, 2);
+    δ = [0.7, -0.3];
+    u = randn(rng, 50);
+    copies = (copy(X), copy(θ), copy(F), copy(δ), copy(u));
 
-For the fixed series with volatility regimes, the clustering over the lags 1 to 10 is above 0.1.
-"""
-function check_clustering_regimes()::Bool
-    return volatility_clustering(ps6_regime_growth_rates(), collect(1:10)) > 0.1;
-end
-
-"""
-    check_clustering_lags() -> Bool
-
-`volatility_clustering` averages over exactly the lags passed: for the lags 1, 5, and 20 it equals
-the mean of those three autocorrelations, and the input is unchanged.
-"""
-function check_clustering_lags()::Bool
-
-    # The expected value over the lags 1, 5, and 20 only, with a copy of the input -
-    g = ps6_regime_growth_rates();
-    copy_of_g = copy(g);
-    lags = [1, 5, 20];
-    expected = mean(sample_autocorrelation(abs.(g), lags));
-
-    # The clustering must equal the expected value, and the input must be unchanged -
-    result = volatility_clustering(g, lags);
-    return isapprox(result, expected; atol = 1e-12) && g == copy_of_g;
+    # The result must be a vector of 50 growth rates, and every input unchanged -
+    g = compose_growth_rates(X, θ, F, δ, u);
+    return g isa Vector{Float64} && length(g) == 50 && (X, θ, F, δ, u) == copies;
 end
 
 """
     standard_public_checks() -> Vector{NamedTuple}
 
-The twelve Standard public checks: four for each of `three_state_rule`, `excess_kurtosis`, and
-`volatility_clustering`.
+The twelve Standard public checks: four for each of `least_squares_fit`, `sector_matrix`, and
+`compose_growth_rates`.
 """
 function standard_public_checks()::Vector{NamedTuple}
 
     # The name the checker prints, and the function that runs each check -
     return NamedTuple[
-        (name = "Three-state rule: matches the course threshold rule", test = check_three_state_matches_course),
-        (name = "Three-state rule: a signal at a threshold does not move the trader", test = check_three_state_strict),
-        (name = "Three-state rule: returns an Int in -1:1", test = check_three_state_type),
-        (name = "Three-state rule: a small market matches the course solve function", test = check_three_state_market),
-        (name = "Excess kurtosis: hand-computed value for [1, 2, 3, 4, 10]", test = check_kurtosis_by_hand),
-        (name = "Excess kurtosis: unchanged by a shift and a positive scale", test = check_kurtosis_shift_scale),
-        (name = "Excess kurtosis: near zero for a Normal sample", test = check_kurtosis_normal),
-        (name = "Excess kurtosis: returns a Float64 and leaves the input unchanged", test = check_kurtosis_type_and_input),
-        (name = "Volatility clustering: matches the mean autocorrelation of abs.(g)", test = check_clustering_matches_course),
-        (name = "Volatility clustering: near zero for white noise", test = check_clustering_white_noise),
-        (name = "Volatility clustering: positive for volatility regimes", test = check_clustering_regimes),
-        (name = "Volatility clustering: averages over exactly the lags passed", test = check_clustering_lags),
+        (name = "Least-squares fit: matches pinv(X) * y", test = check_fit_matches_pinv),
+        (name = "Least-squares fit: with X = B, returns the average of each sector", test = check_fit_sector_averages),
+        (name = "Least-squares fit: the residual is orthogonal to every column of X", test = check_fit_residual_orthogonal),
+        (name = "Least-squares fit: returns a Vector{Float64} and leaves the inputs unchanged", test = check_fit_type_and_inputs),
+        (name = "Sector matrix: hand case with three stocks and two sectors", test = check_sector_matrix_by_hand),
+        (name = "Sector matrix: one 1 in each row, and the sector sizes as column sums", test = check_sector_matrix_counts),
+        (name = "Sector matrix: an unknown sector raises an ArgumentError", test = check_sector_matrix_unknown),
+        (name = "Sector matrix: returns a Matrix{Float64} of size stocks × sectors", test = check_sector_matrix_type_and_inputs),
+        (name = "Compose growth rates: hand case with two days", test = check_compose_by_hand),
+        (name = "Compose growth rates: the fitted pieces rebuild a stock exactly", test = check_compose_rebuilds_stock),
+        (name = "Compose growth rates: works with no sector factors", test = check_compose_no_sectors),
+        (name = "Compose growth rates: returns a Vector{Float64} and leaves the inputs unchanged", test = check_compose_type_and_inputs),
     ]
 end
