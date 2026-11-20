@@ -173,13 +173,14 @@ julia --project=. --startup-file=no explore.jl
 The script writes `results/exploration/Exploration.md` from your functions. The
 exploration is not graded.
 
-You could also build a new agent-based model from this one by adding a third
-kind of trader, such as **noise traders**, who buy and sell on private signals
-that the market cannot see. In the model, a noise trader's signal can be a
-random number drawn at each step. Each group of traders is one loop in
-`simulate_market` in `src/Market.jl`, so a third group is one more loop. Which
-stylized facts would noise traders change? Try this in a copy of your PS6
-folder, so that the checker still runs the supplied market.
+**Just for fun.** This idea earns no points, and you do not need to try it. You
+could build a new agent-based model from this one by adding a third kind of
+trader, such as **noise traders**, who buy and sell on private signals that the
+market cannot see. In the model, a noise trader's signal can be a random number
+drawn at each step. Each group of traders is one loop in `simulate_market` in
+`src/Market.jl`, so a third group is one more loop. Which stylized facts would
+noise traders change? If you try it, work in a copy of your PS6 folder, so that
+the checker still runs the supplied market.
 
 ## Check and submit your work
 
