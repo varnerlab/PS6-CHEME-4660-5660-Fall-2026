@@ -28,23 +28,23 @@ function ps6_regime_growth_rates()::Vector{Float64}
     return g;
 end
 
-# --- three_state_rung checks ---
+# --- three_state_rule checks ---
 
 """
-    check_rung_matches_course() -> Bool
+    check_three_state_matches_course() -> Bool
 
-`three_state_rung` matches the course `threshold_position` for three pairs of thresholds
-`(T, τ)`, every rung, and a grid of signals that includes `T`, `-T`, `τ`, and `-τ`.
+`three_state_rule` matches the course `threshold_position` for three pairs of thresholds
+`(T, τ)`, every state, and a grid of signals that includes `T`, `-T`, `τ`, and `-τ`.
 """
-function check_rung_matches_course()::Bool
+function check_three_state_matches_course()::Bool
 
-    # Compare the student's rung with the course function on every case -
+    # Compare three_state_rule with the course function on every case -
     for (T, τ) in ((0.5, -0.1), (2.0, 0.0), (3.7, -0.2))
         signals = vcat(collect(range(-5, 5, length = 201)), [T, -T, τ, -τ]);
-        for rung in -1:1
+        for state in -1:1
             for z in signals
-                expected = Int(threshold_position(Float64(rung), z, T, τ, 1.0, 1));
-                if three_state_rung(rung, z, T, τ) != expected
+                expected = Int(threshold_position(Float64(state), z, T, τ, 1.0, 1));
+                if three_state_rule(state, z, T, τ) != expected
                     return false;
                 end
             end
@@ -54,43 +54,43 @@ function check_rung_matches_course()::Bool
 end
 
 """
-    check_rung_strict() -> Bool
+    check_three_state_strict() -> Bool
 
 A signal exactly at a threshold does not move the trader: all comparisons are strict.
 """
-function check_rung_strict()::Bool
+function check_three_state_strict()::Bool
 
-    # From rung 0, a signal exactly at T or at -T does not enter a position -
-    if three_state_rung(0, 2.0, 2.0, 0.0) != 0
+    # From state 0, a signal exactly at T or at -T does not enter a position -
+    if three_state_rule(0, 2.0, 2.0, 0.0) != 0
         return false;
     end
-    if three_state_rung(0, -2.0, 2.0, 0.0) != 0
-        return false;
-    end
-
-    # From rung 1, a signal exactly at τ does not exit -
-    if three_state_rung(1, -0.1, 2.0, -0.1) != 1
+    if three_state_rule(0, -2.0, 2.0, 0.0) != 0
         return false;
     end
 
-    # From rung -1, a signal exactly at -τ does not exit -
-    return three_state_rung(-1, 0.1, 2.0, -0.1) == -1;
+    # From state 1, a signal exactly at τ does not exit -
+    if three_state_rule(1, -0.1, 2.0, -0.1) != 1
+        return false;
+    end
+
+    # From state -1, a signal exactly at -τ does not exit -
+    return three_state_rule(-1, 0.1, 2.0, -0.1) == -1;
 end
 
 """
-    check_rung_type() -> Bool
+    check_three_state_type() -> Bool
 
-`three_state_rung` returns an `Int` in `-1:1` for 1,000 random inputs.
+`three_state_rule` returns an `Int` in `-1:1` for 1,000 random inputs.
 """
-function check_rung_type()::Bool
+function check_three_state_type()::Bool
 
-    # Draw a random rung, signal, entry threshold, and exit threshold for each case -
+    # Draw a random state, signal, entry threshold, and exit threshold for each case -
     rng = Xoshiro(5660);
     for i in 1:1000
-        rung = rand(rng, -1:1);
-        result = three_state_rung(rung, 6.0 * rand(rng) - 3.0, 3.0 * rand(rng) + 0.1, 0.4 * rand(rng) - 0.2);
+        state = rand(rng, -1:1);
+        result = three_state_rule(state, 6.0 * rand(rng) - 3.0, 3.0 * rand(rng) + 0.1, 0.4 * rand(rng) - 0.2);
 
-        # The next rung must be an Int from -1 to 1 -
+        # The next state must be an Int from -1 to 1 -
         if !(result isa Int) || result < -1 || result > 1
             return false;
         end
@@ -99,14 +99,14 @@ function check_rung_type()::Bool
 end
 
 """
-    check_rung_market() -> Bool
+    check_three_state_market() -> Bool
 
-A small market with 50 value investors and 50 trend followers that uses `three_state_rung`
+A small market with 50 value investors and 50 trend followers that uses `three_state_rule`
 reproduces the log price of the course `solve` function.
 """
-function check_rung_market()::Bool
+function check_three_state_market()::Bool
 
-    # Run the same small market with three_state_rung and with the course solve -
+    # Run the same small market with three_state_rule and with the course solve -
     market = build_market(_SETTINGS, 1; value_number = 50, trend_number = 50);
     ours = simulate_market(market, :three, 1, 1.0; number_of_steps = 500, burn_in = 100, seed = 1);
     course = solve(market; number_of_steps = 500, burn_in = 100, rng = Xoshiro(2));
@@ -223,17 +223,17 @@ end
 """
     standard_public_checks() -> Vector{NamedTuple}
 
-The twelve Standard public checks: four for each of `three_state_rung`, `excess_kurtosis`, and
+The twelve Standard public checks: four for each of `three_state_rule`, `excess_kurtosis`, and
 `volatility_clustering`.
 """
 function standard_public_checks()::Vector{NamedTuple}
 
     # The name the checker prints, and the function that runs each check -
     return NamedTuple[
-        (name = "Three-state rung: matches the course threshold rule", test = check_rung_matches_course),
-        (name = "Three-state rung: a signal at a threshold does not move the trader", test = check_rung_strict),
-        (name = "Three-state rung: returns an Int in -1:1", test = check_rung_type),
-        (name = "Three-state rung: a small market reproduces the course solve", test = check_rung_market),
+        (name = "Three-state rule: matches the course threshold rule", test = check_three_state_matches_course),
+        (name = "Three-state rule: a signal at a threshold does not move the trader", test = check_three_state_strict),
+        (name = "Three-state rule: returns an Int in -1:1", test = check_three_state_type),
+        (name = "Three-state rule: a small market reproduces the course solve", test = check_three_state_market),
         (name = "Excess kurtosis: hand-computed value for [1, 2, 3, 4, 10]", test = check_kurtosis_by_hand),
         (name = "Excess kurtosis: unchanged by a shift and a positive scale", test = check_kurtosis_shift_scale),
         (name = "Excess kurtosis: near zero for a Normal sample", test = check_kurtosis_normal),

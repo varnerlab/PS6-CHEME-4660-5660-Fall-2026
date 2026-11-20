@@ -42,7 +42,7 @@ with SPY. Cite the excess kurtosis, the clustering at lags 1–10 and 11–50, a
 the autocorrelation at lag 1, and say which values move toward SPY as the number
 of states rises and as the probability `p` falls. To explain the changes, use
 the column **Steps from flat to long** in **Hesitant traders**, and say what
-happens to a trader's rung when the signal drops below the entry threshold
+happens to a trader's state when the signal drops below the entry threshold
 before the trader enters. Say whether your prediction in Question 1 was right.
 
 <!-- answer-3:start -->

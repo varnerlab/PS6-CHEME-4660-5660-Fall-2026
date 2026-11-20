@@ -42,9 +42,9 @@ states**, **both groups, 5 states**, and **both groups, 7 states** with SPY.
 Cite the excess kurtosis, the clustering at lags 1–10 and 11–50, and the
 autocorrelation at lag 1, and say which values move toward SPY as the number of
 states rises. To explain the changes, use the conviction rule with 5 states:
-count the steps a flat trader on rung `0` needs to enter a long position while
+count the steps a flat trader in state `0` needs to enter a long position while
 the signal stays above the entry threshold, and say what happens to the
-trader's rung when the signal drops below the entry threshold before the trader
+trader's state when the signal drops below the entry threshold before the trader
 enters. Say whether your prediction in Question 1 was right.
 
 <!-- answer-3:start -->

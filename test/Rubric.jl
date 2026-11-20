@@ -349,8 +349,8 @@ end
 
 
 # Functions that must have docstrings -
-const STANDARD_DOCUMENTED_FUNCTIONS = [:three_state_rung, :excess_kurtosis, :volatility_clustering];
+const STANDARD_DOCUMENTED_FUNCTIONS = [:three_state_rule, :excess_kurtosis, :volatility_clustering];
 
-const ADVANCED_DOCUMENTED_FUNCTIONS = vcat(STANDARD_DOCUMENTED_FUNCTIONS, [:conviction_rung]);
+const ADVANCED_DOCUMENTED_FUNCTIONS = vcat(STANDARD_DOCUMENTED_FUNCTIONS, [:conviction_rule]);
 
-const EXPERT_DOCUMENTED_FUNCTIONS = vcat(ADVANCED_DOCUMENTED_FUNCTIONS, [:hesitant_rung, :transition_matrix]);
+const EXPERT_DOCUMENTED_FUNCTIONS = vcat(ADVANCED_DOCUMENTED_FUNCTIONS, [:hesitant_rule, :transition_matrix]);

@@ -79,9 +79,9 @@ packages are the same as in PS5.
 
    | Track | Functions to complete | Questions to answer |
    |:--|:--|:--|
-   | Standard | Three functions in [src/Standard.jl](src/Standard.jl): `three_state_rung`, `excess_kurtosis`, and `volatility_clustering` | [responses/Standard.md](responses/Standard.md) |
-   | Advanced | Four functions in [src/Advanced.jl](src/Advanced.jl): the same three plus `conviction_rung` | [responses/Advanced.md](responses/Advanced.md) |
-   | Expert | Six functions in [src/Expert.jl](src/Expert.jl): the same four plus `hesitant_rung` and `transition_matrix` | [responses/Expert.md](responses/Expert.md) |
+   | Standard | Three functions in [src/Standard.jl](src/Standard.jl): `three_state_rule`, `excess_kurtosis`, and `volatility_clustering` | [responses/Standard.md](responses/Standard.md) |
+   | Advanced | Four functions in [src/Advanced.jl](src/Advanced.jl): the same three plus `conviction_rule` | [responses/Advanced.md](responses/Advanced.md) |
+   | Expert | Six functions in [src/Expert.jl](src/Expert.jl): the same four plus `hesitant_rule` and `transition_matrix` | [responses/Expert.md](responses/Expert.md) |
 
 5. Answer Question 1, your prediction, before you write any code.
 6. Complete each function by replacing each `error("Complete ...")` with your
@@ -110,28 +110,27 @@ document each function.
 
 ## The market and its states
 
-**The rungs.** We'll model a trader's state as an integer, the **rung**. In the
-course example, a trader has three states, which we number as rungs `-1`
-(short), `0` (flat), and `1` (long). We call the course example's rule the
-**three-state rule**:
+**The states.** We'll number each trader's states with integers. In the course
+example, a trader has three states: `-1` (short), `0` (flat), and `1` (long). We
+call the course example's rule the **three-state rule**:
 
-- A trader on rung `0` moves to rung `1` when the signal is above the entry
-  threshold, and to rung `-1` when the signal is below minus the entry
+- A trader in state `0` moves to state `1` when the signal is above the entry
+  threshold, and to state `-1` when the signal is below minus the entry
   threshold.
-- A trader on rung `1` exits to rung `0` when the signal falls below the exit
-  threshold. A trader on rung `-1` exits to rung `0` when the signal rises above
+- A trader in state `1` exits to state `0` when the signal falls below the exit
+  threshold. A trader in state `-1` exits to state `0` when the signal rises above
   minus the exit threshold.
 
-A **conviction ladder** has more rungs. With 5 states, the rungs run from `-2`
-to `2`. A trader holds a long position only on the top rung and a short position
-only on the bottom rung, and holds no position on any rung in between. With 5
-states, the market cannot tell a trader on rung `1` from a trader on rung `0`,
-because neither trader holds a position: the rung is the trader's hidden state.
+A **conviction ladder** has more states. With 5 states, the states run from `-2`
+to `2`. A trader holds a long position only in the top state and a short position
+only in the bottom state, and holds no position in any state in between. With 5
+states, the market cannot tell a trader in state `1` from a trader in state `0`,
+because neither trader holds a position, so the trader's state is hidden.
 
 **The simulator.** The supplied code in `src/Market.jl` runs the course
 package's Farmer–Joshi market one step at a time. One step is one trading day.
 Each group has 1,200 traders. At each step, the simulator computes each trader's
-signal, calls your function for the trader's next rung, and adds up the changes
+signal, calls your function for the trader's next state, and adds up the changes
 in the traders' positions to get the net demand. The market maker then moves
 the log price in the direction of the net demand, and random noise moves both
 the log price and the log value.
@@ -168,7 +167,7 @@ in the growth rates, not the size of the moves.
 
 Complete these functions:
 
-1. **`three_state_rung`** returns a trader's next rung under the three-state
+1. **`three_state_rule`** returns a trader's next state under the three-state
    rule.
 2. **`excess_kurtosis`** returns the excess kurtosis of a market's growth rates,
    from population moments.
@@ -185,15 +184,15 @@ students also answer Question 3 from this table.
 Complete the Advanced copies of the three Standard functions, then complete one
 more function:
 
-4. **`conviction_rung`** returns a trader's next rung on a conviction ladder
-   with rungs from `-K` (the bottom rung) to `K` (the top rung). On every other
-   rung, the trader is flat. A flat trader moves one rung up when the signal is
-   above the entry threshold, and one rung down when the signal is below minus
+4. **`conviction_rule`** returns a trader's next state on a conviction ladder
+   with states from `-K` (the bottom state) to `K` (the top state). In every other
+   state, the trader is flat. A flat trader moves up one state when the signal is
+   above the entry threshold, and down one state when the signal is below minus
    the entry threshold. Otherwise the trader's conviction fades, and the trader
-   moves one rung toward rung `0`, or stays on rung `0` if the trader is already
-   there. On the top rung, the trader exits to the rung below when the signal
-   falls below the exit threshold. On the bottom rung, the trader exits to the
-   rung above when the signal rises above minus the exit threshold. With 3
+   moves one state toward state `0`, or stays in state `0` if the trader is already
+   there. In the top state, the trader exits to the state below when the signal
+   falls below the exit threshold. In the bottom state, the trader exits to the
+   state above when the signal rises above minus the exit threshold. With 3
    states, this rule is the three-state rule.
 
 Rerun the checker, read the table **Conviction ladders**, and answer Question 3.
@@ -204,17 +203,17 @@ The table compares SPY with the market with both groups at 3, 5, and 7 states.
 Complete the Expert copies of the four Advanced functions, then complete two
 more functions:
 
-5. **`hesitant_rung`** returns a hesitant trader's next rung. At each step, the
+5. **`hesitant_rule`** returns a hesitant trader's next state. At each step, the
    simulator draws one random number for each trader, uniformly between `0` and
-   `1`. The trader moves to the rung that `conviction_rung` proposes when that
-   number is below the probability `p`, and otherwise stays on the current rung.
+   `1`. The trader moves to the state that `conviction_rule` proposes when that
+   number is below the probability `p`, and otherwise stays in the current state.
    Entries and exits are both hesitant.
 6. **`transition_matrix`** returns the one-step transition matrix of one
-   trader's rung at a fixed signal. Each entry is the probability of moving in
-   one step from the row's rung to the column's rung, so each row sums to one.
+   trader's state at a fixed signal. Each entry is the probability of moving in
+   one step from the row's state to the column's state, so each row sums to one.
 
 The report uses your `transition_matrix` to compute the expected number of steps
-a trader takes to go from rung `0` (flat) to the top rung (long) while the
+a trader takes to go from state `0` (flat) to the top state (long) while the
 signal stays above the entry threshold. Rerun the checker, read the tables
 **Conviction ladders** and **Hesitant traders**, and answer Question 3. The
 table **Hesitant traders** compares SPY with the market with both groups at 5

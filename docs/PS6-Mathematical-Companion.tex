@@ -96,11 +96,11 @@ mispricing, so a positive signal favors a long position in both groups.}
 \end{frame}
 
 \begin{frame}{The market maker sets the price}
-Trader $i$'s state is a rung $r_t^{(i)}$, an integer from $-K$ to $K$, so each
+Trader $i$'s state $r_t^{(i)}$ is an integer from $-K$ to $K$, so each
 trader has $2K+1$ states. The three-state rule has $K=1$. The market sees only
-the trader's position $x_t^{(i)}$: $+c_i$ on rung $K$ (long), $-c_i$ on rung
-$-K$ (short), and 0 on every other rung (flat). At each step, every trader
-moves to its next rung and orders $\omega_{t+1}^{(i)}=x_{t+1}^{(i)}-x_t^{(i)}$.
+the trader's position $x_t^{(i)}$: $+c_i$ in state $K$ (long), $-c_i$ in state
+$-K$ (short), and 0 in every other state (flat). At each step, every trader
+moves to its next state and orders $\omega_{t+1}^{(i)}=x_{t+1}^{(i)}-x_t^{(i)}$.
 The market maker moves the log price in proportion to the net demand, the sum
 of the orders. The log value takes a random step:
 \begin{align*}
@@ -110,13 +110,13 @@ of the orders. The log value takes a random step:
 where $\lambda$ is the liquidity, $Z_{t+1},Z'_{t+1}\sim\mathcal{N}(0,1)$ are
 independent, $\sigma_S$ and $\sigma_v$ are the annualized volatilities of
 the noise (1/$\sqrt{\text{yr}}$), and $\mu_v$ is the drift of the log value (1/yr).
-\slidenote{Start}{$\ln S_0=\ln V_0=0$, with every trader on rung 0. Each run
+\slidenote{Start}{$\ln S_0=\ln V_0=0$, with every trader in state 0. Each run
 drops the first 2,000 steps and keeps the next 20,000.}
 \end{frame}
 
 \begin{frame}{The three-state rule}
-Standard uses the course example's rule on rungs $-1$, $0$, and $1$. We write
-$z$ and $r_t$ for trader $i$'s signal and rung. All comparisons are strict:
+Standard uses the course example's rule in states $-1$, $0$, and $1$. We write
+$z$ and $r_t$ for trader $i$'s signal and state. All comparisons are strict:
 \vspace{0.3em}
 \begin{columns}[T,onlytextwidth]
 \begin{column}{0.36\textwidth}
@@ -151,7 +151,7 @@ $z$ and $r_t$ for trader $i$'s signal and rung. All comparisons are strict:
 \vspace{0.5em}
 The course package's \texttt{threshold\_position} gives the same rule for the
 positions $-c_i$, $0$, and $+c_i$.
-\slidenote{Code}{\texttt{three\_state\_rung(rung, z, T, \tauc)} returns
+\slidenote{Code}{\texttt{three\_state\_rule(state, z, T, \tauc)} returns
 $r_{t+1}$, with \texttt{T} $=\cin$ and \texttt{\tauc} $=\cout$.}
 \end{frame}
 
@@ -210,7 +210,7 @@ Clustering, lags 1–10 and 11–50 & $C(\{1,\dots,10\})$ and $C(\{11,\dots,50\}
 Autocorrelation, lag 1 & $\rho_g(1)$ \\
 Volatility (1/$\sqrt{\text{yr}}$) & $s(g)\sqrt{\Delta t}$ \\
 Gap spread & $s(\ln S_t-\ln V_t)$; \texttt{n/a} for SPY \\
-Steps from flat to long & expected steps from rung 0 to rung $K$, slide \pageref{fr:steps} \\
+Steps from flat to long & expected steps from state 0 to state $K$, slide \pageref{fr:steps} \\
 \bottomrule
 \end{tabular}
 \end{center}
@@ -224,50 +224,50 @@ probability about 0.95.
 \begin{frame}{The conviction ladder}\label{fr:ladder}
 \begin{columns}[T,onlytextwidth]
 \begin{column}{0.61\textwidth}
-Advanced gives each trader $2K+1$ states, the rungs from $-K$ to $K$. The
-trader holds $+c_i$ only on rung $K$ and $-c_i$ only on rung $-K$. All
+Advanced gives each trader $2K+1$ states, the states from $-K$ to $K$. The
+trader holds $+c_i$ only in state $K$ and $-c_i$ only in state $-K$. All
 comparisons are strict:
 \begin{itemize}\setlength{\itemsep}{0.15em}
-\item \hilite{Flat rung,} $-K<r_t<K$: move up one rung when $z>\cin$, and down
-one rung when $z<-\cin$. Otherwise conviction fades: move one rung toward 0, or
-stay on rung 0.
-\item \hilite{End rungs:} exit from rung $K$ to rung $K-1$ when $z<\cout$, and
-from rung $-K$ to rung $-(K-1)$ when $z>-\cout$. Otherwise stay.
+\item \hilite{Flat state,} $-K<r_t<K$: move up one state when $z>\cin$, and down
+one state when $z<-\cin$. Otherwise conviction fades: move one state toward 0, or
+stay in state 0.
+\item \hilite{End states:} exit from state $K$ to state $K-1$ when $z<\cout$, and
+from state $-K$ to state $-(K-1)$ when $z>-\cout$. Otherwise stay.
 \end{itemize}
 \end{column}
 \begin{column}{0.35\textwidth}
 \centering
 \begin{tikzpicture}[x=0.9cm,y=0.55cm,
-  rungbar/.style={vnslideink,line width=1.3pt},
+  statebar/.style={vnslideink,line width=1.3pt},
   lab/.style={font=\footnotesize,text=vnslidebody},
   head/.style={font=\scriptsize,text=vnmuted},
   entry/.style={vnaccent,line width=0.9pt,-{Latex[length=1.8mm]}},
   fade/.style={vnmuted,line width=0.9pt,dashed,-{Latex[length=1.8mm]}},
   exit/.style={vnlink,line width=0.9pt,-{Latex[length=1.8mm]}}]
   % Column headings -
-  \node[head,anchor=east] at (-0.6,3.9) {rung};
+  \node[head,anchor=east] at (-0.6,3.9) {state};
   \node[head,anchor=west] at (1.75,3.9) {position};
-  % Rungs, rung numbers, and positions -
+  % States, state numbers, and positions -
   \foreach \y/\r/\x in {3/{$K$}/{$+c_i$},2/{$K-1$}/{$0$},0/{$0$}/{$0$},-2/{$-(K-1)$}/{$0$},-3/{$-K$}/{$-c_i$}}{
-    \draw[rungbar] (0,\y) -- (1.1,\y);
+    \draw[statebar] (0,\y) -- (1.1,\y);
     \node[lab,anchor=east] at (-0.6,\y) {\r};
     \node[lab,anchor=west] at (1.75,\y) {\x};
   }
   \node[lab] at (0.55,1.1) {$\vdots$};
   \node[lab] at (0.55,-0.9) {$\vdots$};
-  % Entry moves, on the right: one rung away from 0 -
+  % Entry moves, on the right: one state away from 0 -
   \draw[entry] (1.2,0.1) .. controls (1.65,0.2) and (1.65,0.65) .. (1.2,0.75);
   \draw[entry] (1.2,1.25) .. controls (1.65,1.35) and (1.65,1.8) .. (1.2,1.9);
   \draw[entry] (1.2,2.1) .. controls (1.65,2.2) and (1.65,2.8) .. (1.2,2.9);
   \draw[entry] (1.2,-0.1) .. controls (1.65,-0.2) and (1.65,-0.65) .. (1.2,-0.75);
   \draw[entry] (1.2,-1.25) .. controls (1.65,-1.35) and (1.65,-1.8) .. (1.2,-1.9);
   \draw[entry] (1.2,-2.1) .. controls (1.65,-2.2) and (1.65,-2.8) .. (1.2,-2.9);
-  % Fade moves, on the left: one rung toward 0 -
+  % Fade moves, on the left: one state toward 0 -
   \draw[fade] (-0.1,1.9) .. controls (-0.55,1.8) and (-0.55,1.35) .. (-0.1,1.25);
   \draw[fade] (-0.1,0.75) .. controls (-0.55,0.65) and (-0.55,0.2) .. (-0.1,0.1);
   \draw[fade] (-0.1,-1.9) .. controls (-0.55,-1.8) and (-0.55,-1.35) .. (-0.1,-1.25);
   \draw[fade] (-0.1,-0.75) .. controls (-0.55,-0.65) and (-0.55,-0.2) .. (-0.1,-0.1);
-  % Exit moves, on the left: from an end rung to the next rung toward 0 -
+  % Exit moves, on the left: from an end state to the next state toward 0 -
   \draw[exit] (-0.1,2.9) .. controls (-0.55,2.8) and (-0.55,2.2) .. (-0.1,2.1);
   \draw[exit] (-0.1,-2.9) .. controls (-0.55,-2.8) and (-0.55,-2.2) .. (-0.1,-2.1);
   % Legend: each move's name in its color -
@@ -276,14 +276,14 @@ from rung $-K$ to rung $-(K-1)$ when $z>-\cout$. Otherwise stay.
 \end{tikzpicture}
 \end{column}
 \end{columns}
-\slidenote{Code}{\texttt{conviction\_rung(rung, z, T, \tauc, K)} returns $r_{t+1}$. With $K=1$,
+\slidenote{Code}{\texttt{conviction\_rule(state, z, T, \tauc, K)} returns $r_{t+1}$. With $K=1$,
 this rule is the three-state rule.}
 \end{frame}
 
 \begin{frame}{Hesitant traders}\label{fr:hesitant}
 Expert makes every move hesitant. At each step, the simulator draws one number
-$u$, uniform on $[0,1)$, for every trader. With $r'$ the rung that the
-conviction rule proposes, the trader's next rung is:
+$u$, uniform on $[0,1)$, for every trader. With $r'$ the state that the
+conviction rule proposes, the trader's next state is:
 \[
  r_{t+1}=\begin{cases}
  r' & r'\neq r_t\ \text{and}\ u<p,\\
@@ -293,16 +293,16 @@ conviction rule proposes, the trader's next rung is:
 Each proposed move, an entry, a fade, or an exit, happens with probability $p$, and
 $p=1$ gives the conviction ladder of slide \pageref{fr:ladder}. Expert uses 5
 states ($K=2$) and compares $p=1$, $0.5$, and $0.2$.
-\slidenote{Code}{\texttt{hesitant\_rung(rung, proposed, p, u)} returns
+\slidenote{Code}{\texttt{hesitant\_rule(state, proposed, p, u)} returns
 $r_{t+1}$, with \texttt{proposed} $=r'$. The simulator calls it only when
 $p<1$.}
 \end{frame}
 
 \begin{frame}{The transition matrix of one trader}
-At a fixed signal $z$, a hesitant trader's rung follows a Markov chain: the next
-rung depends only on the current rung. In the transition matrix $\Pb$, row and
-column $i$ hold rung $i-K-1$. With $r'$ the conviction rule's proposal from the rung $r$ of row $i$, the probability of moving from the
-rung of row $i$ to the rung of column $j$ in one step is:
+At a fixed signal $z$, a hesitant trader's state follows a Markov chain: the next
+state depends only on the current state. In the transition matrix $\Pb$, row and
+column $i$ hold state $i-K-1$. With $r'$ the conviction rule's proposal from the state $r$ of row $i$, the probability of moving from the
+state of row $i$ to the state of column $j$ in one step is:
 \begin{columns}[T,onlytextwidth]
 \begin{column}{0.56\textwidth}
 \[
@@ -326,23 +326,23 @@ rung of row $i$ to the rung of column $j$ in one step is:
 \end{columns}
 \vspace{0.6em}
 Each row of $\Pb$ sums to 1. The matrix on the right is $\Pb$ for $K=1$ at a
-strong signal, $z>\cin$ and $z>-\cout$, with rows for rungs $-1$, $0$, and $1$.
+strong signal, $z>\cin$ and $z>-\cout$, with rows for states $-1$, $0$, and $1$.
 \slidenote{Code}{\texttt{transition\_matrix(z, T, \tauc, K, p)} returns $\Pb$.
-The column of rung $r$ is $r+K+1$.}
+The column of state $r$ is $r+K+1$.}
 \end{frame}
 
 \begin{frame}{Steps from flat to long}\label{fr:steps}
-At a strong signal, $z>\cin$ and $z>-\cout$, every rung below $K$ proposes the
-rung above it. The block $\Qb$ of $\Pb$ for rungs $-K$ to $K-1$, labeled by rung, is $\Qb=(1-p)\,\Ib+p\,\Jb$, where $\Jb$ is
+At a strong signal, $z>\cin$ and $z>-\cout$, every state below $K$ proposes the
+state above it. The block $\Qb$ of $\Pb$ for states $-K$ to $K-1$, labeled by state, is $\Qb=(1-p)\,\Ib+p\,\Jb$, where $\Jb$ is
 the $2K\times2K$ matrix with ones just above the diagonal. Entry $N_{rm}$ of the
-fundamental matrix $\Nb=(\Ib-\Qb)^{-1}$ is the expected number of steps on rung
-$m$, from rung $r$, before reaching rung $K$. Because $\Jb^{2K}=0$, $\Nb$ is a
+fundamental matrix $\Nb=(\Ib-\Qb)^{-1}$ is the expected number of steps in state
+$m$, from state $r$, before reaching state $K$. Because $\Jb^{2K}=0$, $\Nb$ is a
 finite sum:
 \[
  \Nb=\frac{1}{p}\left(\Ib-\Jb\right)^{-1}
  =\frac{1}{p}\left(\Ib+\Jb+\Jb^{2}+\dots+\Jb^{2K-1}\right).
 \]
-Every entry of $\Nb$ on or above the diagonal is $1/p$. The row of rung 0 has
+Every entry of $\Nb$ on or above the diagonal is $1/p$. The row of state 0 has
 $K$ such entries, so the expected number of steps from flat to long is:
 \[
  \sum_{m=-K}^{K-1}N_{0m}=\frac{K}{p}.
@@ -352,19 +352,19 @@ from \texttt{transition\_matrix(10.0, 1.0, -0.1, K, p)}.}
 \end{frame}
 
 \begin{frame}{Summary}
-PS6 gives each Farmer–Joshi trader a hidden state, the rung, and compares the
+PS6 gives each Farmer–Joshi trader a hidden state and compares the
 stylized facts of the simulated growth rates with those of SPY.
 
 \vspace{0.6em}
 \textbf{Key takeaways}
 \begin{itemize}\setlength{\itemsep}{0.5em}
-\item The market sees only each trader's position: $+c_i$ on rung $K$, $-c_i$
-on rung $-K$, and 0 on every other rung. The rung itself is hidden.
+\item The market sees only each trader's position: $+c_i$ in state $K$, $-c_i$
+in state $-K$, and 0 in every other state. The state itself is hidden.
 \item The excess kurtosis measures fat tails, and the mean autocorrelation of
 the absolute growth rates over a set of lags measures volatility clustering.
 An autocorrelation outside the white-noise band is unlikely for a series with
 no autocorrelation.
-\item At a fixed signal, a hesitant trader's rung follows a Markov chain, and
+\item At a fixed signal, a hesitant trader's state follows a Markov chain, and
 the fundamental matrix of the chain gives the expected steps from flat to long.
 \end{itemize}
 \vspace{0.6em}

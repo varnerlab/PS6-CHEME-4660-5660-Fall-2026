@@ -55,29 +55,29 @@ end
 """
     expected_steps_to_long(P::Matrix{Float64}, K::Int) -> Float64
 
-Compute the expected number of steps for a trader to go from rung 0 to rung `K`.
+Compute the expected number of steps for a trader to go from state 0 to state `K`.
 
 ### Arguments
 
-- `P`: The one-step transition matrix of the rungs. Row and column `i` is rung `i - K - 1`.
-- `K`: The top rung. Rung `K` is treated as absorbing.
+- `P`: The one-step transition matrix of the states. Row and column `i` is state `i - K - 1`.
+- `K`: The top state. State `K` is treated as absorbing.
 
 ### Returns
 
-- The expected number of steps, from the fundamental matrix of the other rungs.
+- The expected number of steps, from the fundamental matrix of the other states.
 """
 function expected_steps_to_long(P::Matrix{Float64}, K::Int)::Float64
 
-    # The transition matrix among the rungs below K -
-    number_of_rungs = 2 * K + 1;
-    Q = P[1:(number_of_rungs - 1), 1:(number_of_rungs - 1)];
+    # The transition matrix among the states below K -
+    number_of_states = 2 * K + 1;
+    Q = P[1:(number_of_states - 1), 1:(number_of_states - 1)];
 
-    # The fundamental matrix gives the expected visits to each rung before reaching K -
+    # The fundamental matrix gives the expected visits to each state before reaching K -
     N = inv(I - Q);
 
-    # Expected steps starting from rung 0, which is state K + 1 -
+    # Expected steps starting from state 0, which is state K + 1 -
     steps = 0.0;
-    for j in 1:(number_of_rungs - 1)
+    for j in 1:(number_of_states - 1)
         steps += N[K + 1, j];
     end
     return steps;

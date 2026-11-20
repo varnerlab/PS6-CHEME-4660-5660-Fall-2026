@@ -15,8 +15,8 @@ track in `TRACK.txt`.
 
 The checks are the public checks that `check_submission.jl` runs, four for each
 function. Standard has **12 checks**. Advanced has **16 checks**: the same 12
-plus four for `conviction_rung`. Expert has **24 checks**: the same 16 plus four
-for `hesitant_rung` and four for `transition_matrix`. Completing only the work
+plus four for `conviction_rule`. Expert has **24 checks**: the same 16 plus four
+for `hesitant_rule` and four for `transition_matrix`. Completing only the work
 of an earlier track therefore earns at most 2. The cutoffs for scores 1 and 2
 are 1–6 and 7–11 checks on Standard, 1–8 and 9–15 on Advanced, and 1–12
 and 13–23 on Expert.
@@ -26,15 +26,15 @@ the other functions.
 
 ## Requirements for a 4
 
-- **Standard functions:** `three_state_rung` follows the three-state rule in its
+- **Standard functions:** `three_state_rule` follows the three-state rule in its
   docstring, with strict comparisons. `excess_kurtosis` uses population moments.
   `volatility_clustering` averages the autocorrelations of the absolute growth
   rates over exactly the lags passed in. Use the arguments passed in; do not
   hard-code them, and do not modify the growth rates `g`.
-- **Advanced:** `conviction_rung` follows the rule in its docstring for every
+- **Advanced:** `conviction_rule` follows the rule in its docstring for every
   value of `K`. Complete the Advanced copies of the three Standard functions.
-- **Expert:** `hesitant_rung` follows the rule in its docstring.
-  `transition_matrix` builds each row from `conviction_rung` and the probability
+- **Expert:** `hesitant_rule` follows the rule in its docstring.
+  `transition_matrix` builds each row from `conviction_rule` and the probability
   `p`, as its docstring describes, and each row of the matrix sums to one.
   Complete the Expert copies of the four Advanced functions.
 - **Documentation:** Keep the supplied docstrings. Document each helper's

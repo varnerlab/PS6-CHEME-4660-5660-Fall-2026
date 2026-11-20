@@ -1,6 +1,6 @@
 # PS6 Advanced: complete the 4 functions below: the 3 Standard functions and 1 for the conviction ladder.
-# The simulator calls three_state_rung for every trader at every step of the first table and
-# conviction_rung for every trader at every step of the second table. The report calls
+# The simulator calls three_state_rule for every trader at every step of the first table and
+# conviction_rule for every trader at every step of the second table. The report calls
 # excess_kurtosis and volatility_clustering on the growth rates of each market.
 # Keep the function names, arguments, return types, and docstrings.
 # Replace each error("Complete ...") expression with your calculation.
@@ -13,55 +13,55 @@
 # lines you need and rename variables to match this file.
 
 """
-    three_state_rung(rung::Int, z::Float64, T::Float64, τ::Float64) -> Int
+    three_state_rule(state::Int, z::Float64, T::Float64, τ::Float64) -> Int
 
-Give a trader's next rung in the three-state Farmer–Joshi rule.
+Give a trader's next state in the three-state Farmer–Joshi rule.
 
 ### Arguments
 
-- `rung`: The trader's current rung: `-1` (short), `0` (flat), or `1` (long).
+- `state`: The trader's current state: `-1` (short), `0` (flat), or `1` (long).
 - `z`: The trader's signal (dimensionless). A positive `z` favors a long position.
 - `T`: The trader's entry threshold (dimensionless, positive).
 - `τ`: The trader's exit threshold (dimensionless, below `T`).
 
 ### Returns
 
-- The trader's next rung: `-1`, `0`, or `1`.
+- The trader's next state: `-1`, `0`, or `1`.
 
 ### Method
 
 All comparisons are strict.
 
-- From rung `0`, the trader enters a long position (rung `1`) when `z` is above `T`, and enters a
-  short position (rung `-1`) when `z` is below `-T`. Otherwise the trader stays on rung `0`.
-- From rung `1`, the trader exits to rung `0` when `z` is below `τ`. Otherwise the trader stays on rung `1`.
-- From rung `-1`, the trader exits to rung `0` when `z` is above `-τ`. Otherwise the trader stays on rung `-1`.
+- From state `0`, the trader enters a long position (state `1`) when `z` is above `T`, and enters a
+  short position (state `-1`) when `z` is below `-T`. Otherwise the trader stays in state `0`.
+- From state `1`, the trader exits to state `0` when `z` is below `τ`. Otherwise the trader stays in state `1`.
+- From state `-1`, the trader exits to state `0` when `z` is above `-τ`. Otherwise the trader stays in state `-1`.
 
 ### Course references
 
 - Course lecture L12a, section 'The Farmer–Joshi algorithm'.
 - PS6 companion: slide 6, 'The three-state rule'.
 """
-function three_state_rung(rung::Int, z::Float64, T::Float64, τ::Float64)::Int
+function three_state_rule(state::Int, z::Float64, T::Float64, τ::Float64)::Int
 
-    # From rung 0 (flat), the trader enters on a strong signal, and otherwise stays flat -
-    if rung == 0
+    # From state 0 (flat), the trader enters on a strong signal, and otherwise stays flat -
+    if state == 0
         # TODO 1: Return 1 when z is above T, and return -1 when z is below -T.
         # Hint: write one if-block for each entry.
-        error("Complete three_state_rung: the entry rule from rung 0.");
+        error("Complete three_state_rule: the entry rule from state 0.");
         return 0;
     end
 
-    # From rung 1 (long), the trader exits when the signal falls below τ, and otherwise stays long -
-    if rung == 1
+    # From state 1 (long), the trader exits when the signal falls below τ, and otherwise stays long -
+    if state == 1
         # TODO 2: Return 0 when z is below τ.
-        error("Complete three_state_rung: the exit rule from rung 1.");
+        error("Complete three_state_rule: the exit rule from state 1.");
         return 1;
     end
 
-    # From rung -1 (short), the trader exits when the signal rises above -τ, and otherwise stays short -
+    # From state -1 (short), the trader exits when the signal rises above -τ, and otherwise stays short -
     # TODO 3: Return 0 when z is above -τ.
-    error("Complete three_state_rung: the exit rule from rung -1.");
+    error("Complete three_state_rule: the exit rule from state -1.");
     return -1;
 end
 
@@ -152,34 +152,34 @@ function volatility_clustering(g::Vector{Float64}, lags::Vector{Int})::Float64
 end
 
 """
-    conviction_rung(rung::Int, z::Float64, T::Float64, τ::Float64, K::Int) -> Int
+    conviction_rule(state::Int, z::Float64, T::Float64, τ::Float64, K::Int) -> Int
 
-Give a trader's next rung on the conviction ladder, which runs from `-K` to `K`.
+Give a trader's next state on the conviction ladder, which runs from `-K` to `K`.
 
 ### Arguments
 
-- `rung`: The trader's current rung, from `-K` to `K`. The trader holds a long position only on rung `K`,
-  a short position only on rung `-K`, and no position on every other rung.
+- `state`: The trader's current state, from `-K` to `K`. The trader holds a long position only in state `K`,
+  a short position only in state `-K`, and no position in every other state.
 - `z`: The trader's signal (dimensionless). A positive `z` favors a long position.
 - `T`: The trader's entry threshold (dimensionless, positive).
 - `τ`: The trader's exit threshold (dimensionless, below `T`).
-- `K`: The top rung of the ladder (positive integer). The ladder has `2K + 1` rungs.
+- `K`: The top state of the ladder (positive integer). The ladder has `2K + 1` states.
 
 ### Returns
 
-- The trader's next rung, from `-K` to `K`.
+- The trader's next state, from `-K` to `K`.
 
 ### Method
 
 All comparisons are strict.
 
-- On a flat rung (`-K < rung < K`), the trader moves one rung up when `z` is above `T`, and one rung down
-  when `z` is below `-T`. Otherwise conviction fades: the trader moves one rung toward rung `0`, and stays
-  on rung `0` if the trader is already there.
-- On rung `K`, the trader exits to the lean-long rung `K - 1` when `z` is below `τ`. Otherwise the trader
-  stays on rung `K`.
-- On rung `-K`, the trader exits to the lean-short rung `-(K - 1)` when `z` is above `-τ`. Otherwise the
-  trader stays on rung `-K`.
+- In a flat state (`-K < state < K`), the trader moves up one state when `z` is above `T`, and down one state
+  when `z` is below `-T`. Otherwise conviction fades: the trader moves one state toward state `0`, and stays
+  in state `0` if the trader is already there.
+- In state `K`, the trader exits to the lean-long state `K - 1` when `z` is below `τ`. Otherwise the trader
+  stays in state `K`.
+- In state `-K`, the trader exits to the lean-short state `-(K - 1)` when `z` is above `-τ`. Otherwise the
+  trader stays in state `-K`.
 
 With `K = 1`, this rule gives the Standard three-state rule for every input.
 
@@ -188,32 +188,32 @@ With `K = 1`, this rule gives the Standard three-state rule for every input.
 - Course lecture L12a, section 'The Farmer–Joshi algorithm'.
 - PS6 companion: slide 10, 'The conviction ladder'.
 """
-function conviction_rung(rung::Int, z::Float64, T::Float64, τ::Float64, K::Int)::Int
+function conviction_rule(state::Int, z::Float64, T::Float64, τ::Float64, K::Int)::Int
 
-    # On the top rung (long), the trader exits to rung K - 1 when the signal falls below τ -
-    if rung == K
+    # In the top state (long), the trader exits to state K - 1 when the signal falls below τ -
+    if state == K
         # TODO 1: Return K - 1 when z is below τ.
-        error("Complete conviction_rung: the exit rule from rung K.");
+        error("Complete conviction_rule: the exit rule from state K.");
         return K;
     end
 
-    # On the bottom rung (short), the trader exits to rung -(K - 1) when the signal rises above -τ -
-    if rung == -K
+    # In the bottom state (short), the trader exits to state -(K - 1) when the signal rises above -τ -
+    if state == -K
         # TODO 2: Return -(K - 1) when z is above -τ.
-        error("Complete conviction_rung: the exit rule from rung -K.");
+        error("Complete conviction_rule: the exit rule from state -K.");
         return -K;
     end
 
-    # On a flat rung, a strong signal moves the trader one rung toward the signal's side -
-    # TODO 3: Return rung + 1 when z is above T, and return rung - 1 when z is below -T.
-    error("Complete conviction_rung: the entry rule on a flat rung.");
+    # In a flat state, a strong signal moves the trader one state toward the signal's side -
+    # TODO 3: Return state + 1 when z is above T, and return state - 1 when z is below -T.
+    error("Complete conviction_rule: the entry rule in a flat state.");
 
-    # Otherwise the trader's conviction fades one rung toward rung 0 -
-    if rung > 0
-        return rung - 1;
+    # Otherwise the trader's conviction fades one state toward state 0 -
+    if state > 0
+        return state - 1;
     end
-    if rung < 0
-        return rung + 1;
+    if state < 0
+        return state + 1;
     end
     return 0;
 end

@@ -21,7 +21,7 @@ Simulate one market for every run number in `settings.seeds` and average the fac
 - `settings`: The settings from `load_config`.
 - `label`: The name of the row.
 - `rule`: `:three` or `:conviction`.
-- `K`: The top rung.
+- `K`: The top state.
 - `p`: The probability that a trader acts on a proposed move.
 - `value_number`: The number of value investors.
 - `trend_number`: The number of trend followers.
@@ -155,7 +155,7 @@ function ladder_table(settings::NamedTuple)::Union{Vector{NamedTuple},String}
         rows = NamedTuple[];
         push!(rows, benchmark_row(settings));
 
-        # One row for each number of states; n states have the top rung K = (n - 1) / 2 -
+        # One row for each number of states; n states have the top state K = (n - 1) / 2 -
         for n in settings.number_of_states
             K = (n - 1) ÷ 2;
             push!(rows, market_row(settings, "both groups, $(n) states", :conviction, K, 1.0;

@@ -1,4 +1,4 @@
-# PS6 market: the Farmer-Joshi market, written as a loop that calls your rung functions.
+# PS6 market: the Farmer-Joshi market, written as a loop that calls your functions for each trader's next state.
 # This file is supplied. Do not edit it.
 
 """
@@ -38,111 +38,111 @@ function build_market(settings::NamedTuple, seed::Int; value_number::Int = setti
 end
 
 """
-    rung_position(rung::Int, K::Int, c::Float64) -> Float64
+    state_position(state::Int, K::Int, c::Float64) -> Float64
 
-Convert a trader's rung into the position the market sees.
+Convert a trader's state into the position the market sees.
 
 ### Arguments
 
-- `rung`: The trader's rung, a whole number from `-K` to `K`.
-- `K`: The top rung.
+- `state`: The trader's state, a whole number from `-K` to `K`.
+- `K`: The top state.
 - `c`: The trader's capital.
 
 ### Returns
 
-- `c` on rung `K` (long), `-c` on rung `-K` (short), and `0.0` on every other rung.
+- `c` in state `K` (long), `-c` in state `-K` (short), and `0.0` in every other state.
 """
-function rung_position(rung::Int, K::Int, c::Float64)::Float64
+function state_position(state::Int, K::Int, c::Float64)::Float64
 
-    # Only the top and bottom rungs hold a position -
-    if rung == K
+    # Only the top and bottom states hold a position -
+    if state == K
         return c;
     end
-    if rung == -K
+    if state == -K
         return -c;
     end
     return 0.0;
 end
 
 """
-    check_rung(rung, K::Int, name::String) -> Int
+    check_state(state, K::Int, name::String) -> Int
 
-Check that a function returned a rung.
+Check that a function returned a state.
 
 ### Arguments
 
-- `rung`: The value the function returned.
-- `K`: The top rung.
+- `state`: The value the function returned.
+- `K`: The top state.
 - `name`: The name of the function, used in the error message.
 
 ### Returns
 
-- The rung, when it is an `Int` from `-K` to `K`. Otherwise throws an `ArgumentError` that names the function.
+- The state, when it is an `Int` from `-K` to `K`. Otherwise throws an `ArgumentError` that names the function.
 """
-function check_rung(rung, K::Int, name::String)::Int
+function check_state(state, K::Int, name::String)::Int
 
-    # A rung is a whole number from -K to K -
-    if !(rung isa Int) || rung < -K || rung > K
-        throw(ArgumentError("$name returned $rung; a rung must be a whole number from -$K to $K."));
+    # A state is a whole number from -K to K -
+    if !(state isa Int) || state < -K || state > K
+        throw(ArgumentError("$name returned $state; a state must be a whole number from -$K to $K."));
     end
-    return rung;
+    return state;
 end
 
 """
-    next_rung(rule::Symbol, rung::Int, z::Float64, T::Float64, τ::Float64, K::Int, p::Float64, u::Float64) -> Int
+    next_state(rule::Symbol, state::Int, z::Float64, T::Float64, τ::Float64, K::Int, p::Float64, u::Float64) -> Int
 
-Find one trader's rung for the next step.
+Find one trader's state for the next step.
 
 ### Arguments
 
-- `rule`: `:three` calls `three_state_rung`, and `:conviction` calls `conviction_rung`.
-- `rung`: The trader's current rung.
+- `rule`: `:three` calls `three_state_rule`, and `:conviction` calls `conviction_rule`.
+- `state`: The trader's current state.
 - `z`: The trader's signal, positive when the signal favors a long position.
 - `T`: The trader's entry threshold.
 - `τ`: The trader's exit threshold.
-- `K`: The top rung.
+- `K`: The top state.
 - `p`: The probability that the trader acts on a proposed move.
 - `u`: A uniform random number on [0, 1) for this trader and this step.
 
 ### Returns
 
-- The next rung. Calls `hesitant_rung` only when `p < 1.0`.
+- The next state. Calls `hesitant_rule` only when `p < 1.0`.
 """
-function next_rung(rule::Symbol, rung::Int, z::Float64, T::Float64, τ::Float64, K::Int, p::Float64, u::Float64)::Int
+function next_state(rule::Symbol, state::Int, z::Float64, T::Float64, τ::Float64, K::Int, p::Float64, u::Float64)::Int
 
-    # Ask the rule for the rung it proposes -
-    proposed = rung;
+    # Ask the rule for the state it proposes -
+    proposed = state;
     if rule == :three
-        proposed = check_rung(three_state_rung(rung, z, T, τ), K, "three_state_rung");
+        proposed = check_state(three_state_rule(state, z, T, τ), K, "three_state_rule");
     else
-        proposed = check_rung(conviction_rung(rung, z, T, τ, K), K, "conviction_rung");
+        proposed = check_state(conviction_rule(state, z, T, τ, K), K, "conviction_rule");
     end
 
-    # A trader that always acts takes the proposed rung -
+    # A trader that always acts takes the proposed state -
     if p >= 1.0
         return proposed;
     end
 
     # A hesitant trader acts on the proposal only some of the time -
-    return check_rung(hesitant_rung(rung, proposed, p, u), K, "hesitant_rung");
+    return check_state(hesitant_rule(state, proposed, p, u), K, "hesitant_rule");
 end
 
 """
     simulate_market(model::MyFarmerJoshiMarketModel, rule::Symbol, K::Int, p::Float64;
         number_of_steps::Int, burn_in::Int, seed::Int) -> NamedTuple
 
-Run one Farmer-Joshi market, with each trader's next rung set by your functions.
+Run one Farmer-Joshi market, with each trader's next state set by your functions.
 
 ### Arguments
 
 - `model`: The market from `build_market`.
 - `rule`: `:three` (requires `K == 1`) or `:conviction`.
-- `K`: The top rung. The traders have `2K + 1` rungs.
+- `K`: The top state. The traders have `2K + 1` states.
 - `p`: The probability that a trader acts on a proposed move.
 - `number_of_steps`: The number of daily steps kept.
 - `burn_in`: The number of first daily steps dropped.
 - `seed`: The run number. The price and value noise come from `Xoshiro(seed + 1)`, and the
-  uniform numbers for `hesitant_rung` from `Xoshiro(seed + 2)`.
+  uniform numbers for `hesitant_rule` from `Xoshiro(seed + 2)`.
 
 ### Returns
 
@@ -151,7 +151,7 @@ Run one Farmer-Joshi market, with each trader's next rung set by your functions.
 function simulate_market(model::MyFarmerJoshiMarketModel, rule::Symbol, K::Int, p::Float64;
     number_of_steps::Int, burn_in::Int, seed::Int)::NamedTuple
 
-    # Check the rule and the top rung -
+    # Check the rule and the top state -
     if rule != :three && rule != :conviction
         throw(ArgumentError("The rule must be :three or :conviction."));
     end
@@ -167,8 +167,8 @@ function simulate_market(model::MyFarmerJoshiMarketModel, rule::Symbol, K::Int, 
     total = burn_in + number_of_steps;
     log_price = zeros(total + 1);
     log_value = zeros(total + 1);
-    value_rungs = zeros(Int, length(model.value_entry));
-    trend_rungs = zeros(Int, length(model.trend_entry));
+    value_states = zeros(Int, length(model.value_entry));
+    trend_states = zeros(Int, length(model.trend_entry));
     sqrt_dt = sqrt(model.Δt);
 
     # One loop pass per daily step -
@@ -178,27 +178,27 @@ function simulate_market(model::MyFarmerJoshiMarketModel, rule::Symbol, K::Int, 
         net = 0.0;
 
         # Value investors first. A positive signal means the price is below the value.
-        for i in eachindex(value_rungs)
+        for i in eachindex(value_states)
             z = -(log_price[k] - (log_value[k] + model.value_offset[i]));
             u = rand(action_rng);
-            old_rung = value_rungs[i];
-            new_rung = next_rung(rule, old_rung, z, model.value_entry[i], model.value_exit[i], K, p, u);
+            old_state = value_states[i];
+            new_state = next_state(rule, old_state, z, model.value_entry[i], model.value_exit[i], K, p, u);
             c = model.value_capital[i];
-            net += rung_position(new_rung, K, c) - rung_position(old_rung, K, c);
-            value_rungs[i] = new_rung;
+            net += state_position(new_state, K, c) - state_position(old_state, K, c);
+            value_states[i] = new_state;
         end
 
         # Trend followers next. Each trend follower draws its uniform number, then waits until it has a full lag of history.
-        for j in eachindex(trend_rungs)
+        for j in eachindex(trend_states)
             u = rand(action_rng);
             lag = model.trend_lag[j];
             if k - 1 >= lag
                 z = log_price[k] - log_price[k - lag];
-                old_rung = trend_rungs[j];
-                new_rung = next_rung(rule, old_rung, z, model.trend_entry[j], model.trend_exit[j], K, p, u);
+                old_state = trend_states[j];
+                new_state = next_state(rule, old_state, z, model.trend_entry[j], model.trend_exit[j], K, p, u);
                 c = model.trend_capital[j];
-                net += rung_position(new_rung, K, c) - rung_position(old_rung, K, c);
-                trend_rungs[j] = new_rung;
+                net += state_position(new_state, K, c) - state_position(old_state, K, c);
+                trend_states[j] = new_state;
             end
         end
 

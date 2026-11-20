@@ -1,5 +1,5 @@
 # PS6 Standard: complete the 3 functions below.
-# The simulator calls three_state_rung for every trader at every step, and the report calls
+# The simulator calls three_state_rule for every trader at every step, and the report calls
 # excess_kurtosis and volatility_clustering on the growth rates of each market.
 # Keep the function names, arguments, return types, and docstrings.
 # Replace each error("Complete ...") expression with your calculation.
@@ -12,55 +12,55 @@
 # lines you need and rename variables to match this file.
 
 """
-    three_state_rung(rung::Int, z::Float64, T::Float64, τ::Float64) -> Int
+    three_state_rule(state::Int, z::Float64, T::Float64, τ::Float64) -> Int
 
-Give a trader's next rung in the three-state Farmer–Joshi rule.
+Give a trader's next state in the three-state Farmer–Joshi rule.
 
 ### Arguments
 
-- `rung`: The trader's current rung: `-1` (short), `0` (flat), or `1` (long).
+- `state`: The trader's current state: `-1` (short), `0` (flat), or `1` (long).
 - `z`: The trader's signal (dimensionless). A positive `z` favors a long position.
 - `T`: The trader's entry threshold (dimensionless, positive).
 - `τ`: The trader's exit threshold (dimensionless, below `T`).
 
 ### Returns
 
-- The trader's next rung: `-1`, `0`, or `1`.
+- The trader's next state: `-1`, `0`, or `1`.
 
 ### Method
 
 All comparisons are strict.
 
-- From rung `0`, the trader enters a long position (rung `1`) when `z` is above `T`, and enters a
-  short position (rung `-1`) when `z` is below `-T`. Otherwise the trader stays on rung `0`.
-- From rung `1`, the trader exits to rung `0` when `z` is below `τ`. Otherwise the trader stays on rung `1`.
-- From rung `-1`, the trader exits to rung `0` when `z` is above `-τ`. Otherwise the trader stays on rung `-1`.
+- From state `0`, the trader enters a long position (state `1`) when `z` is above `T`, and enters a
+  short position (state `-1`) when `z` is below `-T`. Otherwise the trader stays in state `0`.
+- From state `1`, the trader exits to state `0` when `z` is below `τ`. Otherwise the trader stays in state `1`.
+- From state `-1`, the trader exits to state `0` when `z` is above `-τ`. Otherwise the trader stays in state `-1`.
 
 ### Course references
 
 - Course lecture L12a, section 'The Farmer–Joshi algorithm'.
 - PS6 companion: slide 6, 'The three-state rule'.
 """
-function three_state_rung(rung::Int, z::Float64, T::Float64, τ::Float64)::Int
+function three_state_rule(state::Int, z::Float64, T::Float64, τ::Float64)::Int
 
-    # From rung 0 (flat), the trader enters on a strong signal, and otherwise stays flat -
-    if rung == 0
+    # From state 0 (flat), the trader enters on a strong signal, and otherwise stays flat -
+    if state == 0
         # TODO 1: Return 1 when z is above T, and return -1 when z is below -T.
         # Hint: write one if-block for each entry.
-        error("Complete three_state_rung: the entry rule from rung 0.");
+        error("Complete three_state_rule: the entry rule from state 0.");
         return 0;
     end
 
-    # From rung 1 (long), the trader exits when the signal falls below τ, and otherwise stays long -
-    if rung == 1
+    # From state 1 (long), the trader exits when the signal falls below τ, and otherwise stays long -
+    if state == 1
         # TODO 2: Return 0 when z is below τ.
-        error("Complete three_state_rung: the exit rule from rung 1.");
+        error("Complete three_state_rule: the exit rule from state 1.");
         return 1;
     end
 
-    # From rung -1 (short), the trader exits when the signal rises above -τ, and otherwise stays short -
+    # From state -1 (short), the trader exits when the signal rises above -τ, and otherwise stays short -
     # TODO 3: Return 0 when z is above -τ.
-    error("Complete three_state_rung: the exit rule from rung -1.");
+    error("Complete three_state_rule: the exit rule from state -1.");
     return -1;
 end
 
