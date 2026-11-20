@@ -7,59 +7,43 @@ SPY?
 The Standard track measures the Farmer–Joshi market before the Advanced and
 Expert tracks add hidden states.
 
-Write a few sentences for each lettered part, and label each part with its
-letter. Cite numbers from `results/Report.md`. Replace the TODO between each
-question's `<!-- answer-N:start -->` and `<!-- answer-N:end -->` markers with
-your answer.
+Write one or two paragraphs for each question. Cite numbers from
+`results/Report.md`. Replace the TODO between each question's
+`<!-- answer-N:start -->` and `<!-- answer-N:end -->` markers with your answer.
 
 ## 1. Which stylized facts will the market reproduce?
 
-**a. What do you predict?** Answer before you write any code; accuracy is not
-graded. The daily growth rates of SPY have fat tails, volatility clustering, and
-a weak autocorrelation. Which of these stylized facts will the market with both
-value investors and trend followers reproduce? Which group of traders do you
-expect to cause each stylized fact, and why?
-
-**b. What are the stylized facts of SPY?** In the table
-**Farmer–Joshi and SPY**, read the row **SPY (daily closes)**. Cite the
-excess kurtosis, the clustering at lags 1–10 and 11–50, and the
-autocorrelation at lag 1. Do the two clustering values and the autocorrelation
-at lag 1 lie outside the white-noise band for SPY? What does each value say
-about the daily growth rates of SPY?
+Answer before you write any code; accuracy is not graded. The daily growth rates
+of SPY have fat tails, volatility clustering, and a weak autocorrelation.
+Predict which of these stylized facts the market with both value investors and
+trend followers will reproduce, and which group of traders will cause each
+stylized fact. Explain why.
 
 <!-- answer-1:start -->
-TODO: Answer parts a and b.
+TODO: Answer Question 1.
 <!-- answer-1:end -->
 
 ## 2. How does each group of traders shape the growth rates?
 
-**a. What does each group produce alone?** In the table
-**Farmer–Joshi and SPY**, compare the rows **value investors only** and
-**trend followers only** with SPY. Cite the excess kurtosis, the clustering at
-lags 1–10, and the autocorrelation at lag 1. Which stylized facts does each
-group produce alone? Use each group's rule for buying and selling to explain
-the group's autocorrelation at lag 1.
-
-**b. What changes when both groups trade?** Compare the row **both groups** with
-the rows **value investors only** and **trend followers only**. How do the
-autocorrelation at lag 1 and the gap spread change when value investors join
-the trend followers? Use the value investors' rule to explain the change.
+In the table **Farmer–Joshi and SPY**, compare the rows **value investors
+only**, **trend followers only**, and **both groups** with the row **SPY (daily
+closes)**. Cite the excess kurtosis, the clustering at lags 1–10 and 11–50, and
+the autocorrelation at lag 1, and say which of SPY's values lie outside the
+white-noise band. Use each group's rule for buying and selling to explain the
+group's autocorrelation at lag 1, and explain how adding value investors to the
+trend followers changes the gap spread.
 
 <!-- answer-2:start -->
-TODO: Answer parts a and b.
+TODO: Answer Question 2.
 <!-- answer-2:end -->
 
-## 3. What can we conclude?
+## 3. What does the Farmer–Joshi market reproduce and miss?
 
-**a. What does the Farmer–Joshi market reproduce and miss?** Compare the row
-**both groups** with SPY. Cite the excess kurtosis, the clustering at both lag
-ranges, and the autocorrelation at lag 1. Which stylized facts of SPY does the
-market reproduce, and which does the market miss?
-
-**b. What causes the differences from SPY?** For each stylized fact that the
-market misses, explain which part of the three-state rule causes the difference.
-Was your prediction in part 1a right?
+Compare the row **both groups** with SPY, and say which stylized facts of SPY
+the market reproduces and which the market misses. For each stylized fact that
+the market misses, explain which part of the three-state rule causes the
+difference. Say whether your prediction in Question 1 was right.
 
 <!-- answer-3:start -->
-TODO: Answer parts a and b.
+TODO: Answer Question 3.
 <!-- answer-3:end -->

@@ -83,7 +83,7 @@ packages are the same as in PS5.
    | Advanced | Four functions in [src/Advanced.jl](src/Advanced.jl): the same three plus `conviction_rung` | [responses/Advanced.md](responses/Advanced.md) |
    | Expert | Six functions in [src/Expert.jl](src/Expert.jl): the same four plus `hesitant_rung` and `transition_matrix` | [responses/Expert.md](responses/Expert.md) |
 
-5. Answer Question 1a, your prediction, before you write any code.
+5. Answer Question 1, your prediction, before you write any code.
 6. Complete each function by replacing each `error("Complete ...")` with your
    calculation. Follow the TODO hint above each `error` line, then delete the
    TODO. Do not change the function names, arguments, docstrings, or supplied
@@ -176,7 +176,7 @@ Complete these functions:
    growth rates over a list of lags.
 
 Run the checker, read the table **Farmer–Joshi and SPY** in `results/Report.md`,
-and answer Questions 1 and 2. The table compares SPY with three markets: **value
+and answer Question 2. The table compares SPY with three markets: **value
 investors only**, **trend followers only**, and **both groups**. Standard
 students also answer Question 3 from this table.
 

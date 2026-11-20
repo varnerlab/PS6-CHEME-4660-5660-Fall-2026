@@ -40,8 +40,8 @@ the other functions.
 - **Documentation:** Keep the supplied docstrings. Document each helper's
   purpose, inputs, and output, and comment non-obvious steps. Load helper files
   under `src` through `Include.jl`.
-- **Written work:** Answer every lettered part of all three questions in the
-  selected response file with the requested numbers and reasoning. Include the
+- **Written work:** Answer all three questions in the selected response file
+  with the requested numbers and reasoning. Include the
   prediction and say whether the prediction was right. Cite selected values from
   `results/Report.md` rather than reproducing the tables, and explain each
   difference from SPY with what the traders do.

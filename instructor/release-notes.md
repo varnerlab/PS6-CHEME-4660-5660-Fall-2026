@@ -9,7 +9,7 @@ Set `TRACK.txt` to `standard`, `advanced`, or `expert`.
 * __Advanced__ adds a conviction ladder, extra flat states in which a trader builds conviction before taking a position, and compares markets with 3, 5, and 7 states.
 * __Expert__ adds hesitant traders, who move to a new state only with a fixed probability, and compares three values of that probability.
 
-Write your prediction in Question 1a before you write any code.
+Write your prediction in Question 1 before you write any code.
 
 Use **Julia 1.12.7** and follow the package setup in the README. `check_submission.jl` checks your code, writes the report to `results/Report.md`, and gives the instructions for building your ZIP.
 

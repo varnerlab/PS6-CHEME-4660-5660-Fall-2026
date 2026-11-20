@@ -4,75 +4,47 @@
 Farmer–Joshi market reproduce the stylized facts of the daily growth rates of
 SPY?
 
-Write a few sentences for each lettered part, and label each part with its
-letter. Cite numbers from `results/Report.md`. Replace the TODO between each
-question's `<!-- answer-N:start -->` and `<!-- answer-N:end -->` markers with
-your answer.
+Write one or two paragraphs for each question. Cite numbers from
+`results/Report.md`. Replace the TODO between each question's
+`<!-- answer-N:start -->` and `<!-- answer-N:end -->` markers with your answer.
 
 ## 1. Which stylized facts will the market reproduce?
 
-**a. What do you predict?** Answer before you write any code; accuracy is not
-graded. The daily growth rates of SPY have fat tails, volatility clustering, and
-a weak autocorrelation. Which of these stylized facts will the market with both
-value investors and trend followers reproduce? Which group of traders do you
-expect to cause each stylized fact, and why? Will a conviction ladder with 5
-or 7 states, or hesitant traders, move the market closer to SPY, and why?
-
-**b. What are the stylized facts of SPY?** In the table
-**Farmer–Joshi and SPY**, read the row **SPY (daily closes)**. Cite the
-excess kurtosis, the clustering at lags 1–10 and 11–50, and the
-autocorrelation at lag 1. Do the two clustering values and the autocorrelation
-at lag 1 lie outside the white-noise band for SPY? What does each value say
-about the daily growth rates of SPY?
+Answer before you write any code; accuracy is not graded. The daily growth rates
+of SPY have fat tails, volatility clustering, and a weak autocorrelation.
+Predict which of these stylized facts the market with both value investors and
+trend followers will reproduce, and which group of traders will cause each
+stylized fact. Explain why. Also predict whether a conviction ladder with 5
+or 7 states, or hesitant traders, will move the market closer to SPY.
 
 <!-- answer-1:start -->
-TODO: Answer parts a and b.
+TODO: Answer Question 1.
 <!-- answer-1:end -->
 
 ## 2. How does each group of traders shape the growth rates?
 
-**a. What does each group produce alone?** In the table
-**Farmer–Joshi and SPY**, compare the rows **value investors only** and
-**trend followers only** with SPY. Cite the excess kurtosis, the clustering at
-lags 1–10, and the autocorrelation at lag 1. Which stylized facts does each
-group produce alone? Use each group's rule for buying and selling to explain
-the group's autocorrelation at lag 1.
-
-**b. What changes when both groups trade?** Compare the row **both groups** with
-the rows **value investors only** and **trend followers only**. How do the
-autocorrelation at lag 1 and the gap spread change when value investors join
-the trend followers? Use the value investors' rule to explain the change.
+In the table **Farmer–Joshi and SPY**, compare the rows **value investors
+only**, **trend followers only**, and **both groups** with the row **SPY (daily
+closes)**. Cite the excess kurtosis, the clustering at lags 1–10 and 11–50, and
+the autocorrelation at lag 1, and say which of SPY's values lie outside the
+white-noise band. Use each group's rule for buying and selling to explain the
+group's autocorrelation at lag 1, and explain how adding value investors to the
+trend followers changes the gap spread.
 
 <!-- answer-2:start -->
-TODO: Answer parts a and b.
+TODO: Answer Question 2.
 <!-- answer-2:end -->
 
 ## 3. Do hidden states and hesitant traders move the market toward SPY?
 
-**a. How do the stylized facts change with the number of states?** In the
-table **Conviction ladders**, compare the rows **both groups, 3 states**, **both
-groups, 5 states**, and **both groups, 7 states** with SPY. Cite the excess
-kurtosis, the clustering at both lag ranges, and the autocorrelation at lag 1.
-Which values move toward SPY as the number of states rises, and which move
-away?
-
-**b. How does the hidden state change when a trader enters?** With 5
-states, how many consecutive steps with a signal above the entry threshold does
-a flat trader on rung `0` need to enter a long position? What happens to the
-trader's rung when the signal drops below the entry threshold before the trader
-enters? Use these answers to explain the changes in part a.
-
-**c. What do hesitant traders change?** In the table **Hesitant traders**,
-compare the rows **5 states, p = 1**, **5 states, p = 0.5**, and
-**5 states, p = 0.2** with SPY. Cite the excess kurtosis, the clustering at
-lags 1–10, and the autocorrelation at lag 1. Use the expected steps from flat
-to long (last column) to explain how the probability `p` changes the
-clustering at lags 1–10 and the autocorrelation at lag 1.
-
-**d. What can we conclude?** Do hidden states, and random moves between them,
-help the Farmer–Joshi market reproduce the stylized facts of SPY? Was your
-prediction in part 1a right?
+In the tables **Conviction ladders** and **Hesitant traders**, compare each row
+with SPY. Cite the excess kurtosis, the clustering at lags 1–10 and 11–50, and
+the autocorrelation at lag 1, and say which values move toward SPY as the number
+of states rises and as the probability `p` falls. To explain the changes, use
+the column **Steps from flat to long** in **Hesitant traders**, and say what
+happens to a trader's rung when the signal drops below the entry threshold
+before the trader enters. Say whether your prediction in Question 1 was right.
 
 <!-- answer-3:start -->
-TODO: Answer parts a, b, c, and d.
+TODO: Answer Question 3.
 <!-- answer-3:end -->
