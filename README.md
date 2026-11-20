@@ -46,11 +46,11 @@ three values of that probability.
   unfinished. You may then revise until December 19, 2026 at 11:59 PM ET. We
   keep your highest score, even if you change tracks. A missing, empty, or
   unreadable submission receives a **Frozen Zero** and cannot be revised.
-- **Grading:** The maximum score is 4 on every track. An Advanced score of 4,
-  confirmed by the teaching team, also earns one Magic Point, and a confirmed
-  Expert score of 4 earns two Magic Points. PS6 earns at most two Magic Points.
-  If you change tracks, you keep the Magic Points of the track that earned your
-  highest score. A 3 or 4 requires passing every check; the teaching team then
+- **Grading:** Each track is graded out of 4. The most you can earn is a 4 on
+  the Standard track, a 4 plus one Magic Point on the Advanced track, and a 4
+  plus two Magic Points on the Expert track. Magic Points require a score of 4
+  confirmed by the teaching team, and PS6 earns at most two Magic Points. A 3 or
+  4 requires passing every check; the teaching team then
   reviews your code and answers. You are graded on your calculations and
   interpretation, not on whether the market matches SPY. See the [grading
   rubric](RUBRIC.md).
