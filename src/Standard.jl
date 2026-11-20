@@ -42,7 +42,7 @@ operator.
 ### Course references
 
 - Course lecture L14a, section 'Building a General Factor Model', fitting algorithm, steps 1, 2, and 3.
-- PS6 companion: slide 'One least-squares solve for fitting steps 1, 2, and 3'.
+- PS6 companion: slide 6, 'One solve for fitting steps 1, 2, and 3'.
 """
 function least_squares_fit(X::Matrix{Float64}, y::Vector{Float64})::Vector{Float64}
 
@@ -81,7 +81,7 @@ Start from a matrix of zeros. For each stock, find the column of the stock's sec
 
 - Course lecture L14a, section 'Building a General Factor Model', fitting algorithm: the
   Initialize line that defines the sector matrix `B`.
-- PS6 companion: slide 'The sector matrix B'.
+- PS6 companion: slide 7, 'The sector matrix B'.
 """
 function sector_matrix(sectors::Vector{String}, sector_names::Vector{String})::Matrix{Float64}
 
@@ -143,7 +143,7 @@ and `u`.
 ### Course references
 
 - Course lecture L14a, section 'Building a General Factor Model', sampling algorithm, step 3 (Compose).
-- PS6 companion: slide 'Sampling: draw, mix, and compose'.
+- PS6 companion: slide 12, 'Sampling: draw, mix, and compose'.
 """
 function compose_growth_rates(X::Matrix{Float64}, θ::Vector{Float64}, F::Matrix{Float64},
     δ::Vector{Float64}, u::Vector{Float64})::Vector{Float64}

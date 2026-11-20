@@ -1,375 +1,308 @@
 % PS6 mathematical companion. Build with make in this directory.
 % The slide order follows the assignment README; no reference results appear here.
-% Notation follows lecture L12a: price S_t, value V_t, entry and exit thresholds
-% \chi^{in}_i and \chi^{out}_i, position size c_i, offset v^{(i)}, lag \theta_i,
-% position x_t^{(i)}, order \omega_{t+1}^{(i)}, liquidity \lambda, and growth rate g_{t+1}.
-% The starter docstrings cite six slides by number and title: 6 'The three-state rule',
-% 7 'Fat tails: excess kurtosis', 8 'Volatility clustering', 10 'The conviction rule',
-% 11 'Hesitant traders', and 12 'The transition matrix of one trader'. Update those
-% citations if the slide order changes.
-% Settings the slides quote. Check each one after an edit of config/defaults.toml or
-% reports/Markets.jl:
+% Notation follows lecture L14a, section 'Building a General Factor Model': growth rate g_i(t),
+% market g_m(t), economic factors x_k(t), sector factors f_s(t), loadings alpha_i, beta_i, eta_ik,
+% delta_is, stock-specific part u_i(t), design matrix \hat{X}, sector matrix B, factor matrix Phi,
+% Cholesky factor A, and uncorrelated factors Z.
+% The starter docstrings cite five slides by number and title: 6 'One solve for fitting steps 1, 2,
+% and 3', 7 'The sector matrix B', 9 'Economic factors from FRED', 10 'Fitting step 4:
+% unmix the factors', and 12 'Sampling: draw, mix, and compose'. Update those citations if the slide
+% order changes.
+% Settings the slides quote. Check each one after an edit of config/defaults.toml or src/Data.jl:
 %   steps_per_year = 252 (Δt = 1/252 year): slide 4.
-%   burn_in = 2000 and number_of_steps = 20000: slide 5; number_of_steps also on slide 9.
-%   short_lags = [1, 10] and long_lags = [11, 50]: slides 8 and 9.
-%   seeds = [1, 2, 3, 4, 5] (5 runs): slide 9.
-%   number_of_states = [3, 5, 7]: slide 3.
-%   expert_states = 5 (K = 2) and probabilities = [1.0, 0.5, 0.2]: slides 3 and 11.
-%   benchmark_ticker = "SPY": slides 2, 3, 7, 9, and 14.
-%   The strong signal in reports/Markets.jl, transition_matrix(10.0, 1.0, -0.1, K, p): slide 13.
+%   375 stocks, 11 sectors, 2,767 price days (T = 2,766): slides 4, 5, and 11.
+%   fred_series, fred_kinds, and fred_names (four series): slides 5 and 9.
+%   number_of_states = 100, nu = 5.0, epsilon = 1.0e-4, lambda = 100.0: slide 11.
+%   number_of_paths = 10 and seed = 5660: slides 12 and 13.
+%   benchmark_ticker = "SPY": slides 2, 3, 4, and 5.
 \documentclass[aspectratio=169,11pt]{beamer}
 \usepackage{vnslides}
-\newcommand{\cin}{\chi^{\text{in}}_{i}}
-\newcommand{\cout}{\chi^{\text{out}}_{i}}
-\newcommand{\Pb}{\mathbf{P}}
-\newcommand{\Qb}{\mathbf{Q}}
-\newcommand{\Nb}{\mathbf{N}}
+\newcommand{\Xh}{\hat{\mathbf{X}}}
+\newcommand{\Bb}{\mathbf{B}}
+\newcommand{\Fb}{\mathbf{F}}
+\newcommand{\Ab}{\mathbf{A}}
+\newcommand{\Zb}{\mathbf{Z}}
 \newcommand{\Ib}{\mathbf{I}}
-\newcommand{\Jb}{\mathbf{J}}
-% The monospace font has no Greek letters, so the code name τ takes its glyph from DejaVu Sans Mono.
+\newcommand{\Phib}{\symbf{\Phi}}
+\newcommand{\Sigmab}{\symbf{\Sigma}}
+\newcommand{\mub}{\symbf{\mu}}
+\newcommand{\thetab}{\symbf{\theta}}
+\newcommand{\deltab}{\symbf{\delta}}
+\newcommand{\epsb}{\symbf{\varepsilon}}
+\newcommand{\gb}{\mathbf{g}}
+\newcommand{\ub}{\mathbf{u}}
+\newcommand{\yb}{\mathbf{y}}
+\newcommand{\Xb}{\mathbf{X}}
+\newcommand{\fb}{\mathbf{f}}
+\newcommand{\onev}{\mathbf{1}}
+\newcommand{\syn}{^{\text{sim}}}
+% The monospace font has no Greek letters, so code names such as Δt take their glyphs from DejaVu Sans Mono.
 \newfontfamily\greekmono{DejaVuSansMono.ttf}[Scale=MatchLowercase]
-\newcommand{\tauc}{{\greekmono τ}}
+\newcommand{\gm}[1]{{\greekmono #1}}
 
-\title{\texorpdfstring{{\vnheavy PS6}: Do Hidden States\\Make the Farmer–Joshi\\Market Look Real?}{PS6: Do Hidden States Make the Farmer–Joshi Market Look Real?}}
+\title{\texorpdfstring{{\vnheavy PS6}: Does a Synthetic Market\\Move Together Like\\the Real Market?}{PS6: Does a Synthetic Market Move Together Like the Real Market?}}
 \subtitle{CHEME 4/5660 Cornell University | Mathematical Companion}
 \author{Copyright Jeffrey Varner 2026. All Rights Reserved}
 \begin{document}
 \vntitlepage
 
 \begin{frame}{Disclaimer and risks}
-\textbf{Training only.} This assignment uses a simulated market and the daily
-closing prices of SPY for teaching. This assignment provides no investment
-advice.
+\textbf{Training only.} This assignment uses the daily closing prices of SPY
+and 375 of its stocks from 2014 to 2024, and four FRED series, for teaching.
+This assignment provides no investment advice.
 
 \vspace{1em}
-\textbf{Simulated traders.} The trading rules in this assignment describe the
-traders of a simulated market. The rules are not trading strategies.
+\textbf{Synthetic markets.} A synthetic market is a set of random paths drawn
+from a fitted model. A synthetic market is not a forecast of the real market.
 
 \vspace{1em}
-\textbf{Simplifying assumptions.} The market has one asset, which value
-investors and trend followers trade through a market maker who fills every
-order. Each trader holds a short position, no position, or a long position of
-a fixed size. We omit commissions and taxes.
+\textbf{Simplifying assumptions.} The model uses daily growth rates only. We
+omit dividends, commissions, and taxes.
 \end{frame}
 
 \begin{frame}{The central question}
-Do hidden states, and random moves between them, help the Farmer–Joshi market
-reproduce the stylized facts of the daily growth rates of SPY? The stylized
-facts are fat tails, volatility clustering, and a weak autocorrelation of the
-growth rates.
+Does a synthetic market built from single-asset jump hidden Markov models move
+together like the real market? We'll fit the general factor model of lecture
+L14a to SPY and 375 of its stocks, draw synthetic markets, and compare how the
+stocks move together.
 \vspace{0.2em}
 \begin{itemize}\setlength{\itemsep}{0.3em}
-\item \hilite{Standard: the three-state rule.} Each trader is short, flat, or
-long, as in the course example. We'll measure the stylized facts of the
-market and compare them with those of SPY.
-\item \hilite{Advanced: more states.} Each trader has extra states
-in which the trader holds nothing and builds conviction before buying or selling. We'll
-compare markets with 3, 5, and 7 states.
-\item \hilite{Expert: hesitant traders.} Each trader moves to a new state only
-with probability $p$. We'll compare $p=1$, $0.5$, and $0.2$.
+\item \hilite{Standard: the market and the sectors.} Fitting steps 1, 2, 3,
+and 5, with SPY and the 11 sector factors.
+\item \hilite{Advanced: economic factors from FRED.} Standard plus four daily
+economic factors in fitting step 1.
+\item \hilite{Expert: the Cholesky step.} Advanced plus fitting step 4, which
+keeps the correlations between the factors in the synthetic market.
 \end{itemize}
-\slidenote{Reading guide}{All tracks use slides 4–\pageref{fr:columns}. Slide
-\pageref{fr:conviction} is for Advanced and Expert, and slides
-\pageref{fr:hesitant}–\pageref{fr:steps} are for Expert only.}
+\slidenote{Reading guide}{All tracks use slides 4–\pageref{fr:residuals} and
+\pageref{fr:jump}–\pageref{fr:report}. Slide \pageref{fr:fred} is for
+Advanced and Expert, and slide \pageref{fr:unmix} is for Expert only.}
 \end{frame}
 
-\begin{frame}{Traders and their signals}
-As in the course example, $S_t$ is the price and $V_t$ the value of the asset
-at step $t$, and each step lasts $\Delta t=1/252$ year, one trading day.
-Trader $i$ has an entry threshold $\cin$, an exit threshold $\cout<\cin$, and a
-position size $c_i=a(\cin-\cout)$, where $a>0$ is the capital scale. At step
-$t$, trader $i$ computes a signal $z_t^{(i)}$, which is positive when the
-trader favors a long position:
-\begin{itemize}\setlength{\itemsep}{0.3em}
-\item \hilite{Value investors:} $z_t^{(i)}=\left(\ln V_t+v^{(i)}\right)-\ln S_t$,
-where $\ln V_t$ is the log value, a random walk, and $v^{(i)}$ is the
-investor's fixed offset.
-\item \hilite{Trend followers:} $z_t^{(i)}=\ln S_t-\ln S_{t-\theta_i}$, where
-$\theta_i$ is the trader's fixed lag (steps). The trader stays flat until
-$t\geq\theta_i$.
-\end{itemize}
-In code, the signal $z_t^{(i)}$ is \texttt{z}, the entry threshold $\cin$ is
-\texttt{T}, and the exit threshold $\cout$ is \texttt{\tauc}.
-\slidenote{Sign}{Lecture L12a writes the value investor's signal as the
-mispricing $\ln S_t-(\ln V_t+v^{(i)})$. Here $z_t^{(i)}$ is minus the
-mispricing, so a positive signal favors a long position for every trader.}
+\begin{frame}{The data and the growth rates}\label{fr:data}
+The real market is SPY and 375 of its stocks in 11 GICS sectors, with one
+ticker per company. Each stock has a closing price $S_i(t)$ on every trading
+day from 2014 to 2024. The daily growth rate of stock $i$, in 1/yr, is:
+\[
+ g_i(t)=\frac{1}{\Delta t}\ln\left(\frac{S_i(t)}{S_i(t-1)}\right),
+ \qquad \Delta t=\tfrac{1}{252}\ \text{yr}.
+\]
+The 2,767 price days give $T=2{,}766$ growth rates per stock. The growth rates
+of SPY are $g_m(t)$, the market. The vector $\gb_i$ holds the $T$ growth rates
+of stock $i$.
+\slidenote{Code}{\texttt{load\_universe} computes the growth rates with
+\texttt{JumpHMM.excess\_growth\_rates(prices; rf = 0.0, \gm{Δt})}, as in the L14a
+example.}
 \end{frame}
 
-\begin{frame}{The market maker sets the price}
-Trader $i$'s state $r_t^{(i)}$ is an integer from $-K$ to $K$, so each
-trader has $2K+1$ states. The three-state rule has $K=1$. The market sees only
-the trader's position $x_t^{(i)}$: $+c_i$ in state $K$ (long), $-c_i$ in state
-$-K$ (short), and 0 in every other state (flat). At each step, every trader
-moves to its next state and orders $\omega_{t+1}^{(i)}=x_{t+1}^{(i)}-x_t^{(i)}$.
-The market maker moves the log price in proportion to the net demand, the sum
-of the orders. The log value takes a random step:
-\begin{align*}
- \ln S_{t+1}&=\ln S_t+\frac{1}{\lambda}\sum_{i}\omega_{t+1}^{(i)}+\sigma_S\sqrt{\Delta t}\,Z_{t+1},\\
- \ln V_{t+1}&=\ln V_t+\mu_v\Delta t+\sigma_v\sqrt{\Delta t}\,Z'_{t+1},
-\end{align*}
-where $\lambda$ is the liquidity, $Z_{t+1},Z'_{t+1}\sim\mathcal{N}(0,1)$ are
-independent, $\sigma_S$ and $\sigma_v$ are the annualized volatilities of
-the noise (1/$\sqrt{\text{yr}}$), and $\mu_v$ is the drift of the log value (1/yr).
-\slidenote{Start}{$\ln S_0=\ln V_0=0$, with every trader in state 0. Each run
-drops the first 2,000 steps and keeps the next 20,000.}
+\begin{frame}{The general factor model}\label{fr:model}
+The general factor model explains the daily growth rate of stock $i$ with the
+market, $K$ economic factors, and the 11 sector factors:
+\[
+ g_{i}(t)=\underbrace{\alpha_{i}}_{\text{baseline}}
+ +\underbrace{\beta_{i}\,g_{m}(t)}_{\text{market}}
+ +\underbrace{\sum_{k=1}^{K}\eta_{ik}\,x_{k}(t)}_{\text{economic factors}}
+ +\underbrace{\sum_{s=1}^{11}\delta_{is}\,f_{s}(t)}_{\text{sectors}}
+ +\underbrace{u_{i}(t)}_{\text{stock-specific}}.
+\]
+\begin{center}\small
+\begin{tabular}{lll}
+\toprule
+Market in the report & Economic factors & Sector factors \\
+\midrule
+single index model & none ($K=0$) & none \\
+market and sectors (Standard) & none ($K=0$) & 11 \\
+market, FRED series, and sectors (Advanced) & four FRED series ($K=4$) & 11 \\
+\bottomrule
+\end{tabular}
+\end{center}
+\slidenote{Expert}{The Expert market adds fitting step 4 to the Advanced
+market, slide \pageref{fr:unmix}.}
 \end{frame}
 
-\begin{frame}{The three-state rule}
-Standard uses the course example's rule in states $-1$, $0$, and $1$. We write
-$z$ and $r_t$ for trader $i$'s signal and state. All comparisons are strict:
-\vspace{0.3em}
-\begin{columns}[T,onlytextwidth]
-\begin{column}{0.36\textwidth}
-\hilite{From flat,} $r_t=0$:
+\begin{frame}{One solve for fitting steps 1, 2, and 3}\label{fr:solve}
+For a matrix $\Xb$ with full column rank and a vector $\yb$, the least-squares
+solution $\thetab$ minimizes $\lVert\yb-\Xb\thetab\rVert^{2}$. The solution
+solves the normal equations:
 \[
- r_{t+1}=\begin{cases}
- 1 & z>\cin,\\
- -1 & z<-\cin,\\
- 0 & \text{otherwise}.
- \end{cases}
-\]
-\end{column}
-\begin{column}{0.31\textwidth}
-\hilite{From long,} $r_t=1$:
-\[
- r_{t+1}=\begin{cases}
- 0 & z<\cout,\\
- 1 & \text{otherwise}.
- \end{cases}
-\]
-\end{column}
-\begin{column}{0.31\textwidth}
-\hilite{From short,} $r_t=-1$:
-\[
- r_{t+1}=\begin{cases}
- 0 & z>-\cout,\\
- -1 & \text{otherwise}.
- \end{cases}
-\]
-\end{column}
-\end{columns}
-\vspace{0.5em}
-The course package's \texttt{threshold\_position} gives the same rule for the
-positions $-c_i$, $0$, and $+c_i$.
-\slidenote{Code}{\texttt{three\_state\_rule(state, z, T, \tauc)} returns
-$r_{t+1}$, with \texttt{T} $=\cin$ and \texttt{\tauc} $=\cout$.}
-\end{frame}
-
-\begin{frame}{Fat tails: excess kurtosis}\label{fr:kurtosis}
-The growth rate of the price over step $t$, in 1/yr, is:
-\[
- g_{t+1}=\frac{1}{\Delta t}\ln\left(\frac{S_{t+1}}{S_t}\right).
-\]
-The growth rates of SPY use the same formula on the daily closes of 2014 to
-2024. For $n$ growth rates $g_1,\dots,g_n$ with mean $\bar g$ and population
-standard deviation $\sigma_g$, the excess kurtosis is:
-\[
- \kappa=\frac{1}{n}\sum_{t=1}^{n}\left(\frac{g_t-\bar g}{\sigma_g}\right)^{4}-3,
+ \Xb^{\top}\Xb\,\thetab=\Xb^{\top}\yb,
  \qquad
- \sigma_g^{2}=\frac{1}{n}\sum_{t=1}^{n}\left(g_t-\bar g\right)^{2}.
+ \thetab=\left(\Xb^{\top}\Xb\right)^{-1}\Xb^{\top}\yb=\Xb^{+}\yb,
 \]
-A Normal distribution has $\kappa=0$. A positive $\kappa$ means fat tails:
-growth rates far from the mean are more common than in a Normal distribution.
-\slidenote{Population moments}{$\sigma_g$ divides by $n$, not $n-1$, as in the
-course example: \texttt{std(g, corrected = false)}.}
+where $\Xb^{+}$ is the pseudo-inverse of $\Xb$. The residual $\yb-\Xb\thetab$
+is orthogonal to every column of $\Xb$. Fitting steps 1, 2, and 3 use this one
+solve with different inputs:
+\begin{center}\small
+\begin{tabular}{llll}
+\toprule
+Fitting step & $\Xb$ & $\yb$ & $\thetab$ \\
+\midrule
+1, for each stock $i$ & $\Xh=[\onev,\gb_m,\mathbf{x}_1,\dots,\mathbf{x}_K]$, $T\times(K+2)$ & $\gb_i$ & $(\alpha_i,\beta_i,\eta_{i1},\dots,\eta_{iK})$ \\
+2, for each day $t$ & $\Bb$, $n\times 11$ & $\epsb(t)$ & $\fb(t)=(f_1(t),\dots,f_{11}(t))$ \\
+3, for each stock $i$ & $\Fb$, $T\times 11$ & $\epsb_i$ & $\deltab_i=(\delta_{i1},\dots,\delta_{i,11})$ \\
+\bottomrule
+\end{tabular}
+\end{center}
+\slidenote{Code}{\texttt{least\_squares\_fit(X, y)} returns $\thetab$ for each
+of the three steps.}
 \end{frame}
 
-\begin{frame}{Volatility clustering}\label{fr:clustering}
-The sample autocorrelation at lag $\ell$ (steps) of a series $x_1,\dots,x_n$
-with mean $\bar x$ is:
+\begin{frame}{The sector matrix B}\label{fr:sector}
+The sector matrix $\Bb$ has one row for each of the $n=375$ stocks and one
+column for each sector:
 \[
- \rho_x(\ell)=\frac{\sum_{t=1}^{n-\ell}\left(x_t-\bar x\right)\left(x_{t+\ell}-\bar x\right)}
- {\sum_{t=1}^{n}\left(x_t-\bar x\right)^{2}}.
+ B_{is}=\begin{cases}1 & \text{if stock } i \text{ is in sector } s,\\
+ 0 & \text{otherwise.}\end{cases}
 \]
-The volatility clustering over a set of lags $L$ is the mean autocorrelation of
-the absolute growth rates $\lvert g_t\rvert$ over the $\lvert L\rvert$ lags in
-$L$:
+Each row of $\Bb$ holds exactly one 1. The matrix $\Bb^{\top}\Bb$ is diagonal,
+with the number of stocks $n_s$ of each sector on the diagonal, and entry $s$
+of $\Bb^{\top}\epsb(t)$ is the sum of the residuals of the stocks in sector $s$
+on day $t$. Fitting step 2 therefore gives the average residual of each sector:
 \[
- C(L)=\frac{1}{\lvert L\rvert}\sum_{\ell\in L}\rho_{\lvert g\rvert}(\ell).
+ f_s(t)=\frac{1}{n_s}\sum_{i\in s}\varepsilon_i(t).
 \]
-A positive $C(L)$ means that large moves, of either sign, tend to follow large
-moves. The report uses $L=\{1,\dots,10\}$ and $L=\{11,\dots,50\}$.
-\slidenote{Code}{\texttt{sample\_autocorrelation(x, lags)} returns
-$\rho_x(\ell)$ for each lag in \texttt{lags}, and
-\texttt{volatility\_clustering(g, lags)} returns $C(L)$ with $L=$
-\texttt{lags}.}
+\slidenote{Code}{\texttt{sector\_matrix(sectors, sector\_names)} returns
+$\Bb$, with the columns in the order of \texttt{sector\_names}.}
 \end{frame}
 
-\begin{frame}{The columns of the report}\label{fr:columns}
-Each simulated row of the report is the mean over 5 runs of 20,000 steps, and
-the SPY row uses the daily closes of SPY. With $s(\cdot)$ the sample standard
-deviation, which divides by the count minus 1, the columns are:
+\begin{frame}{Fitting steps 1, 2, and 3: the residuals}\label{fr:residuals}
+Fitting step 1 leaves the residual $\epsb_i=\gb_i-\Xh\thetab_i$ of each stock.
+Fitting step 2 stacks the sector factors $\fb(t)$ as the rows of the
+$T\times 11$ matrix $\Fb$. Fitting step 3 leaves the stock-specific part:
+\[
+ \ub_i=\epsb_i-\Fb\deltab_i,
+ \qquad\text{so}\qquad
+ \gb_i=\Xh\thetab_i+\Fb\deltab_i+\ub_i
+\]
+holds exactly on every day. Each residual is orthogonal to the columns of its
+own $\Xb$, so each $\ub_i$ is uncorrelated with the market, the economic
+factors, and the sector factors.
+\slidenote{Single index model}{The single index model stops after fitting step
+1 with $K=0$. Its stock-specific part is $\ub_i=\epsb_i$, and its $\Fb$ has
+zero columns.}
+\end{frame}
+
+\begin{frame}{Economic factors from FRED}\label{fr:fred}
+FRED gives the level $L(t)$ of each series on each price day. A rate becomes
+its daily change, and a price becomes its growth rate, in 1/yr:
+\[
+ x(t)=L(t)-L(t-1)\ \ \text{(change)},
+ \qquad
+ x(t)=\frac{1}{\Delta t}\ln\left(\frac{L(t)}{L(t-1)}\right)\ \ \text{(growth)}.
+\]
+\begin{center}\small
+\begin{tabular}{lll}
+\toprule
+FRED series & Level & Kind \\
+\midrule
+\texttt{DGS10} & 10-year Treasury yield (percent) & change \\
+\texttt{T10YIE} & 10-year breakeven inflation rate (percent) & change \\
+\texttt{DCOILBRENTEU} & Brent crude oil price (USD per barrel) & growth \\
+\texttt{DTWEXBGS} & US dollar index against a broad basket of currencies & growth \\
+\bottomrule
+\end{tabular}
+\end{center}
+\slidenote{Code}{\texttt{economic\_factor(levels, kind, \gm{Δt})} returns
+$x(1),\dots,x(T)$. This product uses the FRED\textsuperscript{\textregistered}
+API but is not endorsed or certified by the Federal Reserve Bank of St.\ Louis.}
+\end{frame}
+
+\begin{frame}{Fitting step 4: unmix the factors}\label{fr:unmix}
+The factor matrix $\Phib=[\gb_m,\mathbf{x}_1,\dots,\mathbf{x}_K,\Fb]$ is
+$T\times p$, with $p=1+K+11$. Its column averages are $\mub$, and its sample
+covariance matrix is:
+\[
+ \Sigmab_{\Phi}=\frac{1}{T-1}\left(\Phib-\onev\mub^{\top}\right)^{\top}\left(\Phib-\onev\mub^{\top}\right).
+\]
+The Cholesky factorization $\Sigmab_{\Phi}=\Ab\Ab^{\top}$ gives the
+lower-triangular matrix $\Ab$. The uncorrelated factors are:
+\[
+ \Zb=\left(\Phib-\onev\mub^{\top}\right)\Ab^{-\top},
+ \qquad
+ \operatorname{cov}(\Zb)=\Ab^{-1}\Sigmab_{\Phi}\Ab^{-\top}=\Ab^{-1}\Ab\Ab^{\top}\Ab^{-\top}=\Ib.
+\]
+\slidenote{Code}{\texttt{unmix\_factors(\gm{Φ})} returns $(\mub,\Ab,\Zb)$. In
+Julia, \texttt{M / A'} computes $\mathbf{M}\Ab^{-\top}$.}
+\end{frame}
+
+\begin{frame}{Fitting step 5: the jump hidden Markov models}\label{fr:jump}
+Fitting step 5 fits one single-asset jump hidden Markov model to each series:
+\begin{itemize}\setlength{\itemsep}{0.3em}
+\item each column of $\Phib$ without fitting step 4 (Standard and Advanced), or
+each column of $\Zb$ with fitting step 4 (Expert);
+\item the stock-specific part $\ub_i$ of each of the 375 stocks.
+\end{itemize}
+Every model has 100 hidden states, a Student-$t$ distribution with $\nu=5$ in
+each state, and the jump settings $\epsilon=10^{-4}$ and $\lambda=100$ days of
+the tuned SPY model of L13a. Each model draws its paths independently of the
+other models. Without fitting step 4, the synthetic factors are uncorrelated,
+so the covariance of two synthetic stocks keeps only the variance of each
+factor, and every covariance term between two different factors drops out.
+\slidenote{Code}{\texttt{fit\_jump\_model} in \texttt{src/Model.jl} calls
+\texttt{JumpHMM.build}; \texttt{draw\_series} calls \texttt{JumpHMM.simulate}.}
+\end{frame}
+
+\begin{frame}{Sampling: draw, mix, and compose}\label{fr:sampling}
+Each synthetic market has $T$ days, as long as the data:
+\begin{enumerate}\setlength{\itemsep}{0.3em}
+\item \hilite{Factor draws.} Draw a path of $T$ days from each factor model.
+With fitting step 4, the draws are the columns of $\Zb\syn$, and we mix the
+draws back:
+\[
+ \Phib\syn=\onev\mub^{\top}+\Zb\syn\Ab^{\top},
+ \qquad
+ \operatorname{cov}(\Phib\syn)=\Ab\,\operatorname{cov}(\Zb\syn)\,\Ab^{\top}\approx\Ab\Ab^{\top}=\Sigmab_{\Phi}.
+\]
+Without fitting step 4, the draws are the columns of $\Phib\syn$.
+\item \hilite{Stock-specific draws.} Draw a path $\ub_i\syn$ from the model of
+each $\ub_i$.
+\item \hilite{Compose.} With $\Xh\syn$ and $\Fb\syn$ taken from the columns of
+$\Phib\syn$: $\gb_i\syn=\Xh\syn\thetab_i+\Fb\syn\deltab_i+\ub_i\syn$.
+\end{enumerate}
+\slidenote{Code}{\texttt{mix\_factors(Z, \gm{μ}, A)} returns $\Phib\syn$, and
+\texttt{compose\_growth\_rates(X, \gm{θ}, F, \gm{δ}, u)} returns $\gb_i\syn$. The
+checker draws 10 synthetic markets from the seed 5660.}
+\end{frame}
+
+\begin{frame}{The columns of the report}\label{fr:report}
+With $\rho_{ij}$ the correlation of the growth rates of stocks $i$ and $j$ over
+the $T$ days, and $s(\cdot)$ the sample standard deviation:
 \vspace{0.3em}
 \begin{center}\small
 \begin{tabular}{ll}
 \toprule
 Column & Definition \\
 \midrule
-Excess kurtosis & $\kappa$, slide \pageref{fr:kurtosis} \\
-Clustering, lags 1–10 and 11–50 & $C(\{1,\dots,10\})$ and $C(\{11,\dots,50\})$, slide \pageref{fr:clustering} \\
-Autocorrelation, lag 1 & $\rho_g(1)$ \\
-Volatility (1/$\sqrt{\text{yr}}$) & $s(g)\sqrt{\Delta t}$ \\
-Gap spread & $s(\ln S_t-\ln V_t)$; \texttt{n/a} for SPY \\
-Steps from flat to long & expected steps from state 0 to state $K$, slide \pageref{fr:steps} \\
+Same sector & average $\rho_{ij}$ over pairs $i<j$ in the same sector \\
+Different sectors & average $\rho_{ij}$ over pairs $i<j$ in different sectors \\
+Each pair of sectors & average $\rho_{ij}$ over $i$ in the first sector and $j$ in the second \\
+Median stock volatility (1/$\sqrt{\text{yr}}$) & median over the stocks of $s(\gb_i)\sqrt{\Delta t}$ \\
+R² (table FRED series) & $1-\operatorname{var}(\epsb_i)/\operatorname{var}(\gb_i)$, after fitting step 1 \\
 \bottomrule
 \end{tabular}
 \end{center}
 \vspace{0.3em}
-Below each table, the report gives the half-width $1.96/\sqrt{n}$ of the
-white-noise band, with $n$ the number of growth rates. For a long series with
-no autocorrelation, each sample autocorrelation lies within this band with
-probability about 0.95.
-\end{frame}
-
-\begin{frame}{The conviction rule}\label{fr:conviction}
-\begin{columns}[T,onlytextwidth]
-\begin{column}{0.61\textwidth}
-Advanced gives each trader $2K+1$ states, the states from $-K$ to $K$. The
-trader holds $+c_i$ only in state $K$ and $-c_i$ only in state $-K$. All
-comparisons are strict:
-\begin{itemize}\setlength{\itemsep}{0.15em}
-\item \hilite{Flat state,} $-K<r_t<K$: move up one state when $z>\cin$, and down
-one state when $z<-\cin$. Otherwise conviction fades: move one state toward 0, or
-stay in state 0.
-\item \hilite{End states:} exit from state $K$ to state $K-1$ when $z<\cout$, and
-from state $-K$ to state $-(K-1)$ when $z>-\cout$. Otherwise stay.
-\end{itemize}
-\end{column}
-\begin{column}{0.35\textwidth}
-\centering
-\begin{tikzpicture}[x=0.9cm,y=0.55cm,
-  statebar/.style={vnslideink,line width=1.3pt},
-  lab/.style={font=\footnotesize,text=vnslidebody},
-  head/.style={font=\scriptsize,text=vnmuted},
-  entry/.style={vnaccent,line width=0.9pt,-{Latex[length=1.8mm]}},
-  fade/.style={vnmuted,line width=0.9pt,dashed,-{Latex[length=1.8mm]}},
-  exit/.style={vnlink,line width=0.9pt,-{Latex[length=1.8mm]}}]
-  % Column headings -
-  \node[head,anchor=east] at (-0.6,3.9) {state};
-  \node[head,anchor=west] at (1.75,3.9) {position};
-  % States, state numbers, and positions -
-  \foreach \y/\r/\x in {3/{$K$}/{$+c_i$},2/{$K-1$}/{$0$},0/{$0$}/{$0$},-2/{$-(K-1)$}/{$0$},-3/{$-K$}/{$-c_i$}}{
-    \draw[statebar] (0,\y) -- (1.1,\y);
-    \node[lab,anchor=east] at (-0.6,\y) {\r};
-    \node[lab,anchor=west] at (1.75,\y) {\x};
-  }
-  \node[lab] at (0.55,1.1) {$\vdots$};
-  \node[lab] at (0.55,-0.9) {$\vdots$};
-  % Entry moves, on the right: one state away from 0 -
-  \draw[entry] (1.2,0.1) .. controls (1.65,0.2) and (1.65,0.65) .. (1.2,0.75);
-  \draw[entry] (1.2,1.25) .. controls (1.65,1.35) and (1.65,1.8) .. (1.2,1.9);
-  \draw[entry] (1.2,2.1) .. controls (1.65,2.2) and (1.65,2.8) .. (1.2,2.9);
-  \draw[entry] (1.2,-0.1) .. controls (1.65,-0.2) and (1.65,-0.65) .. (1.2,-0.75);
-  \draw[entry] (1.2,-1.25) .. controls (1.65,-1.35) and (1.65,-1.8) .. (1.2,-1.9);
-  \draw[entry] (1.2,-2.1) .. controls (1.65,-2.2) and (1.65,-2.8) .. (1.2,-2.9);
-  % Fade moves, on the left: one state toward 0 -
-  \draw[fade] (-0.1,1.9) .. controls (-0.55,1.8) and (-0.55,1.35) .. (-0.1,1.25);
-  \draw[fade] (-0.1,0.75) .. controls (-0.55,0.65) and (-0.55,0.2) .. (-0.1,0.1);
-  \draw[fade] (-0.1,-1.9) .. controls (-0.55,-1.8) and (-0.55,-1.35) .. (-0.1,-1.25);
-  \draw[fade] (-0.1,-0.75) .. controls (-0.55,-0.65) and (-0.55,-0.2) .. (-0.1,-0.1);
-  % Exit moves, on the left: from an end state to the next state toward 0 -
-  \draw[exit] (-0.1,2.9) .. controls (-0.55,2.8) and (-0.55,2.2) .. (-0.1,2.1);
-  \draw[exit] (-0.1,-2.9) .. controls (-0.55,-2.8) and (-0.55,-2.2) .. (-0.1,-2.1);
-  % Legend: each move's name in its color -
-  \node[lab,anchor=center] at (0.55,-4.0) {\textcolor{vnaccent}{entry}\quad
-    \textcolor{vnmuted}{fade}\quad \textcolor{vnlink}{exit}};
-\end{tikzpicture}
-\end{column}
-\end{columns}
-\slidenote{Code}{\texttt{conviction\_rule(state, z, T, \tauc, K)} returns $r_{t+1}$. With $K=1$,
-this rule is the three-state rule.}
-\end{frame}
-
-\begin{frame}{Hesitant traders}\label{fr:hesitant}
-Expert makes every move hesitant. At each step, the simulator draws one number
-$u$, uniform on $[0,1)$, for every trader. With $r'$ the state that the
-conviction rule proposes, the trader's next state is:
-\[
- r_{t+1}=\begin{cases}
- r' & r'\neq r_t\ \text{and}\ u<p,\\
- r_t & \text{otherwise}.
- \end{cases}
-\]
-Each proposed move, an entry, a fade, or an exit, happens with probability $p$, and
-$p=1$ gives the conviction rule of slide \pageref{fr:conviction}. Expert uses 5
-states ($K=2$) and compares $p=1$, $0.5$, and $0.2$.
-\slidenote{Code}{\texttt{hesitant\_rule(state, proposed, p, u)} returns
-$r_{t+1}$, with \texttt{proposed} $=r'$. The simulator calls it only when
-$p<1$.}
-\end{frame}
-
-\begin{frame}{The transition matrix of one trader}
-At a fixed signal $z$, a hesitant trader's state follows a Markov chain: the next
-state depends only on the current state. In the transition matrix $\Pb$, row and
-column $i$ hold state $i-K-1$. Let $r$ be the state of row $i$, and $r'$ the
-conviction rule's proposal from $r$. The probability of moving from $r$ to the
-state of column $j$ in one step is:
-\begin{columns}[T,onlytextwidth]
-\begin{column}{0.56\textwidth}
-\[
- P_{ij}=\begin{cases}
- p & \text{column } j \text{ holds } r' \text{ and } r'\neq r,\\
- 1-p & j=i \text{ and } r'\neq r,\\
- 1 & j=i \text{ and } r'=r,\\
- 0 & \text{otherwise}.
- \end{cases}
-\]
-\end{column}
-\begin{column}{0.40\textwidth}
-\[
- \Pb=\begin{pmatrix}
- 1-p & p & 0\\
- 0 & 1-p & p\\
- 0 & 0 & 1
- \end{pmatrix}
-\]
-\end{column}
-\end{columns}
-\vspace{0.6em}
-Each row of $\Pb$ sums to 1. The matrix on the right is $\Pb$ for $K=1$ at a
-strong signal, $z>\cin$ and $z>-\cout$, with rows for states $-1$, $0$, and $1$.
-\slidenote{Code}{\texttt{transition\_matrix(z, T, \tauc, K, p)} returns $\Pb$.
-The column of state $r$ is $r+K+1$.}
-\end{frame}
-
-\begin{frame}{Steps from flat to long}\label{fr:steps}
-At a strong signal, $z>\cin$ and $z>-\cout$, every state below $K$ proposes the
-state above it. The block of $\Pb$ for states $-K$ to $K-1$ is
-$\Qb=(1-p)\,\Ib+p\,\Jb$, where $\Jb$ is the $2K\times2K$ matrix with ones just
-above the diagonal. For states $r$ and $m$, entry $N_{rm}$ of the
-fundamental matrix $\Nb=(\Ib-\Qb)^{-1}$ is the expected number of steps in state
-$m$, from state $r$, before reaching state $K$. Because $\Jb^{2K}=0$, $\Nb$ is a
-finite sum:
-\[
- \Nb=\frac{1}{p}\left(\Ib-\Jb\right)^{-1}
- =\frac{1}{p}\left(\Ib+\Jb+\Jb^{2}+\dots+\Jb^{2K-1}\right).
-\]
-Every entry of $\Nb$ on or above the diagonal is $1/p$. The row of state 0 has
-$K$ such entries, so the expected number of steps from flat to long is:
-\[
- \sum_{m=-K}^{K-1}N_{0m}=\frac{K}{p}.
-\]
-\slidenote{Report}{\texttt{expected\_steps\_to\_long(P, K)}, with \texttt{P}
-from \texttt{transition\_matrix(10.0, 1.0, -0.1, K, p)}.}
+Each synthetic row averages the 10 synthetic markets. The table FRED series
+averages R² and each loading $\eta_{ik}$ over the stocks of each sector.
 \end{frame}
 
 \begin{frame}{Summary}
-PS6 gives each Farmer–Joshi trader a hidden state and compares the
-stylized facts of the simulated growth rates with those of SPY.
+PS6 fits the general factor model of lecture L14a to SPY and 375 of its
+stocks, draws synthetic markets from single-asset jump hidden Markov models,
+and compares how the stocks move together.
 
 \vspace{0.6em}
 \textbf{Key takeaways}
 \begin{itemize}\setlength{\itemsep}{0.5em}
-\item The market sees only each trader's position: $+c_i$ in state $K$, $-c_i$
-in state $-K$, and 0 in every other state. The state itself is hidden.
-\item The excess kurtosis measures fat tails, and the mean autocorrelation of
-the absolute growth rates over a set of lags measures volatility clustering.
-An autocorrelation outside the white-noise band is unlikely for a series with
-no autocorrelation.
-\item At a fixed signal, a hesitant trader's state follows a Markov chain, and
-the fundamental matrix of the chain gives the expected steps from flat to long.
+\item Fitting steps 1, 2, and 3 are one least-squares solve,
+$\Xb^{\top}\Xb\,\thetab=\Xb^{\top}\yb$, with a different $\Xb$ and $\yb$ in each
+step. With $\Xb=\Bb$, the solve gives the average residual of each sector.
+\item Separate jump hidden Markov models draw independent paths, so the
+synthetic factors are uncorrelated unless the factors are unmixed first.
+\item The Cholesky factor $\Ab$ of the covariance matrix unmixes the factors
+before the fit and mixes the draws back after sampling.
 \end{itemize}
 \vspace{0.6em}
-Use these measures to answer the central question.
+Use these steps to answer the central question.
 \end{frame}
 \end{document}

@@ -12,7 +12,7 @@ Keep the inline styles: they carry the code colors and gray backgrounds into Can
 You can also paste this file's contents into the Canvas HTML editor.
 -->
 
-<h2>Problem Set 6 (PS6): Do Hidden States Make the Farmer–Joshi Market Look Real?</h2>
+<h2>Problem Set 6 (PS6): Does a Synthetic Market Move Together Like the Real Market?</h2>
 
 <p>
   <strong>Release:</strong> Sunday, November 22, 2026<br>
@@ -22,16 +22,17 @@ You can also paste this file's contents into the Canvas HTML editor.
 </p>
 
 <p>
-  The daily growth rates of real stock prices share a few stylized facts: fat
-  tails, volatility clustering, and a weak autocorrelation. In PS6 we'll ask
-  whether hidden states, and random moves between them, help the Farmer–Joshi
-  market from the L12a course example reproduce these facts for SPY. The market
-  has value investors and trend followers. You will compare the growth rates of
-  the simulated market with the daily growth rates of SPY. Standard measures the
-  course example's market. Advanced adds extra states in which a trader holds nothing and builds conviction, and compares markets
-  with 3, 5, and 7 states. Expert adds hesitant traders and compares three values
-  of the probability that a trader moves. You are graded on your calculations
-  and interpretation, not on whether the market matches SPY.
+  The L14a course example builds a synthetic market of SPY and 375 of its stocks
+  from single-asset jump hidden Markov models: one model for SPY, one for each
+  sector, and one for the stock-specific part of each stock. In PS6, we'll ask
+  whether a synthetic market built this way moves together like the real
+  market. You will fit the general factor model of lecture L14a and compare how
+  the real and synthetic stocks move together. Standard fits the market and the
+  sector factors. Advanced adds four economic factors from FRED, such as the
+  daily change in the 10-year Treasury yield. Expert adds the Cholesky step,
+  which keeps the correlations between the factors. You are graded on your
+  calculations and interpretation, not on whether the synthetic market matches
+  the real market.
 </p>
 
 <h3>Download and instructions</h3>
@@ -57,8 +58,8 @@ You can also paste this file's contents into the Canvas HTML editor.
 <p>
   On the release page, scroll to <strong>Assets</strong>, select
   <strong>Source code (zip)</strong>, and extract the archive. Use Julia 1.12.7.
-  The SPY closing prices come with the course package, and the packages are the
-  same as in PS5.
+  The daily prices of SPY and its stocks come with the course package, and the
+  four FRED series come in the release.
 </p>
 
 <p>
@@ -94,9 +95,9 @@ You can also paste this file's contents into the Canvas HTML editor.
 
 <p>
   The checker runs your track's 12, 16, or 24 checks and writes the report to
-  <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">results/Report.md</code>. A table that needs an unfinished function shows
-  <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">UNAVAILABLE</code>. Once your functions work, the checker takes up to two
-  minutes. Use the report to answer your three questions.
+  <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">results/Report.md</code>. A row or a table that needs an unfinished function shows
+  <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">UNAVAILABLE</code>. Once your functions work, the checker takes less than a
+  minute. Use the report to answer your three questions.
 </p>
 
 <p>
