@@ -132,7 +132,7 @@ end
     standard_table(settings) -> Union{Vector{NamedTuple}, String}
 
 Rows of the table "Farmer–Joshi and SPY" (named for the benchmark ticker): the benchmark, value
-investors only, trend followers only, and both groups with 3 states. Returns `"UNAVAILABLE: ..."`
+investors only, trend followers only, and value investors and trend followers together, with 3 states. Returns `"UNAVAILABLE: ..."`
 when a function throws.
 """
 function standard_table(settings::NamedTuple)::Union{Vector{NamedTuple},String}
@@ -141,12 +141,12 @@ function standard_table(settings::NamedTuple)::Union{Vector{NamedTuple},String}
         rows = NamedTuple[];
         push!(rows, benchmark_row(settings));
 
-        # The three markets of the three-state rule: each group alone, then both groups -
+        # The three markets of the three-state rule: each group alone, then value investors and trend followers together -
         push!(rows, market_row(settings, "value investors only", :three, 1, 1.0;
             value_number = settings.value_number, trend_number = 0));
         push!(rows, market_row(settings, "trend followers only", :three, 1, 1.0;
             value_number = 0, trend_number = settings.trend_number));
-        push!(rows, market_row(settings, "both groups", :three, 1, 1.0;
+        push!(rows, market_row(settings, "value investors and trend followers", :three, 1, 1.0;
             value_number = settings.value_number, trend_number = settings.trend_number));
         return rows;
     catch caught
@@ -157,7 +157,7 @@ end
 """
     more_states_table(settings) -> Union{Vector{NamedTuple}, String}
 
-Rows of the table "More states": the benchmark, and both groups for each number of states in
+Rows of the table "More states": the benchmark, and the market of value investors and trend followers for each number of states in
 `settings.number_of_states`. Returns `"UNAVAILABLE: ..."` when a function throws.
 """
 function more_states_table(settings::NamedTuple)::Union{Vector{NamedTuple},String}
@@ -168,7 +168,7 @@ function more_states_table(settings::NamedTuple)::Union{Vector{NamedTuple},Strin
         # One row for each number of states; n states have the top state K = (n - 1) / 2 -
         for n ∈ settings.number_of_states
             K = (n - 1) ÷ 2;
-            push!(rows, market_row(settings, "both groups, $(n) states", :conviction, K, 1.0;
+            push!(rows, market_row(settings, "$(n) states", :conviction, K, 1.0;
                 value_number = settings.value_number, trend_number = settings.trend_number));
         end
         return rows;
@@ -180,7 +180,7 @@ end
 """
     hesitant_table(settings) -> Union{Vector{NamedTuple}, String}
 
-Rows of the table "Hesitant traders": the benchmark, and both groups with `settings.expert_states`
+Rows of the table "Hesitant traders": the benchmark, and the market of value investors and trend followers with `settings.expert_states`
 states for each probability in `settings.probabilities`. Each row also has `steps`, the expected
 number of steps from flat to long. Returns `"UNAVAILABLE: ..."` when a function throws.
 """

@@ -116,19 +116,20 @@ log price. Random noise moves both the log price and the log value.
 simulated market with the daily growth rates of SPY from 2014 to 2024. Each
 simulated row is the mean over 5 runs of 20,000 steps. The columns measure fat
 tails (the excess kurtosis, `0` for a Normal distribution), volatility
-clustering at lags 1–10 and 11–50, the autocorrelation at lag 1, the
-volatility, and the **gap spread**, how far the price wanders from the value. As in the course example, we compare the patterns in the growth
-rates, not the size of the moves. Below each table, the report gives the
-**white-noise band**: for a series with no autocorrelation, about 95% of the
-autocorrelations fall between minus and plus this number.
+clustering at lags 1–10 and 11–50, the autocorrelation at lag 1, the volatility,
+and the **gap spread**, how far the price wanders from the value. As in the
+course example, we compare the patterns in the growth rates, not the size of the
+moves. Below each table, the report gives the **white-noise band**: for a series
+with no autocorrelation, about 95% of the autocorrelations fall between minus
+and plus this number.
 
 ## Standard: the three-state rule
 
 Complete `three_state_rule`, `excess_kurtosis`, and `volatility_clustering`. Run
 the checker, and answer Questions 2 and 3 from the table **Farmer–Joshi and
 SPY**. The table compares SPY with three markets: **value investors only**,
-**trend followers only**, and **both groups**. On the Advanced and Expert
-tracks, answer only Question 2 from this table.
+**trend followers only**, and **value investors and trend followers**. On the
+Advanced and Expert tracks, answer only Question 2 from this table.
 
 ## Advanced: more states
 
@@ -141,7 +142,8 @@ the trader's conviction fades one state back toward `0`. The docstring gives the
 full rule.
 
 Rerun the checker, and answer Question 3 from the table **More states**. The
-table compares SPY with the market of both groups at 3, 5, and 7 states.
+table compares SPY with the market of value investors and trend followers,
+with 3, 5, and 7 states per trader.
 
 ## Expert: hesitant traders
 
@@ -155,7 +157,8 @@ above the entry threshold.
 
 Rerun the checker, and answer Question 3 from the tables **More states** and
 **Hesitant traders**. The table **Hesitant traders** compares SPY with the
-market of both groups at 5 states, with `p` set to `1`, `0.5`, and `0.2`.
+market of value investors and trend followers, with 5 states per trader and
+`p` set to `1`, `0.5`, and `0.2`.
 
 ## Explore on your own
 

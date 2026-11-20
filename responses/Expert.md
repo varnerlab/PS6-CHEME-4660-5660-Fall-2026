@@ -9,8 +9,8 @@ lines around each answer, because the checker reads those lines.
 Answer this question before you write any code. Your prediction is not graded
 for accuracy. SPY's daily growth rates have fat tails, volatility clustering,
 and a weak autocorrelation. Which of these stylized facts do you expect the
-market with both groups of traders to reproduce? Explain why.
-Do you expect more states, or hesitant traders, to move the market closer to SPY?
+market with value investors and trend followers to reproduce? Explain why. Do
+you expect more states, or hesitant traders, to move the market closer to SPY?
 
 <!-- answer-1:start -->
 TODO: Answer Question 1.
@@ -18,7 +18,7 @@ TODO: Answer Question 1.
 
 ## 2. How does each group of traders shape the growth rates?
 
-In the table **Farmer–Joshi and SPY**, compare the three markets with SPY.
+In the table **Farmer–Joshi and SPY**, compare each simulated market with SPY.
 Which group of traders creates the fat tails and the volatility clustering? Use
 each group's rule for buying and selling to explain the sign of the group's
 autocorrelation at lag 1.
