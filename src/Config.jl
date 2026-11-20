@@ -33,6 +33,11 @@ function config_setting(settings::Dict, key::String, T::Type)
     end
     value = settings[key];
 
+    # A number setting cannot be true or false -
+    if T <: Number && value isa Bool
+        throw(ArgumentError("Setting '$key' must be a number, not true or false."));
+    end
+
     # Integer settings must be written as whole numbers -
     if T <: Integer && !(value isa Integer)
         throw(ArgumentError("Setting '$key' must be a whole number."));
@@ -88,6 +93,8 @@ end
 Throw an `ArgumentError` with `message` when a setting fails a check.
 """
 function check_setting(ok::Bool, message::String)
+
+    # Stop with the message when the check fails -
     if !ok
         throw(ArgumentError(message));
     end
@@ -142,14 +149,15 @@ function load_config(path::AbstractString)::NamedTuple
     # Check the single settings -
     check_setting(steps_per_year >= 1, "The steps_per_year must be at least 1.");
     check_setting(number_of_states >= 2, "The number_of_states must be at least 2.");
-    check_setting(nu > 0, "The nu must be positive.");
+    check_setting(isfinite(nu) && nu > 0, "The nu must be a positive number.");
     check_setting(0 <= epsilon && epsilon <= 1, "The epsilon must be from 0 to 1.");
-    check_setting(lambda > 0, "The lambda must be positive.");
+    check_setting(isfinite(lambda) && lambda > 0, "The lambda must be a positive number.");
     check_setting(number_of_paths >= 1, "The number_of_paths must be at least 1.");
-    check_setting(!isempty(benchmark_ticker), "The benchmark_ticker must not be empty.");
+    check_setting(benchmark_ticker == "SPY", "The benchmark_ticker must be \"SPY\", because the FRED file holds one row for each SPY price day.");
 
-    # Check the FRED series: at least one, each a column of the FRED file, each with a kind and a name -
+    # Check the FRED series: at least one, each a column of the FRED file named once, each with a kind and a name -
     check_setting(!isempty(fred_series), "The fred_series list must name at least one series.");
+    check_setting(length(unique(fred_series)) == length(fred_series), "Each series in fred_series must appear only once.");
     for series ∈ fred_series
         check_setting(series in FRED_COLUMNS, "Every entry of fred_series must be one of $(join(FRED_COLUMNS, ", ")).");
     end

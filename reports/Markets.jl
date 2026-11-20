@@ -43,6 +43,8 @@ The row of the real market: the statistics of `market_statistics` for the daily 
 stocks.
 """
 function real_row(universe::NamedTuple, settings::NamedTuple)::NamedTuple
+
+    # Measure the real growth rates, and name the row -
     statistics = market_statistics(universe.G, universe, settings);
     return merge((label = "real market", problem = ""), statistics);
 end
@@ -188,6 +190,8 @@ end
 Write the header line of a Markdown table: the first column aligned left, and the others aligned right.
 """
 function write_header(io::IO, headers::Vector{String})::Nothing
+
+    # The column names, then the alignment line -
     println(io, "| ", join(headers, " | "), " |");
     alignments = fill("--:", length(headers));
     alignments[1] = ":--";

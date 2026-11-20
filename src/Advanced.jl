@@ -14,9 +14,9 @@
 """
     least_squares_fit(X::Matrix{Float64}, y::Vector{Float64}) -> Vector{Float64}
 
-Solve the least-squares problem `X'X θ = X'y` for `θ`. The answer is the pseudo-inverse
-solution, `θ = pinv(X) * y`. The general factor model uses this one solve in fitting steps 1, 2,
-and 3, with a different `X` and `y` in each step:
+Solve the least-squares problem `X'X θ = X'y` for `θ`. When `X` has full column rank, as in every
+step of the general factor model, the answer equals the pseudo-inverse solution `pinv(X) * y`.
+Fitting steps 1, 2, and 3 use this one solve, with a different `X` and `y` in each step:
 
 - Step 1, the market and economic loadings of stock `i`: `X` is the design matrix
   `[1, g_m, x_1, ..., x_K]` (days × columns), `y` is the growth rates of stock `i`, and `θ` is

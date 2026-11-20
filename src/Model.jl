@@ -115,6 +115,8 @@ the jump settings of the tuned SPY model and no tuning.
 - The fitted jump hidden Markov model of the series.
 """
 function fit_jump_model(series::Vector{Float64}, settings::NamedTuple)::JumpHMM.MyJumpHiddenMarkovModel
+
+    # Build the model from the series and the jump settings -
     return JumpHMM.build(JumpHMM.MyJumpHiddenMarkovModel, (growth_rates = series,
         number_of_states = settings.number_of_states, ν = settings.ν, ϵ = settings.ϵ, λ = settings.λ,
         Δt = settings.Δt));
@@ -135,6 +137,8 @@ Draw one synthetic path of a series from its jump hidden Markov model.
 - The synthetic path, one value per day.
 """
 function draw_series(model::JumpHMM.MyJumpHiddenMarkovModel, number_of_days::Int)::Vector{Float64}
+
+    # Draw one path, and keep its growth rates -
     return JumpHMM.simulate(model, number_of_days; number_of_paths = 1).growth_rates[:, 1];
 end
 
@@ -344,5 +348,7 @@ The fraction of the variance of a stock's growth rates that a fit explains.
 - `1 - var(residual) / var(g)`: `1` for a perfect fit, `0` for a fit that explains nothing.
 """
 function r_squared(g::Vector{Float64}, residual::Vector{Float64})::Float64
+
+    # One minus the fraction of the variance that the fit leaves in the residual -
     return 1.0 - var(residual) / var(g);
 end

@@ -24,7 +24,7 @@ number_of_paths = 10
 # Seed of the random numbers, so that every run draws the same synthetic markets.
 seed = 5660
 
-# The market: SPY, the exchange-traded fund that tracks the S&P 500.
+# The market: SPY, the exchange-traded fund that tracks the S&P 500. Keep SPY: the FRED file holds one row for each SPY price day.
 benchmark_ticker = "SPY"
 
 # FRED series used as economic factors on the Advanced and Expert tracks: column names in data/fred-levels-2014-2024.csv.

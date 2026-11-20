@@ -21,7 +21,7 @@ for argument ∈ ARGS
 end
 
 # The track named in TRACK.txt, and its source file -
-const _TRACK = String(strip(read(joinpath(_ROOT, "TRACK.txt"), String)));
+const _TRACK = String(Base.strip(read(joinpath(_ROOT, "TRACK.txt"), String)));
 if !(_TRACK in ("standard", "advanced", "expert"))
     throw(ArgumentError("TRACK.txt must contain standard, advanced, or expert."));
 end

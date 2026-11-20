@@ -10,6 +10,8 @@
 A rate becomes its daily change: the levels `2.0, 2.5, 2.25` give `0.5, -0.25`.
 """
 function check_factor_change_by_hand()::Bool
+
+    # The change from each day to the next -
     x = economic_factor([2.0, 2.5, 2.25], "change", 1/252);
     return isapprox(x, [0.5, -0.25]; atol = 1e-12);
 end
@@ -18,11 +20,16 @@ end
     check_factor_growth_by_hand() -> Bool
 
 A price becomes its growth rate: the levels `100, 110, 99` give `252 log(1.1)` and `252 log(0.9)`
-for one trading day, `Δt = 1/252`.
+for one trading day, `Δt = 1/252`, and `12 log(1.1)` and `12 log(0.9)` for one month, `Δt = 1/12`.
 """
 function check_factor_growth_by_hand()::Bool
-    x = economic_factor([100.0, 110.0, 99.0], "growth", 1/252);
-    return isapprox(x, [252 * log(1.1), 252 * log(0.9)]; atol = 1e-10);
+
+    # The same levels with a time step of one trading day and of one month -
+    daily = economic_factor([100.0, 110.0, 99.0], "growth", 1/252);
+    monthly = economic_factor([100.0, 110.0, 99.0], "growth", 1/12);
+    daily_ok = isapprox(daily, [252 * log(1.1), 252 * log(0.9)]; atol = 1e-10);
+    monthly_ok = isapprox(monthly, [12 * log(1.1), 12 * log(0.9)]; atol = 1e-10);
+    return daily_ok && monthly_ok;
 end
 
 """
@@ -31,6 +38,8 @@ end
 Constant levels give a factor of zeros with one value fewer than the levels, for both kinds.
 """
 function check_factor_constant_levels()::Bool
+
+    # Ten equal levels give nine zeros for each kind -
     levels = fill(3.5, 10);
     change = economic_factor(levels, "change", 1/252);
     growth = economic_factor(levels, "growth", 1/252);

@@ -43,5 +43,5 @@ jobs:
           gh release create "${GITHUB_REF_NAME}" \
             --draft \
             --verify-tag \
-            --title "PS6: Do Hidden States Make the Farmer–Joshi Market Look Real?" \
+            --title "PS6: Does a Synthetic Market Move Together Like the Real Market?" \
             --notes-file instructor/release-notes.md

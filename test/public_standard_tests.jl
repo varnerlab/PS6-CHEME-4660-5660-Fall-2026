@@ -9,14 +9,14 @@
 """
     ps6_random_regression() -> Tuple{Matrix{Float64},Vector{Float64}}
 
-A fixed regression problem: 200 days, a column of ones and three random columns in `X`, and
-random values in `y`.
+A fixed regression problem: 200 days, a column of ones and five random columns in `X` (the shape
+of the Advanced design matrix, with SPY and four FRED series), and random values in `y`.
 """
 function ps6_random_regression()::Tuple{Matrix{Float64},Vector{Float64}}
 
     # Draw the columns of X and the values of y from a fixed seed -
     rng = Xoshiro(5660);
-    X = hcat(ones(200), randn(rng, 200, 3));
+    X = hcat(ones(200), randn(rng, 200, 5));
     y = randn(rng, 200);
     return (X, y);
 end
@@ -29,6 +29,8 @@ end
 `least_squares_fit` matches the pseudo-inverse solution `pinv(X) * y` on a random problem.
 """
 function check_fit_matches_pinv()::Bool
+
+    # Compare the fit with the pseudo-inverse solution -
     (X, y) = ps6_random_regression();
     θ = least_squares_fit(X, y);
     return isapprox(θ, pinv(X) * y; atol = 1e-10);
@@ -57,6 +59,8 @@ end
 The residual `y - X θ` of a least-squares fit is orthogonal to every column of `X`.
 """
 function check_fit_residual_orthogonal()::Bool
+
+    # The residual times each column of X must be zero -
     (X, y) = ps6_random_regression();
     residual = y - X * least_squares_fit(X, y);
     return maximum(abs.(X' * residual)) < 1e-8;
@@ -69,6 +73,8 @@ end
 `X` and `y` unchanged.
 """
 function check_fit_type_and_inputs()::Bool
+
+    # Fit the problem, then check the type, the length, and the inputs -
     (X, y) = ps6_random_regression();
     copy_of_X = copy(X);
     copy_of_y = copy(y);
@@ -84,6 +90,8 @@ end
 A hand case: three stocks, two sectors, and the sectors listed in a different order from the stocks.
 """
 function check_sector_matrix_by_hand()::Bool
+
+    # Stocks 1 and 3 are in Energy, the second column; stock 2 is in Utilities, the first column -
     sectors = ["Energy", "Utilities", "Energy"];
     sector_names = ["Utilities", "Energy"];
     expected = [0.0 1.0; 1.0 0.0; 0.0 1.0];
@@ -129,15 +137,21 @@ end
 """
     check_sector_matrix_type_and_inputs() -> Bool
 
-`sector_matrix` returns a `Matrix{Float64}` of size stocks × sectors, and leaves its inputs unchanged.
+`sector_matrix` returns a `Matrix{Float64}` of size stocks × sectors, with a column of zeros for a
+sector that has no stocks, and leaves its inputs unchanged.
 """
 function check_sector_matrix_type_and_inputs()::Bool
+
+    # Four stocks; Health Care, the second sector, has no stocks -
     sectors = ["Energy", "Utilities", "Energy", "Materials"];
-    sector_names = ["Energy", "Materials", "Utilities"];
+    sector_names = ["Energy", "Health Care", "Materials", "Utilities"];
     copy_of_sectors = copy(sectors);
     copy_of_names = copy(sector_names);
     B = sector_matrix(sectors, sector_names);
-    return B isa Matrix{Float64} && size(B) == (4, 3) && sectors == copy_of_sectors && sector_names == copy_of_names;
+
+    # The type, the size, the empty column, and the inputs after the call -
+    shape_ok = B isa Matrix{Float64} && size(B) == (4, 4) && B[:, 2] == zeros(4);
+    return shape_ok && sectors == copy_of_sectors && sector_names == copy_of_names;
 end
 
 # --- compose_growth_rates checks ---
@@ -166,10 +180,10 @@ The fitted pieces of a stock rebuild its growth rates exactly: `X θ + F δ + u`
 """
 function check_compose_rebuilds_stock()::Bool
 
-    # A stock, its market and economic columns X, and three sector factors F -
+    # A stock, a design matrix X with three columns, and eleven sector factors F -
     rng = Xoshiro(14);
     X = hcat(ones(300), randn(rng, 300, 2));
-    F = randn(rng, 300, 3);
+    F = randn(rng, 300, 11);
     y = randn(rng, 300);
 
     # Fitting step 1, then fitting step 3, solved here without the student functions -
@@ -187,6 +201,8 @@ With no sector factors (`F` with zero columns, `δ` empty), the growth rates are
 single index model row of the report composes the stocks this way.
 """
 function check_compose_no_sectors()::Bool
+
+    # Three days, a design matrix with a market column, and no sector factors -
     X = [1.0 0.5; 1.0 -0.5; 1.0 1.5];
     θ = [0.1, 1.2];
     u = [0.01, 0.02, 0.03];
@@ -233,7 +249,7 @@ function standard_public_checks()::Vector{NamedTuple}
         (name = "Sector matrix: hand case with three stocks and two sectors", test = check_sector_matrix_by_hand),
         (name = "Sector matrix: one 1 in each row, and the sector sizes as column sums", test = check_sector_matrix_counts),
         (name = "Sector matrix: an unknown sector raises an ArgumentError", test = check_sector_matrix_unknown),
-        (name = "Sector matrix: returns a Matrix{Float64} of size stocks × sectors", test = check_sector_matrix_type_and_inputs),
+        (name = "Sector matrix: returns a Matrix{Float64} of size stocks × sectors, with a zero column for an empty sector", test = check_sector_matrix_type_and_inputs),
         (name = "Compose growth rates: hand case with two days", test = check_compose_by_hand),
         (name = "Compose growth rates: the fitted pieces rebuild a stock exactly", test = check_compose_rebuilds_stock),
         (name = "Compose growth rates: works with no sector factors", test = check_compose_no_sectors),
