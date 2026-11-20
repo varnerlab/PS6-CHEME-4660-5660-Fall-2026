@@ -97,8 +97,7 @@ Summarize one market with the statistics the report compares.
 ### Returns
 
 - A `NamedTuple` with `kurtosis`, `clustering_short`, `clustering_long`, `lag_one`, `volatility`,
-  and `gap_spread` (the standard deviation of `gap`). Every field is `NaN` when `g` has a value
-  that is not finite or has zero variance.
+  and `gap_spread` (the standard deviation of `gap`). Every field is `NaN` when a growth rate is not finite or the growth rates have zero variance.
 """
 function market_facts(g::Vector{Float64}, gap::Vector{Float64}, settings::NamedTuple)::NamedTuple
 

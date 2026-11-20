@@ -1,5 +1,5 @@
 # SHA-256 of the supplied config/defaults.toml; the checker warns when a student edits the file -
-const PS6_DEFAULTS_SHA256 = "88057babbdd251d03338c60f9874b88390be8a651e348267a5fae67468da3286";
+const PS6_DEFAULTS_SHA256 = "5ff3e1ac85218e3f4657d75286d70732ad3726e2668872d596a7e28efdd04812";
 
 """
     run_public_check(check::NamedTuple)

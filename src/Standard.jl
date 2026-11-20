@@ -3,7 +3,8 @@
 # excess_kurtosis and volatility_clustering on the growth rates of each market.
 # Keep the function names, arguments, return types, and docstrings.
 # Replace each error("Complete ...") expression with your calculation.
-# The return statements are supplied.
+# The return statements of excess_kurtosis and volatility_clustering are supplied. In
+# three_state_rung, you write the returns.
 # Save your code, then run from the PS6 folder:
 # julia --project=. --startup-file=no check_submission.jl
 #

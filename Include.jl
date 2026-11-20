@@ -31,7 +31,7 @@ else
     const _SOURCE_PATH = joinpath(_ROOT, "src", titlecase(_TRACK)*".jl");
 end
 
-using VLQuantitativeFinancePackage # course contract models, build, and the training market data
+using VLQuantitativeFinancePackage # course Farmer–Joshi market, build, solve, and the training market data
 using Statistics # sample means and standard deviations
 using Random # repeatable market simulations
 using LinearAlgebra # identity matrix in the expected steps to a long position

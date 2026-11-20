@@ -1,9 +1,11 @@
 # PS6 Advanced: complete the 4 functions below: the 3 Standard functions and 1 for the conviction ladder.
-# The simulator calls conviction_rung for every trader at every step, and the report calls
+# The simulator calls three_state_rung for every trader at every step of the first table and
+# conviction_rung for every trader at every step of the second table. The report calls
 # excess_kurtosis and volatility_clustering on the growth rates of each market.
 # Keep the function names, arguments, return types, and docstrings.
 # Replace each error("Complete ...") expression with your calculation.
-# The return statements are supplied.
+# The return statements of excess_kurtosis and volatility_clustering are supplied. In
+# three_state_rung and conviction_rung, you write the returns.
 # Save your code, then run from the PS6 folder:
 # julia --project=. --startup-file=no check_submission.jl
 #

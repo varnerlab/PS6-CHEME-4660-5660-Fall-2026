@@ -28,14 +28,14 @@ function config_setting(settings::Dict, key::String, T::Type)
 
     # Integer settings must be written as whole numbers -
     if T <: Integer && !(value isa Integer)
-        throw(ArgumentError("Setting '$key' must be of type $T."));
+        throw(ArgumentError("Setting '$key' must be a whole number."));
     end
 
     # Convert the value to T -
     try
         return T(value);
     catch
-        throw(ArgumentError("Setting '$key' must be of type $T."));
+        throw(ArgumentError("Setting '$key' must be a number."));
     end
 end
 
@@ -79,7 +79,10 @@ function config_list(settings::Dict, key::String, T::Type)
     result = T[];
     for value in settings[key]
         if !(value isa Real) || (T <: Integer && !(value isa Integer))
-            throw(ArgumentError("Setting '$key' must be a list of numbers of type $T."));
+            if T <: Integer
+                throw(ArgumentError("Setting '$key' must be a list of whole numbers."));
+            end
+            throw(ArgumentError("Setting '$key' must be a list of numbers."));
         end
         push!(result, T(value));
     end

@@ -34,7 +34,7 @@ end
 """
     clear_previous_results(root::String) -> Nothing
 
-Remove the Markdown report from the previous run. Clear them before
+Remove the Markdown report from the previous run. Clear the report before
 running checks or reporting results, even when loading the source failed.
 
 ### Arguments
@@ -261,7 +261,7 @@ end
 """
     main(setup::NamedTuple) -> Nothing
 
-Run the public checks, display available calculations, and write the
+Run the public checks, write the report, and write the
 submission record.
 
 ### Arguments

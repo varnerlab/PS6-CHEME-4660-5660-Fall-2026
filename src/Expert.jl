@@ -1,10 +1,13 @@
 # PS6 Expert: complete the 6 functions below: the 4 Advanced functions and 2 for hesitant traders.
-# The simulator calls conviction_rung and hesitant_rung for every trader at every step, and the
-# report calls excess_kurtosis and volatility_clustering on the growth rates of each market and
-# transition_matrix for the expected number of steps to a long position.
+# The simulator calls three_state_rung for every trader at every step of the first table and
+# conviction_rung for every trader at every step of the second table. In the Expert table, it
+# calls hesitant_rung only when p is below 1. The report calls excess_kurtosis and
+# volatility_clustering on the growth rates of each market and transition_matrix for the
+# expected number of steps to a long position.
 # Keep the function names, arguments, return types, and docstrings.
 # Replace each error("Complete ...") expression with your calculation.
-# The return statements are supplied.
+# The return statements of excess_kurtosis, volatility_clustering, and transition_matrix are
+# supplied. In three_state_rung, conviction_rung, and hesitant_rung, you write the returns.
 # Save your code, then run from the PS6 folder:
 # julia --project=. --startup-file=no check_submission.jl
 #
@@ -250,11 +253,11 @@ on staying.
 """
 function transition_matrix(z::Float64, T::Float64, τ::Float64, K::Int, p::Float64)::Matrix{Float64}
 
-    # TODO 1: Build a (2K + 1) × (2K + 1) matrix of zeros.
+    # A (2K + 1) × (2K + 1) matrix of zeros -
     number_of_rungs = 2 * K + 1;
     P = zeros(number_of_rungs, number_of_rungs);
 
-    # TODO 2: For each row i, find the current rung (i - K - 1) and the rung that conviction_rung proposes.
+    # TODO 1: For each row i, find the current rung (i - K - 1) and the rung that conviction_rung proposes.
     # Put p in the column of the proposed rung and 1 - p in column i, or 1 in column i when the two rungs match.
     # Hint: the column of rung r is r + K + 1.
     for i in 1:number_of_rungs

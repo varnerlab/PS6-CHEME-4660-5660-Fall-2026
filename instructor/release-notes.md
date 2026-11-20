@@ -11,6 +11,6 @@ Set `TRACK.txt` to `standard`, `advanced`, or `expert`.
 
 Write your prediction in Question 1a before you write any code.
 
-Use **Julia 1.12.7** and follow the package setup in the README. `check_submission.jl` checks your code, prints the comparison report, and gives the instructions for building your ZIP.
+Use **Julia 1.12.7** and follow the package setup in the README. `check_submission.jl` checks your code, writes the report to `results/Report.md`, and gives the instructions for building your ZIP.
 
-The initial submission is due on Canvas by **11:59 PM ET on Sunday, December 6, 2026**. Eligible revisions are accepted until **December 19, 2026 at 11:59 PM ET**. An accepted Advanced score of 4 earns one Magic Point, and an accepted Expert score of 4 earns two Magic Points. PS6 earns at most two Magic Points.
+The initial submission is due on Canvas by **11:59 PM ET on Sunday, December 6, 2026**. Eligible revisions are accepted until **December 19, 2026 at 11:59 PM ET**. A confirmed Advanced score of 4 earns one Magic Point, and a confirmed Expert score of 4 earns two Magic Points. PS6 earns at most two Magic Points.

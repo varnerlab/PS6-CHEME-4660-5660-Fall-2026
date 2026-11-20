@@ -188,7 +188,7 @@ function simulate_market(model::MyFarmerJoshiMarketModel, rule::Symbol, K::Int, 
             value_rungs[i] = new_rung;
         end
 
-        # Trend followers next. Each draws its number, then waits until it has a full lag of history.
+        # Trend followers next. Each trend follower draws its uniform number, then waits until it has a full lag of history.
         for j in eachindex(trend_rungs)
             u = rand(action_rng);
             lag = model.trend_lag[j];
