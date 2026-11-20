@@ -1,10 +1,9 @@
 # PS6 grading rules
 
-Your selected track is graded out of **4**. The most you can earn is a 4 on the
-Standard track, a 4 plus **one Magic Point** on the Advanced track, and a 4 plus
-**two Magic Points** on the Expert track. Magic Points require a score of 4
-confirmed by the teaching team, and PS6 earns at most two Magic Points. Select
-your track in `TRACK.txt`.
+Your selected track is graded out of **4**. The most you can earn is 4 on
+Standard, 4 plus **one Magic Point** on Advanced, and 4 plus **two Magic
+Points** on Expert. You can earn at most two Magic Points on PS6. Select your
+track in `TRACK.txt`.
 
 | Score | Checks passed | Other requirements |
 |:--:|:--|:--|
@@ -75,8 +74,8 @@ After a qualifying initial submission, revisions are allowed until
 **December 19, 2026 at 11:59 PM ET**, with no limit on attempts. Use **New
 Attempt** on the same Canvas assignment. Revisions have no late penalty, even if
 Canvas labels them late. We keep your highest score, even if you change tracks.
-An Advanced or Expert score of 4 confirmed through a revision also earns that
-track's Magic Points.
+A revision that scores 4 on Advanced or Expert also earns that track's Magic
+Points.
 
 ## Independent work
 

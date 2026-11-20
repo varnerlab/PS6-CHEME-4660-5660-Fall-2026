@@ -22,10 +22,10 @@ demand. As in the course example, we'll compare the growth rates of this market
 with the daily growth rates of SPY, an exchange-traded fund that tracks the
 S&P 500 index.
 
-PS6 gives the traders **hidden states**: the market sees only each trader's
-position. The idea comes from a student project that gave traders internal
-states, and from our class discussion (L12a) of giving the Farmer–Joshi traders
-states like those of a hidden Markov model.
+PS6 gives the traders **hidden states**. The market sees each trader's
+position, but not the trader's state. The idea comes from a student project and
+from our class discussion (L12a) of giving the traders states like those of a
+hidden Markov model.
 
 > **Do hidden states, and random moves between them, help the Farmer–Joshi
 > market reproduce the stylized facts of the daily growth rates of SPY?**
@@ -46,13 +46,11 @@ three values of that probability.
   unfinished. You may then revise until December 19, 2026 at 11:59 PM ET. We
   keep your highest score, even if you change tracks. A missing, empty, or
   unreadable submission receives a **Frozen Zero** and cannot be revised.
-- **Grading:** Each track is graded out of 4. The most you can earn is a 4 on
-  the Standard track, a 4 plus one Magic Point on the Advanced track, and a 4
-  plus two Magic Points on the Expert track. Magic Points require a score of 4
-  confirmed by the teaching team, and PS6 earns at most two Magic Points. A 3 or
-  4 requires passing every check; the teaching team then
-  reviews your code and answers. You are graded on your calculations and
-  interpretation, not on whether the market matches SPY. See the [grading
+- **Grading:** The most you can earn is 4 on Standard, 4 plus one Magic Point
+  on Advanced, and 4 plus two Magic Points on Expert. You can earn at most two
+  Magic Points on PS6. A 3 or 4 requires passing every check, and the teaching
+  team then reviews your code and answers. You are graded on your calculations
+  and interpretation, not on whether the market matches SPY. See the [grading
   rubric](RUBRIC.md).
 - **Reference solution:** Released after the deadline. Use the solution to
   understand your mistakes, but do not copy the solution. Copying results in a
@@ -88,8 +86,8 @@ packages are the same as in PS5.
 5. Answer Question 1a, your prediction, before you write any code.
 6. Complete each function by replacing each `error("Complete ...")` with your
    calculation. Follow the TODO hint above each `error` line, then delete the
-   TODO. Do not change the function names, arguments, docstrings, or return
-   statements.
+   TODO. Do not change the function names, arguments, docstrings, or supplied
+   return statements.
 7. Run the checker as you work:
 
    ```text
@@ -101,9 +99,9 @@ packages are the same as in PS5.
    functions work, the checker takes up to two minutes.
 
 You complete `excess_kurtosis` and `volatility_clustering` by copying a few
-lines from the course example. Each docstring names the part of the course
-material that does the same calculation, and the slide of the [mathematical
-companion](docs/PS6-Mathematical-Companion.pdf) with the formulas.
+lines from the course example. Each docstring names the course material that
+does the same calculation, and the slide of the [mathematical
+companion](docs/PS6-Mathematical-Companion.pdf) that gives the formulas.
 
 Edit only `TRACK.txt`, your track's source and response files, `Include.jl`,
 `config/explore.toml`, and any helper files you add. Put helper functions in
@@ -134,9 +132,9 @@ because neither trader holds a position: the rung is the trader's hidden state.
 package's Farmer–Joshi market one step at a time. One step is one trading day.
 Each group has 1,200 traders. At each step, the simulator computes each trader's
 signal, calls your function for the trader's next rung, and adds up the changes
-in the traders' positions, the net demand. The market maker then moves the log
-price in the direction of the net demand, and random noise moves both the log
-price and the log value.
+in the traders' positions to get the net demand. The market maker then moves
+the log price in the direction of the net demand, and random noise moves both
+the log price and the log value.
 
 - A value investor's signal is the investor's estimate of the log value minus
   the log price. The estimate is the log value plus the investor's fixed offset.
@@ -163,8 +161,8 @@ has these columns:
 
 Below each table, the report gives the half-width of the **white-noise band**:
 for a series with no autocorrelation, 95% of the autocorrelations lie between
-minus and plus this number. As in the course example, we compare the shapes of
-the growth rates, not the size of the moves.
+minus and plus this number. As in the course example, we compare the patterns
+in the growth rates, not the size of the moves.
 
 ## Standard: the three-state rule
 
@@ -212,9 +210,8 @@ more functions:
    number is below the probability `p`, and otherwise stays on the current rung.
    Entries and exits are both hesitant.
 6. **`transition_matrix`** returns the one-step transition matrix of one
-   trader's rung at a fixed signal. Each entry of the matrix is the probability
-   of moving from the rung of the entry's row to the rung of the entry's column
-   in one step, so each row sums to one.
+   trader's rung at a fixed signal. Each entry is the probability of moving in
+   one step from the row's rung to the column's rung, so each row sums to one.
 
 The report uses your `transition_matrix` to compute the expected number of steps
 a trader takes to go from rung `0` (flat) to the top rung (long) while the
@@ -232,10 +229,10 @@ run:
 julia --project=. --startup-file=no explore.jl
 ```
 
-The script `explore.jl` runs the report of your track with your functions and
-the settings in `config/explore.toml`, and writes
-`results/exploration/Exploration.md`. The exploration is not graded. You could
-try other numbers of states (any odd number of 3 or more), other probabilities,
+The script `explore.jl` builds your track's report from your functions and the
+settings in `config/explore.toml`, and writes
+`results/exploration/Exploration.md`. The exploration is not graded. Try other
+numbers of states (any odd number of 3 or more), other probabilities,
 other numbers of value investors and trend followers, other noise levels, or
 other seeds.
 
