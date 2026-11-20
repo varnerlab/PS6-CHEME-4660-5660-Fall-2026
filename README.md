@@ -24,10 +24,10 @@ from our discussion in L12a.
 > market reproduce the stylized facts of the daily growth rates of SPY?**
 
 We'll explore this question on three tracks, and you will choose one.
-**Standard** measures the course example's market. **Advanced** adds extra flat
-states, in which a trader builds conviction before taking a position. **Expert**
-adds **hesitant traders**, who move to a new state only with a fixed
-probability.
+**Standard** measures the course example's market. **Advanced** adds extra
+states in which a trader holds nothing and builds conviction before buying or
+selling. **Expert** adds **hesitant traders**, who move to a new state only with
+a fixed probability.
 
 ## Logistics
 

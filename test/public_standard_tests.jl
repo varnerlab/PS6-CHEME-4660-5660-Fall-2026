@@ -107,7 +107,7 @@ reproduces the log price of the course `solve` function.
 """
 function check_three_state_market()::Bool
 
-    # Run the same small market with three_state_rule and with the course solve -
+    # Run the same small market with three_state_rule and with the course solve function -
     market = build_market(_SETTINGS, 1; value_number = 50, trend_number = 50);
     ours = simulate_market(market, :three, 1, 1.0; number_of_steps = 500, burn_in = 100, seed = 1);
     course = solve(market; number_of_steps = 500, burn_in = 100, rng = Xoshiro(2));
@@ -234,7 +234,7 @@ function standard_public_checks()::Vector{NamedTuple}
         (name = "Three-state rule: matches the course threshold rule", test = check_three_state_matches_course),
         (name = "Three-state rule: a signal at a threshold does not move the trader", test = check_three_state_strict),
         (name = "Three-state rule: returns an Int in -1:1", test = check_three_state_type),
-        (name = "Three-state rule: a small market reproduces the course solve", test = check_three_state_market),
+        (name = "Three-state rule: a small market matches the course solve function", test = check_three_state_market),
         (name = "Excess kurtosis: hand-computed value for [1, 2, 3, 4, 10]", test = check_kurtosis_by_hand),
         (name = "Excess kurtosis: unchanged by a shift and a positive scale", test = check_kurtosis_shift_scale),
         (name = "Excess kurtosis: near zero for a Normal sample", test = check_kurtosis_normal),
