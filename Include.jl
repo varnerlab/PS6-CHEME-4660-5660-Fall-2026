@@ -31,10 +31,12 @@ else
     const _SOURCE_PATH = joinpath(_ROOT, "src", titlecase(_TRACK)*".jl");
 end
 
-using VLQuantitativeFinancePackage # course Farmer–Joshi market, build, solve, and the training market data
-using Statistics # sample means and standard deviations
-using Random # repeatable market simulations
-using LinearAlgebra # identity matrix in the expected steps to a long position
+using VLQuantitativeFinancePackage # the daily training prices and the GICS sector table
+import JumpHMM # single-asset jump hidden Markov models; always written JumpHMM.build, JumpHMM.simulate
+using CSV, DataFrames # read the FRED file
+using Statistics # means, standard deviations, covariances, and correlations
+using Random # repeatable synthetic markets
+using LinearAlgebra # cholesky, Symmetric, and the backslash solve
 using Printf # readable report tables
 using Dates # record when a run happened
 using TOML # read the settings file
@@ -42,8 +44,8 @@ using SHA # hash the settings file
 
 # The supplied code, the settings, the report, and the public checks -
 include(joinpath(_ROOT, "src", "Config.jl"));
-include(joinpath(_ROOT, "src", "Market.jl"));
-include(joinpath(_ROOT, "src", "Facts.jl"));
+include(joinpath(_ROOT, "src", "Data.jl"));
+include(joinpath(_ROOT, "src", "Model.jl"));
 const _SETTINGS = load_config(joinpath(_ROOT, "config", "defaults.toml"));
 include(joinpath(_ROOT, "reports", "Markets.jl"));
 include(joinpath(_ROOT, "test", "public_standard_tests.jl"));
