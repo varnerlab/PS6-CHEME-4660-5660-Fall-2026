@@ -161,13 +161,15 @@ function load_config(path::AbstractString)::NamedTuple
         throw(ArgumentError("The config file could not be read as TOML."));
     end
 
-    # Read each scalar setting with its type -
+    # Read each scalar setting with its type: the time step, the noise, and the number of traders -
     steps_per_year = config_setting(settings, "steps_per_year", Int);
     sigma_S = config_setting(settings, "sigma_S", Float64);
     sigma_v = config_setting(settings, "sigma_v", Float64);
     mu_v = config_setting(settings, "mu_v", Float64);
     value_number = config_setting(settings, "value_number", Int);
     trend_number = config_setting(settings, "trend_number", Int);
+
+    # The ranges of the entry and exit thresholds of each group -
     value_T_min = config_setting(settings, "value_T_min", Float64);
     value_T_max = config_setting(settings, "value_T_max", Float64);
     value_tau_min = config_setting(settings, "value_tau_min", Float64);
@@ -176,10 +178,14 @@ function load_config(path::AbstractString)::NamedTuple
     trend_T_max = config_setting(settings, "trend_T_max", Float64);
     trend_tau_min = config_setting(settings, "trend_tau_min", Float64);
     trend_tau_max = config_setting(settings, "trend_tau_max", Float64);
+
+    # The ranges of the value offsets and the trend lags -
     value_v_min = config_setting(settings, "value_v_min", Float64);
     value_v_max = config_setting(settings, "value_v_max", Float64);
     trend_lag_min = config_setting(settings, "trend_lag_min", Int);
     trend_lag_max = config_setting(settings, "trend_lag_max", Int);
+
+    # The market maker, the runs, and the benchmark -
     capital_scale = config_setting(settings, "capital_scale", Float64);
     liquidity = config_setting(settings, "liquidity", Float64);
     number_of_steps = config_setting(settings, "number_of_steps", Int);
@@ -195,13 +201,15 @@ function load_config(path::AbstractString)::NamedTuple
     number_of_states = config_list(settings, "number_of_states", Int);
     probabilities = config_list(settings, "probabilities", Float64);
 
-    # Check that each value makes sense -
+    # Check the time step, the noise, and the number of traders -
     check_setting(steps_per_year >= 1, "The steps_per_year must be at least 1.");
     check_setting(sigma_S >= 0, "The sigma_S must not be negative.");
     check_setting(sigma_v >= 0, "The sigma_v must not be negative.");
     check_setting(value_number >= 0, "The value_number must not be negative.");
     check_setting(trend_number >= 0, "The trend_number must not be negative.");
     check_setting(value_number + trend_number > 0, "The value_number and trend_number must not both be zero.");
+
+    # Check the thresholds: every exit threshold is below every entry threshold of its group -
     check_setting(0 < value_T_min && value_T_min <= value_T_max,
         "The value_T_min must be positive and not above value_T_max.");
     check_setting(value_tau_min <= value_tau_max && value_tau_max < value_T_min,
@@ -210,6 +218,8 @@ function load_config(path::AbstractString)::NamedTuple
         "The trend_T_min must be positive and not above trend_T_max.");
     check_setting(trend_tau_min <= trend_tau_max && trend_tau_max < trend_T_min,
         "The trend_tau_min must not exceed trend_tau_max, and trend_tau_max must be below trend_T_min.");
+
+    # Check the offsets, the lags, the market maker, and the runs -
     check_setting(value_v_min <= value_v_max, "The value_v_min must not exceed value_v_max.");
     check_setting(1 <= trend_lag_min && trend_lag_min <= trend_lag_max,
         "The trend_lag_min must be at least 1 and not above trend_lag_max.");
@@ -217,6 +227,8 @@ function load_config(path::AbstractString)::NamedTuple
     check_setting(liquidity > 0, "The liquidity must be positive.");
     check_setting(number_of_steps >= 100, "The number_of_steps must be at least 100.");
     check_setting(burn_in >= 0, "The burn_in must not be negative.");
+
+    # Check that no list and no ticker is empty -
     check_setting(!isempty(seeds), "The seeds list must not be empty.");
     check_setting(!isempty(number_of_states), "The number_of_states list must not be empty.");
     check_setting(!isempty(probabilities), "The probabilities list must not be empty.");

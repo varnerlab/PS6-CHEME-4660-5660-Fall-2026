@@ -42,6 +42,8 @@ end
 Hand-computed rungs for `K = 2` and `K = 3`, with `T = 1.0` and `τ = -0.1`.
 """
 function check_conviction_by_hand()::Bool
+
+    # The entry and exit thresholds of every case -
     T = 1.0;
     τ = -0.1;
 
@@ -51,6 +53,8 @@ function check_conviction_by_hand()::Bool
         (2, 2, -0.2, 1), (2, -1, -1.5, -2), (2, -2, 0.2, -1), (2, 0, 0.5, 0),
         (3, 2, 0.5, 1), (3, 3, -0.2, 2),
     );
+
+    # The conviction rung must give the expected next rung in every case -
     for (K, rung, z, expected) in cases
         if conviction_rung(rung, z, T, τ, K) != expected
             return false;
@@ -66,9 +70,13 @@ For `K` from 1 to 4, `conviction_rung` returns an `Int` in `-K:K` that is at mos
 from the current rung, over every rung and the signal grid.
 """
 function check_conviction_range()::Bool
+
+    # The thresholds and the signal grid -
     T = 1.0;
     τ = -0.1;
     signals = ps6_signal_grid(T, τ);
+
+    # For every K, rung, and signal: an Int in -K:K, at most one rung from the current rung -
     for K in 1:4
         for rung in -K:K
             for z in signals
@@ -89,9 +97,13 @@ Flipping the sign of the rung and the signal flips the sign of the next rung, fo
 over every rung and the signal grid.
 """
 function check_conviction_symmetry()::Bool
+
+    # The thresholds and the signal grid -
     T = 1.0;
     τ = -0.1;
     signals = ps6_signal_grid(T, τ);
+
+    # For every K, rung, and signal: the mirrored case gives the mirrored next rung -
     for K in 1:3
         for rung in -K:K
             for z in signals
@@ -110,6 +122,8 @@ end
 The sixteen Advanced public checks: the twelve Standard checks, then four for `conviction_rung`.
 """
 function advanced_public_checks()::Vector{NamedTuple}
+
+    # The twelve Standard checks, then the four conviction checks -
     checks = standard_public_checks();
     push!(checks, (name = "Conviction rung: K = 1 matches the course threshold rule", test = check_conviction_k1_matches_course));
     push!(checks, (name = "Conviction rung: hand-computed rungs for K = 2 and K = 3", test = check_conviction_by_hand));

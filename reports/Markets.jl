@@ -127,8 +127,11 @@ and both groups with 3 states. Returns `"UNAVAILABLE: ..."` when a function thro
 """
 function standard_table(settings::NamedTuple)::Union{Vector{NamedTuple},String}
     try
+        # The benchmark row -
         rows = NamedTuple[];
         push!(rows, benchmark_row(settings));
+
+        # The three markets of the three-state rule: each group alone, then both groups -
         push!(rows, market_row(settings, "value investors only", :three, 1, 1.0;
             value_number = settings.value_number, trend_number = 0));
         push!(rows, market_row(settings, "trend followers only", :three, 1, 1.0;
@@ -199,13 +202,23 @@ end
 """
     number_text(x::Float64, digits::Int) -> String
 
-Write a number with `digits` decimals, or `n/a` when the number is `NaN`.
+Write a number with `digits` decimals (`1`, `2`, or `3`), or `n/a` when the number is `NaN`.
 """
 function number_text(x::Float64, digits::Int)::String
+
+    # A missing number prints as n/a -
     if isnan(x)
         return "n/a";
     end
-    return Printf.format(Printf.Format("%." * string(digits) * "f"), x);
+
+    # Round to the requested number of decimals -
+    if digits == 1
+        return @sprintf("%.1f", x);
+    end
+    if digits == 2
+        return @sprintf("%.2f", x);
+    end
+    return @sprintf("%.3f", x);
 end
 
 """
@@ -293,18 +306,24 @@ function write_report(track::String, settings::NamedTuple, path::String)::Nothin
         hesitant = Base.invokelatest(hesitant_table, settings);
     end
 
-    # Write the file -
+    # Write the file: the title, then one table for each table the track runs -
     io = open(path, "w");
     try
         println(io, "# PS6 report\n");
+
+        # The first table, on every track -
         write_table(io, "Farmer–Joshi and SPY",
             "Each simulated row is the mean over $(length(settings.seeds)) runs of $(settings.number_of_steps) daily steps; the gap spread is the standard deviation of the log price minus the log value.",
             standard, settings);
+
+        # The second table, on the Advanced and Expert tracks -
         if track == "advanced" || track == "expert"
             write_table(io, "Conviction ladders",
                 "Each row has value investors and trend followers with the listed number of states.",
                 ladders, settings);
         end
+
+        # The third table, on the Expert track -
         if track == "expert"
             write_table(io, "Hesitant traders",
                 "Each row has traders with $(settings.expert_states) states who act on a proposed move with probability p; the last column is the expected number of steps for a trader to go from flat to long.",
