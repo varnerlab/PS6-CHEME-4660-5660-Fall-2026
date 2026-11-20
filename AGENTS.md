@@ -12,8 +12,9 @@
   series as economic factors (`economic_factor`). Expert: Advanced plus the
   Cholesky step (`unmix_factors`, `mix_factors`).
 - The supplied code in `src/Model.jl` follows the lecture's fitting and sampling
-  algorithms exactly. `least_squares_fit` is the one solve for fitting steps 1,
-  2, and 3.
+  algorithms exactly, with one addition: `spread_rate_changes` spreads the
+  recorded rate changes over their 0.01 step before their jump models are fit.
+  `least_squares_fit` is the one solve for fitting steps 1, 2, and 3.
 - All settings live in `config/defaults.toml`, read by `load_config` in
   `src/Config.jl`. The file is graded, so students do not edit it. The track
   is chosen in `TRACK.txt`.

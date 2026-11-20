@@ -99,6 +99,44 @@ function fit_factor_model(universe::NamedTuple, x::Matrix{Float64}; sectors::Boo
 end
 
 """
+    spread_rate_changes(x::Matrix{Float64}, settings::NamedTuple) -> Matrix{Float64}
+
+Spread each daily change of a FRED series over its 0.01 recording step, for the jump hidden Markov
+models only. FRED records the 10-year Treasury yield and the 10-year breakeven inflation to 0.01
+percentage point, so their daily changes take only a few dozen values. A jump hidden Markov model
+with 100 states fit to these changes has many states that hold one repeated value, and its draws are
+about 1.6 times as volatile as the real changes. Adding a uniform draw from -0.005 to 0.005 to each
+change gives a series the model can fit. Fitting steps 1 to 3 still use the recorded changes.
+
+### Arguments
+
+- `x`: The economic factors, days × series, in the order of `settings.fred_series`, or a matrix
+  with no columns.
+- `settings`: The settings from `load_config`. The function uses `fred_kinds` and `seed`.
+
+### Returns
+
+- A copy of `x` in which each `"change"` column holds the spread changes. The `"growth"` columns are
+  unchanged. The draws come from a fixed seed, so every call returns the same matrix.
+"""
+function spread_rate_changes(x::Matrix{Float64}, settings::NamedTuple)::Matrix{Float64}
+
+    # Initialize: a copy of the factors, and a random number generator with a fixed seed -
+    spread = copy(x);
+    rng = Xoshiro(settings.seed);
+
+    # Add a uniform draw from -0.005 to 0.005 to each day of each "change" column -
+    for k ∈ 1:size(x, 2)
+        if settings.fred_kinds[k] == "change"
+            for t ∈ 1:size(x, 1)
+                spread[t, k] = x[t, k] + 0.01 * (rand(rng) - 0.5);
+            end
+        end
+    end
+    return spread;
+end
+
+"""
     fit_jump_model(series::Vector{Float64}, settings::NamedTuple) -> JumpHMM.MyJumpHiddenMarkovModel
 
 Fit a single-asset jump hidden Markov model to one series, as in the L13a and L14a examples, with
@@ -150,7 +188,8 @@ each factor and one for the stock-specific part of each stock. Each synthetic ma
 the data.
 
 Without the Cholesky step, each factor gets its own jump hidden Markov model, and the draws are the
-synthetic factors. With the Cholesky step, `unmix_factors` runs first (fitting step 4), each column
+synthetic factors; the models of the rate changes are fit to the spread changes of
+`spread_rate_changes`. With the Cholesky step, `unmix_factors` runs first (fitting step 4), each column
 of `Z` gets its own model, and `mix_factors` turns the draws back into factors (sampling step 1).
 
 ### Arguments
@@ -175,8 +214,10 @@ function synthetic_markets(fit::NamedTuple, settings::NamedTuple; cholesky_step:
     number_of_market_columns = size(fit.X, 2) - 1; # g_m and the economic factors
     Φ = hcat(fit.X[:, 2:end], fit.F);
 
-    # Fitting step 4, with the Cholesky step only: unmix the factors -
-    series = Φ;
+    # The series for the jump models: Φ, with the rate changes spread over their 0.01 recording step -
+    series = hcat(fit.X[:, 2], spread_rate_changes(fit.X[:, 3:end], settings), fit.F);
+
+    # Fitting step 4, with the Cholesky step only: unmix the recorded factors -
     μ = Float64[];
     A = zeros(0, 0);
     if cholesky_step == true
