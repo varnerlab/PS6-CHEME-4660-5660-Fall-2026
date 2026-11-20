@@ -173,6 +173,13 @@ julia --project=. --startup-file=no explore.jl
 The script writes `results/exploration/Exploration.md` from your functions. The
 exploration is not graded.
 
+You could also build a new agent-based model from this one by adding a third
+kind of trader, such as **contrarians**, who sell after the price has risen and
+buy after the price has fallen. Each group of traders is one loop in
+`simulate_market` in `src/Market.jl`, so a third group is one more loop. Which
+stylized facts would contrarians change? Try this in a copy of your PS6 folder,
+so that the checker still runs the supplied market.
+
 ## Check and submit your work
 
 1. Save your code and answers, and run the checker one more time:
