@@ -1,0 +1,364 @@
+% PS6 mathematical companion. Build with make in this directory.
+% The slide order follows the assignment README; no reference results appear here.
+% Notation follows lecture L12a: price S_t, value V_t, entry and exit thresholds
+% \chi^{in}_i and \chi^{out}_i, position size c_i, offset v^{(i)}, lag \theta_i,
+% position x_t^{(i)}, order \omega_{t+1}^{(i)}, liquidity \lambda, and growth rate g_{t+1}.
+% The starter docstrings cite six slides by number and title: 6 'The three-state rule',
+% 7 'Fat tails: excess kurtosis', 8 'Volatility clustering', 10 'The conviction ladder',
+% 11 'Hesitant traders', and 12 'The transition matrix of one trader'. Update those
+% citations if the slide order changes.
+\documentclass[aspectratio=169,11pt]{beamer}
+\usepackage{vnslides}
+\newcommand{\cin}{\chi^{\text{in}}_{i}}
+\newcommand{\cout}{\chi^{\text{out}}_{i}}
+\newcommand{\Pb}{\mathbf{P}}
+\newcommand{\Qb}{\mathbf{Q}}
+\newcommand{\Nb}{\mathbf{N}}
+\newcommand{\Ib}{\mathbf{I}}
+\newcommand{\Jb}{\mathbf{J}}
+% The monospace font has no Greek letters, so the code name τ takes its glyph from DejaVu Sans Mono.
+\newfontfamily\greekmono{DejaVuSansMono.ttf}[Scale=MatchLowercase]
+\newcommand{\tauc}{{\greekmono τ}}
+
+\title{\texorpdfstring{{\vnheavy PS6}: Do Hidden States\\Make the Farmer–Joshi\\Market Look Real?}{PS6: Do Hidden States Make the Farmer–Joshi Market Look Real?}}
+\subtitle{CHEME 4/5660 Cornell University | Mathematical Companion}
+\author{Copyright Jeffrey Varner 2026. All Rights Reserved}
+\begin{document}
+\vntitlepage
+
+\begin{frame}{Disclaimer and risks}
+\textbf{Training only.} This assignment uses a simulated market and the daily
+closing prices of SPY for teaching. This assignment provides no investment
+advice.
+
+\vspace{1em}
+\textbf{Simulated traders.} The trading rules in this assignment describe the
+traders of a simulated market. The rules are not trading strategies.
+
+\vspace{1em}
+\textbf{Simplifying assumptions.} The market has one asset, which value
+investors and trend followers trade through a market maker who fills every
+order. Each trader holds a short position, no position, or a long position of
+a fixed size. We omit commissions and taxes.
+\end{frame}
+
+\begin{frame}{The central question}
+Do hidden states, and random moves between them, help the Farmer–Joshi market
+reproduce the stylized facts of the daily growth rates of SPY? The stylized
+facts are fat tails, volatility clustering, and a weak autocorrelation of the
+growth rates.
+\vspace{0.2em}
+\begin{itemize}\setlength{\itemsep}{0.3em}
+\item \hilite{Standard: the three-state rule.} Each trader is short, flat, or
+long, as in the course example. We'll measure the stylized facts of the
+market and compare them with those of SPY.
+\item \hilite{Advanced: the conviction ladder.} Each trader has extra flat
+states, in which the trader builds conviction before taking a position. We'll
+compare markets with 3, 5, and 7 states.
+\item \hilite{Expert: hesitant traders.} Each trader moves to a new state only
+with probability $p$. We'll compare $p=1$, $0.5$, and $0.2$.
+\end{itemize}
+\slidenote{Reading guide}{All tracks use slides 4–\pageref{fr:columns}. Slide
+\pageref{fr:ladder} is for Advanced and Expert, and slides
+\pageref{fr:hesitant}–\pageref{fr:steps} are for Expert only.}
+\end{frame}
+
+\begin{frame}{Traders and their signals}
+As in the course example, $S_t$ is the price and $V_t$ the value of the asset
+at step $t$, and each step lasts $\Delta t=1/252$ year, one trading day.
+Trader $i$ has an entry threshold $\cin$, an exit threshold $\cout<\cin$, and a
+position size $c_i=a(\cin-\cout)$, where $a>0$ is the capital scale. At step
+$t$, trader $i$ computes a signal $z_t^{(i)}$, which is positive when the
+trader favors a long position:
+\begin{itemize}\setlength{\itemsep}{0.3em}
+\item \hilite{Value investors:} $z_t^{(i)}=\left(\ln V_t+v^{(i)}\right)-\ln S_t$,
+where $\ln V_t$ is the log value, a random walk, and $v^{(i)}$ is the
+investor's fixed offset.
+\item \hilite{Trend followers:} $z_t^{(i)}=\ln S_t-\ln S_{t-\theta_i}$, where
+$\theta_i$ is the trader's fixed lag (steps). The trader stays flat until
+$t\geq\theta_i$.
+\end{itemize}
+In code, the signal $z_t^{(i)}$ is \texttt{z}, the entry threshold $\cin$ is
+\texttt{T}, and the exit threshold $\cout$ is \texttt{\tauc}.
+\slidenote{Sign}{Lecture L12a writes the value investor's signal as the
+mispricing $\ln S_t-(\ln V_t+v^{(i)})$. Here $z_t^{(i)}$ is minus the
+mispricing, so a positive signal favors a long position in both groups.}
+\end{frame}
+
+\begin{frame}{The market maker sets the price}
+Trader $i$'s state is an integer, the rung $r_t^{(i)}$, from $-K$ to $K$. The
+market sees only the trader's position $x_t^{(i)}$: $+c_i$ on rung $K$ (long),
+$-c_i$ on rung $-K$ (short), and 0 on every other rung (flat). At each step,
+every trader moves to its next rung and orders
+$\omega_{t+1}^{(i)}=x_{t+1}^{(i)}-x_t^{(i)}$. The market maker moves the log
+price in proportion to the net demand, the sum of the orders, and the log value
+takes a random step:
+\begin{align*}
+ \ln S_{t+1}&=\ln S_t+\frac{1}{\lambda}\sum_{i}\omega_{t+1}^{(i)}+\sigma_S\sqrt{\Delta t}\,Z_{t+1},\\
+ \ln V_{t+1}&=\ln V_t+\mu_v\Delta t+\sigma_v\sqrt{\Delta t}\,Z'_{t+1},
+\end{align*}
+where $\lambda$ is the liquidity, $Z_{t+1},Z'_{t+1}\sim\mathcal{N}(0,1)$ are
+independent, $\sigma_S$ and $\sigma_v$ are the annualized volatilities of
+the noise (1/$\sqrt{\text{yr}}$), and $\mu_v$ is the drift of the log value (1/yr).
+\slidenote{Start}{$\ln S_0=\ln V_0=0$, with every trader on rung 0. Each run
+drops the first 2,000 steps and keeps the next 20,000.}
+\end{frame}
+
+\begin{frame}{The three-state rule}
+Standard uses the course example's rule on rungs $-1$, $0$, and $1$. We write
+$z$ and $r_t$ for trader $i$'s signal and rung. All comparisons are strict:
+\vspace{0.3em}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.36\textwidth}
+\hilite{From flat,} $r_t=0$:
+\[
+ r_{t+1}=\begin{cases}
+ 1 & z>\cin,\\
+ -1 & z<-\cin,\\
+ 0 & \text{otherwise}.
+ \end{cases}
+\]
+\end{column}
+\begin{column}{0.31\textwidth}
+\hilite{From long,} $r_t=1$:
+\[
+ r_{t+1}=\begin{cases}
+ 0 & z<\cout,\\
+ 1 & \text{otherwise}.
+ \end{cases}
+\]
+\end{column}
+\begin{column}{0.31\textwidth}
+\hilite{From short,} $r_t=-1$:
+\[
+ r_{t+1}=\begin{cases}
+ 0 & z>-\cout,\\
+ -1 & \text{otherwise}.
+ \end{cases}
+\]
+\end{column}
+\end{columns}
+\vspace{0.5em}
+A trend follower uses this rule from step $t=\theta_i$ on. The course package's
+\texttt{threshold\_position} gives the same rule for the positions $-c_i$, $0$,
+and $+c_i$.
+\slidenote{Code}{\texttt{three\_state\_rung(rung, z, T, \tauc)} returns
+$r_{t+1}$, with \texttt{T} $=\cin$ and \texttt{\tauc} $=\cout$.}
+\end{frame}
+
+\begin{frame}{Fat tails: excess kurtosis}\label{fr:kurtosis}
+The growth rate of the price over step $t$, in 1/yr, is:
+\[
+ g_{t+1}=\frac{1}{\Delta t}\ln\left(\frac{S_{t+1}}{S_t}\right).
+\]
+The growth rates of SPY use the same formula on the daily closes of 2014 to
+2024. For $n$ growth rates $g_1,\dots,g_n$ with mean $\bar g$ and population
+standard deviation $\sigma_g$, the excess kurtosis is:
+\[
+ \kappa=\frac{1}{n}\sum_{t=1}^{n}\left(\frac{g_t-\bar g}{\sigma_g}\right)^{4}-3,
+ \qquad
+ \sigma_g^{2}=\frac{1}{n}\sum_{t=1}^{n}\left(g_t-\bar g\right)^{2}.
+\]
+A Normal distribution has $\kappa=0$. A positive $\kappa$ means fat tails:
+growth rates far from the mean are more common than in a Normal distribution.
+\slidenote{Population moments}{$\sigma_g$ divides by $n$, not $n-1$, as in the
+course example: \texttt{std(g, corrected = false)}.}
+\end{frame}
+
+\begin{frame}{Volatility clustering}\label{fr:clustering}
+The sample autocorrelation at lag $\ell$ (steps) of a series $x_1,\dots,x_n$
+with mean $\bar x$ is:
+\[
+ \rho_x(\ell)=\frac{\sum_{t=1}^{n-\ell}\left(x_t-\bar x\right)\left(x_{t+\ell}-\bar x\right)}
+ {\sum_{t=1}^{n}\left(x_t-\bar x\right)^{2}}.
+\]
+The volatility clustering over a set of lags $L$ is the mean autocorrelation of
+the absolute growth rates $\lvert g_t\rvert$ over the $\lvert L\rvert$ lags in
+$L$:
+\[
+ C(L)=\frac{1}{\lvert L\rvert}\sum_{\ell\in L}\rho_{\lvert g\rvert}(\ell).
+\]
+A positive $C(L)$ means that large moves, of either sign, tend to follow large
+moves. The report uses $L=\{1,\dots,10\}$ and $L=\{11,\dots,50\}$.
+\slidenote{Code}{\texttt{sample\_autocorrelation(x, lags)} returns
+$\rho_x(\ell)$ for each lag in \texttt{lags}, and
+\texttt{volatility\_clustering(g, lags)} returns $C(L)$ with $L=$
+\texttt{lags}.}
+\end{frame}
+
+\begin{frame}{The columns of the report}\label{fr:columns}
+Each simulated row of the report is the mean over 5 runs of 20,000 steps, and
+the SPY row uses the daily closes of SPY. With $s(\cdot)$ the sample standard
+deviation, which divides by the count minus 1, the columns are:
+\vspace{0.3em}
+\begin{center}\small
+\begin{tabular}{ll}
+\toprule
+Column & Definition \\
+\midrule
+Excess kurtosis & $\kappa$, slide \pageref{fr:kurtosis} \\
+Clustering, lags 1–10 and lags 11–50 & $C(\{1,\dots,10\})$ and $C(\{11,\dots,50\})$, slide \pageref{fr:clustering} \\
+Autocorrelation, lag 1 & $\rho_g(1)$ \\
+Volatility (1/$\sqrt{\text{yr}}$) & $s(g)\sqrt{\Delta t}$ \\
+Gap spread & $s(\ln S_t-\ln V_t)$; \texttt{n/a} for SPY \\
+\bottomrule
+\end{tabular}
+\end{center}
+\vspace{0.3em}
+Below each table, the report gives the half-width $1.96/\sqrt{n}$ of the
+white-noise band, with $n$ the number of growth rates. For a long series with
+no autocorrelation, each sample autocorrelation lies within this band with
+probability 0.95.
+\end{frame}
+
+\begin{frame}{The conviction ladder}\label{fr:ladder}
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.61\textwidth}
+Advanced gives each trader $2K+1$ rungs, from $-K$ to $K$. The trader holds
+$+c_i$ only on rung $K$ and $-c_i$ only on rung $-K$. All comparisons are
+strict:
+\begin{itemize}\setlength{\itemsep}{0.15em}
+\item \hilite{Flat rung,} $-K<r_t<K$: move up one rung when $z>\cin$, and down
+one rung when $z<-\cin$. Otherwise conviction fades: move one rung toward 0, or
+stay on rung 0.
+\item \hilite{Rung $K$:} exit to rung $K-1$ when $z<\cout$. Otherwise stay.
+\item \hilite{Rung $-K$:} exit to rung $-(K-1)$ when $z>-\cout$. Otherwise stay.
+\end{itemize}
+\end{column}
+\begin{column}{0.35\textwidth}
+\centering
+\begin{tikzpicture}[x=0.9cm,y=0.55cm,
+  rungbar/.style={vnslideink,line width=1.3pt},
+  lab/.style={font=\footnotesize,text=vnslidebody},
+  head/.style={font=\scriptsize,text=vnmuted},
+  entry/.style={vnaccent,line width=0.9pt,-{Latex[length=1.8mm]}},
+  fade/.style={vnmuted,line width=0.9pt,dashed,-{Latex[length=1.8mm]}},
+  exit/.style={vnlink,line width=0.9pt,-{Latex[length=1.8mm]}}]
+  % Column headings -
+  \node[head,anchor=east] at (-0.6,3.9) {rung};
+  \node[head,anchor=west] at (1.75,3.9) {position};
+  % Rungs, rung numbers, and positions -
+  \foreach \y/\r/\x in {3/{$K$}/{$+c_i$},2/{$K-1$}/{$0$},0/{$0$}/{$0$},-2/{$-(K-1)$}/{$0$},-3/{$-K$}/{$-c_i$}}{
+    \draw[rungbar] (0,\y) -- (1.1,\y);
+    \node[lab,anchor=east] at (-0.6,\y) {\r};
+    \node[lab,anchor=west] at (1.75,\y) {\x};
+  }
+  \node[lab] at (0.55,1.1) {$\vdots$};
+  \node[lab] at (0.55,-0.9) {$\vdots$};
+  % Entry moves, on the right: one rung away from 0 -
+  \draw[entry] (1.2,0.1) .. controls (1.65,0.2) and (1.65,0.65) .. (1.2,0.75);
+  \draw[entry] (1.2,1.25) .. controls (1.65,1.35) and (1.65,1.8) .. (1.2,1.9);
+  \draw[entry] (1.2,2.1) .. controls (1.65,2.2) and (1.65,2.8) .. (1.2,2.9);
+  \draw[entry] (1.2,-0.1) .. controls (1.65,-0.2) and (1.65,-0.65) .. (1.2,-0.75);
+  \draw[entry] (1.2,-1.25) .. controls (1.65,-1.35) and (1.65,-1.8) .. (1.2,-1.9);
+  \draw[entry] (1.2,-2.1) .. controls (1.65,-2.2) and (1.65,-2.8) .. (1.2,-2.9);
+  % Fade moves, on the left: one rung toward 0 -
+  \draw[fade] (-0.1,1.9) .. controls (-0.55,1.8) and (-0.55,1.35) .. (-0.1,1.25);
+  \draw[fade] (-0.1,0.75) .. controls (-0.55,0.65) and (-0.55,0.2) .. (-0.1,0.1);
+  \draw[fade] (-0.1,-1.9) .. controls (-0.55,-1.8) and (-0.55,-1.35) .. (-0.1,-1.25);
+  \draw[fade] (-0.1,-0.75) .. controls (-0.55,-0.65) and (-0.55,-0.2) .. (-0.1,-0.1);
+  % Exit moves, on the left: from an end rung to the next rung toward 0 -
+  \draw[exit] (-0.1,2.9) .. controls (-0.55,2.8) and (-0.55,2.2) .. (-0.1,2.1);
+  \draw[exit] (-0.1,-2.9) .. controls (-0.55,-2.8) and (-0.55,-2.2) .. (-0.1,-2.1);
+  % Legend: each move's name in its color -
+  \node[lab,anchor=center] at (0.55,-4.0) {\textcolor{vnaccent}{entry}\quad
+    \textcolor{vnmuted}{fade}\quad \textcolor{vnlink}{exit}};
+\end{tikzpicture}
+\end{column}
+\end{columns}
+\slidenote{Code}{\texttt{conviction\_rung(rung, z, T, \tauc, K)} returns $r_{t+1}$. With $K=1$,
+this rule is the three-state rule.}
+\end{frame}
+
+\begin{frame}{Hesitant traders}\label{fr:hesitant}
+Expert makes every move hesitant. At each step, the simulator draws one number
+$u$, uniform on $[0,1)$, for every trader. With $r'$ the rung that the
+conviction rule proposes, the trader's next rung is:
+\[
+ r_{t+1}=\begin{cases}
+ r' & r'\neq r_t\ \text{and}\ u<p,\\
+ r_t & \text{otherwise}.
+ \end{cases}
+\]
+Each proposed move, an entry, a fade, or an exit, happens with probability $p$, and
+$p=1$ gives the conviction ladder of slide \pageref{fr:ladder}. Expert uses 5
+states ($K=2$) and compares $p=1$, $0.5$, and $0.2$.
+\slidenote{Code}{\texttt{hesitant\_rung(rung, proposed, p, u)} returns
+$r_{t+1}$, with \texttt{proposed} $=r'$. The simulator calls it only when
+$p<1$.}
+\end{frame}
+
+\begin{frame}{The transition matrix of one trader}
+At a fixed signal $z$, a hesitant trader's rung is a hidden state that follows a
+Markov chain: the next rung depends only on the current rung. Row and column $i$
+of the transition matrix $\Pb$ hold rung $i-K-1$. With $r'$ the proposal of the
+conviction rule from the rung $r$ of row $i$, the probability $P_{ij}$ of moving
+from the rung of row $i$ to the rung of column $j$ in one step is:
+\begin{columns}[T,onlytextwidth]
+\begin{column}{0.56\textwidth}
+\[
+ P_{ij}=\begin{cases}
+ p & \text{column } j \text{ holds } r' \text{ and } r'\neq r,\\
+ 1-p & j=i \text{ and } r'\neq r,\\
+ 1 & j=i \text{ and } r'=r,\\
+ 0 & \text{otherwise}.
+ \end{cases}
+\]
+\end{column}
+\begin{column}{0.40\textwidth}
+\[
+ \Pb=\begin{pmatrix}
+ 1-p & p & 0\\
+ 0 & 1-p & p\\
+ 0 & 0 & 1
+ \end{pmatrix}
+\]
+\end{column}
+\end{columns}
+Each row of $\Pb$ sums to 1. The matrix on the right is $\Pb$ for $K=1$ at a
+strong signal, $z>\cin$ and $z>-\cout$, with rows for rungs $-1$, $0$, and $1$.
+\slidenote{Code}{\texttt{transition\_matrix(z, T, \tauc, K, p)} returns $\Pb$.
+The column of rung $r$ is $r+K+1$.}
+\end{frame}
+
+\begin{frame}{Steps from flat to long}\label{fr:steps}
+At a strong signal, $z>\cin$ and $z>-\cout$, every rung below $K$ proposes the
+rung above it, and rung $K$ proposes itself. Let $\Qb$ be the block of $\Pb$
+for rungs $-K$ to $K-1$, labeled by rung. Entry $N_{rj}$ of the fundamental
+matrix $\Nb=(\Ib-\Qb)^{-1}$ is the expected number of steps on rung $j$, from
+rung $r$, before the trader reaches rung $K$. With $\Jb$ the matrix with ones just above the diagonal, $\Jb^{2K}=0$, so:
+\[
+ \Qb=(1-p)\,\Ib+p\,\Jb,
+ \qquad
+ \Nb=\frac{1}{p}\left(\Ib-\Jb\right)^{-1}
+ =\frac{1}{p}\left(\Ib+\Jb+\Jb^{2}+\dots+\Jb^{2K-1}\right).
+\]
+Every entry of $\Nb$ on or above the diagonal is $1/p$. The row of rung 0 has
+$K$ such entries, so the expected number of steps from flat to long is:
+\[
+ \sum_{j=-K}^{K-1}N_{0j}=\frac{K}{p}.
+\]
+\slidenote{Report}{\texttt{expected\_steps\_to\_long(P, K)}, with \texttt{P}
+from \texttt{transition\_matrix(10.0, 1.0, -0.1, K, p)}.}
+\end{frame}
+
+\begin{frame}{Summary}
+PS6 gives each Farmer–Joshi trader a hidden state, the rung, and compares the
+stylized facts of the simulated growth rates with those of SPY.
+
+\vspace{0.6em}
+\textbf{Key takeaways}
+\begin{itemize}\setlength{\itemsep}{0.5em}
+\item The market sees only each trader's position: $+c_i$ on rung $K$, $-c_i$
+on rung $-K$, and 0 on every other rung. The rung itself is hidden.
+\item The excess kurtosis measures fat tails, and the mean autocorrelation of
+the absolute growth rates over a set of lags measures volatility clustering.
+An autocorrelation outside the white-noise band is unlikely for a series with
+no autocorrelation.
+\item At a fixed signal, a hesitant trader's rung follows a Markov chain. At a
+strong signal, the trader takes $K/p$ steps on average to go from flat to long.
+\end{itemize}
+\vspace{0.6em}
+Use these measures to answer the central question.
+\end{frame}
+\end{document}

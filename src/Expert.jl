@@ -40,7 +40,7 @@ All comparisons are strict.
 ### Course references
 
 - Course lecture L12a, section 'The Farmer–Joshi algorithm'.
-- PS6 companion: slide [SLIDE], 'The three-state rule'.
+- PS6 companion: slide 6, 'The three-state rule'.
 """
 function three_state_rung(rung::Int, z::Float64, T::Float64, τ::Float64)::Int
 
@@ -78,7 +78,7 @@ these values over the `N` growth rates. Subtract `3.0`.
 ### Course references
 
 - Course example 'The Farmer–Joshi Market', Task 2: the line that defines `excess_kurtosis`.
-- PS6 companion: slide [SLIDE], 'Fat tails: excess kurtosis'.
+- PS6 companion: slide 7, 'Fat tails: excess kurtosis'.
 """
 function excess_kurtosis(g::Vector{Float64})::Float64
 
@@ -120,7 +120,7 @@ autocorrelations.
 
 - Course example 'The Farmer–Joshi Market', Task 2: the plot cell that calls `sample_autocorrelation`
   on `abs.(g)`.
-- PS6 companion: slide [SLIDE], 'Volatility clustering'.
+- PS6 companion: slide 8, 'Volatility clustering'.
 """
 function volatility_clustering(g::Vector{Float64}, lags::Vector{Int})::Float64
 
@@ -169,7 +169,7 @@ With `K = 1`, this rule gives the Standard three-state rule for every input.
 ### Course references
 
 - Course lecture L12a, section 'The Farmer–Joshi algorithm'.
-- PS6 companion: slide [SLIDE], 'The conviction ladder'.
+- PS6 companion: slide 10, 'The conviction ladder'.
 """
 function conviction_rung(rung::Int, z::Float64, T::Float64, τ::Float64, K::Int)::Int
 
@@ -210,7 +210,7 @@ Otherwise the trader stays on the current rung. Entries and exits are both hesit
 ### Course references
 
 - Course lecture L13a, section 'Markov Chains and Hidden Markov Models'.
-- PS6 companion: slide [SLIDE], 'Hesitant traders'.
+- PS6 companion: slide 11, 'Hesitant traders'.
 """
 function hesitant_rung(rung::Int, proposed::Int, p::Float64, u::Float64)::Int
 
@@ -246,7 +246,7 @@ on staying.
 ### Course references
 
 - Course lecture L13a, section 'Markov Chains and Hidden Markov Models'.
-- PS6 companion: slide [SLIDE], 'The transition matrix of one trader'.
+- PS6 companion: slide 12, 'The transition matrix of one trader'.
 """
 function transition_matrix(z::Float64, T::Float64, τ::Float64, K::Int, p::Float64)::Matrix{Float64}
 
