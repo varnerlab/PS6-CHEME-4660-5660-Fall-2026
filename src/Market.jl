@@ -175,11 +175,12 @@ function simulate_market(model::MyFarmerJoshiMarketModel, rule::Symbol, K::Int, 
     # delete the #= and =# lines around this block and around the noise-trader loop below. The noise
     # traders then join every market the simulator runs.
     #=
-    # The noise traders: how many, their thresholds, and their position size (capital scale times T minus tau) -
+    # The noise traders: how many, their thresholds, and their position size, the market's capital scale model.a
+    # (capital_scale in the settings) times T minus tau -
     noise_number = 1200;
     noise_entry = 1.0;
     noise_exit = 0.0;
-    noise_capital = 0.0025 * (noise_entry - noise_exit);
+    noise_capital = model.a * (noise_entry - noise_exit);
     noise_states = zeros(Int, noise_number);
 
     # A third random stream, for the noise traders' signals and actions -
