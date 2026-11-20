@@ -23,16 +23,15 @@ You can also paste this file's contents into the Canvas HTML editor.
 
 <p>
   The daily growth rates of real stock prices share a few stylized facts: fat
-  tails, volatility clustering, and weak autocorrelation. In PS6 we'll ask
+  tails, volatility clustering, and a weak autocorrelation. In PS6 we'll ask
   whether hidden states, and random moves between them, help the Farmer–Joshi
   market from the L12a course example reproduce these facts for SPY. The market
-  has value investors and trend followers, and each trader is short, flat, or
-  long. You will compare the growth rates of the simulated market with the daily
-  growth rates of SPY. Standard measures the course example's market. Advanced
-  adds extra flat states and compares markets with 3, 5, and 7 states. Expert
-  adds hesitant traders and compares three values of the probability that a
-  trader moves. You are graded on correct calculations and interpretation, not
-  on whether the market matches SPY.
+  has value investors and trend followers. You will compare the growth rates of
+  the simulated market with the daily growth rates of SPY. Standard measures the
+  course example's market. Advanced adds extra flat states and compares markets
+  with 3, 5, and 7 states. Expert adds hesitant traders and compares three values
+  of the probability that a trader moves. You are graded on your calculations
+  and interpretation, not on whether the market matches SPY.
 </p>
 
 <h3>Download and instructions</h3>
@@ -56,90 +55,77 @@ You can also paste this file's contents into the Canvas HTML editor.
 </ul>
 
 <p>
-  On the release page, scroll to <strong>Assets</strong> and select
-  <strong>Source code (zip)</strong>. Extract the archive before beginning.
-  Use Julia 1.12.7. The SPY closing prices come with the course package, so you
-  download no market data, and the packages are the same as in PS5.
+  On the release page, scroll to <strong>Assets</strong>, select
+  <strong>Source code (zip)</strong>, and extract the archive. Use Julia 1.12.7.
+  The SPY closing prices come with the course package, and the packages are the
+  same as in PS5.
 </p>
 
 <p>
   Set <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">TRACK.txt</code> to <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">standard</code>, <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">advanced</code>, or <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">expert</code>.
-  Standard completes three functions in <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">src/Standard.jl</code>. Advanced
-  completes the same three plus one more in <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">src/Advanced.jl</code>, and Expert
-  completes the same four plus two more in <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">src/Expert.jl</code>. A confirmed
-  Advanced score of 4 earns one Magic Point, and a confirmed Expert score of 4
-  earns two. Answer your track's three questions in <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">responses</code>
-  (Standard.md, Advanced.md, or Expert.md). Keep the supplied docstrings and
-  answer markers, and replace only the TODO line between the two answer
-  comments. Put helper functions in separate files under <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">src</code> and load
-  them from <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">Include.jl</code>.
+  On Standard, you complete three functions in <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">src/Standard.jl</code>; on
+  Advanced, four in <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">src/Advanced.jl</code>; and on Expert, six in
+  <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">src/Expert.jl</code>. Answer your track's three questions in the matching file
+  under <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">responses</code>. Replace only the TODO line of each answer, and keep the
+  supplied docstrings and marker lines. Put any helper functions in files under
+  <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">src</code>, and load them from <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">Include.jl</code>.
 </p>
 
 <p>
-  Before you complete any function, write your prediction in Question 1 of your
-  response file. The starter code is incomplete, so the checks fail until you
-  complete the functions. Edit only <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">TRACK.txt</code>, your track's source and
-  response files, <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">Include.jl</code>, <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">config/explore.toml</code>, and helper
-  files you add.
+  Answer Question 1, your prediction, before you write any code. Edit only
+  <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">TRACK.txt</code>, your track's source and response files, <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">Include.jl</code>,
+  <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">config/explore.toml</code>, and helper files you add.
 </p>
 
 <h3>Check your work</h3>
 
 <p>
-  In VS Code, open the extracted folder containing <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">Project.toml</code>,
-  <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">README.md</code>, and <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">check_submission.jl</code>. Open a terminal in that
-  folder and run this setup command once:
+  In VS Code, open the extracted folder containing <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">Project.toml</code>, and open
+  a terminal there. Run this setup command once:
 </p>
 
 <pre style="display: block; padding: 10px; margin: 0 0 10px; color: #333333; background-color: #f5f5f5; border: 1px solid #cccccc; border-radius: 4px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 13px; line-height: 1.5; white-space: pre-wrap;"><code style="color: #333333; background-color: #f5f5f5; padding: 0; font-family: inherit; font-size: inherit;">julia --project=. --startup-file=no -e 'using Pkg; Pkg.instantiate()'</code></pre>
 
 <p>
-  After saving your code, run this command to check your code and generate the
-  report:
+  Then run the checker each time you save your code:
 </p>
 
 <pre style="display: block; padding: 10px; margin: 0 0 10px; color: #333333; background-color: #f5f5f5; border: 1px solid #cccccc; border-radius: 4px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 13px; line-height: 1.5; white-space: pre-wrap;"><code style="color: #333333; background-color: #f5f5f5; padding: 0; font-family: inherit; font-size: inherit;">julia --project=. --startup-file=no check_submission.jl</code></pre>
 
 <p>
-  The checker runs the 12 Standard, 16 Advanced, or 24 Expert checks that the
-  rubric scores, calls your functions, and writes the report to
-  <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">results/Report.md</code>. Unfinished calculations show <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">UNAVAILABLE</code>,
-  so rerun the command as you complete the functions. Once your functions work,
-  the checker takes up to two minutes. Use the report to answer your three
-  questions.
+  The checker runs your track's 12, 16, or 24 checks and writes the report to
+  <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">results/Report.md</code>. A table that needs an unfinished function shows
+  <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">UNAVAILABLE</code>. Once your functions work, the checker takes up to two
+  minutes. Use the report to answer your three questions.
 </p>
 
 <p>
-  Save your answers and run the same command again before submitting. The
-  checker also reports any supplied docstrings you removed and any unfinished
-  answers, and creates <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">MANIFEST.txt</code>, but the checker does
-  <strong>not</strong> upload anything to Canvas. If you pass every check, the
-  teaching team reviews your code, docstrings, comments, and answers and awards
-  a 3 or 4. Passing more than half but not all of the checks earns a 2.
+  Save your answers and run the checker again before you submit. The checker
+  flags missing docstrings and unfinished answers, and writes
+  <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">MANIFEST.txt</code>. The checker does <strong>not</strong> upload anything to
+  Canvas. If you pass every check, the teaching team reviews your code and
+  answers and gives a 3 or a 4. Passing more than half but not all of the checks
+  earns a 2.
 </p>
 
 <h3>Submit to Canvas</h3>
 
 <ol>
   <li>
-    Zip the entire PS6 folder after running the checker, including
-    your code, answers, project files, checker, tests, and generated
+    After you run the checker, ZIP the whole PS6 folder, including
     <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">MANIFEST.txt</code>.
   </li>
   <li>
-    Rename the archive to <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">CHEME-5660-PS6-&lt;your netid&gt;.zip</code>.
+    Name the ZIP <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">CHEME-5660-PS6-&lt;your netid&gt;.zip</code>, with your NetID in
+    place of <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">&lt;your netid&gt;</code>, for example
+    <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">CHEME-5660-PS6-abc123.zip</code>.
   </li>
-  <li>
-    Replace the complete <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">&lt;your netid&gt;</code>
-    placeholder, including the angle brackets, with your actual NetID.
-    For example: <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">CHEME-5660-PS6-abc123.zip</code>.
-  </li>
-  <li>Upload the ZIP file to this Canvas assignment.</li>
+  <li>Upload the ZIP to this Canvas assignment.</li>
 </ol>
 
 <p>
   <strong>Submit a readable ZIP with attempted work by the initial deadline,
-  even if your work is incomplete or tests fail.</strong>
+  even if your work is unfinished or checks fail.</strong>
   If you cannot run the checker, submit without <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">MANIFEST.txt</code>.
   A missing, empty, or unreadable submission receives a <strong>Frozen Zero</strong>:
   that submission cannot be revised for credit or earn a Magic Point.
@@ -150,32 +136,31 @@ You can also paste this file's contents into the Canvas HTML editor.
 <p>
   After a qualifying initial submission, you may revise until
   <strong>December 19, 2026 at 11:59 PM ET</strong>, with no limit on attempts.
-  Return to this same Canvas assignment, select <strong>New Attempt</strong>,
-  and upload the revised ZIP file.
+  In this Canvas assignment, select <strong>New Attempt</strong>, and upload the
+  revised ZIP.
 </p>
 
 <p>
-  Canvas may label these revisions “late,” but they have no late penalty. We keep your highest score, including across tracks.
-  To change tracks, update <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">TRACK.txt</code>,
-  complete that track's files, and rerun the checker.
-  An Advanced score of 4 confirmed by the teaching team, on the first
-  submission or a revision, earns <strong>one Magic Point</strong>, and a
-  confirmed Expert score of 4 earns <strong>two Magic Points</strong>. PS6 earns
-  at most two Magic Points.
+  Canvas may label revisions “late,” but revisions have no late penalty. We keep
+  your highest score, including across tracks. To change tracks, update
+  <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">TRACK.txt</code>, complete that track's files, and rerun the checker. A
+  confirmed Advanced score of 4, on the first submission or a revision, earns
+  <strong>one Magic Point</strong>, and a confirmed Expert score of 4 earns
+  <strong>two Magic Points</strong>. PS6 earns at most two Magic Points.
 </p>
 
 <h3>Collaboration and academic integrity</h3>
 
 <p>
   Submit your own work. You may discuss ideas with classmates and use course
-  materials, books, documentation, internet resources, and AI tools.
-  Do not share code or solutions. You are responsible for understanding and
-  explaining everything you submit.
+  materials, books, documentation, the internet, and AI tools. Do not share code
+  or solutions. You are responsible for understanding and explaining everything
+  you submit.
 </p>
 
 <p>
-  The reference solution will be released after the initial deadline.
-  Use the solution to understand errors and debug your own work, but do not copy the solution.
-  Copying results in a score of 0 for PS6 that revisions cannot change.
-  These rules also apply to revisions.
+  The reference solution is released after the initial deadline. Use the
+  solution to understand your mistakes, but do not copy the solution. Copying
+  results in a score of 0 for PS6 that revisions cannot change. These rules also
+  apply to revisions.
 </p>

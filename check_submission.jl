@@ -250,15 +250,15 @@ function print_next_steps()::Nothing
     # The three steps to submit the assignment -
     print_terminal_section("Next steps");
     print_terminal_text("Save your code and answers, then rerun the checker."; prefix="1. ", continuation="   ");
-    print_terminal_text("Create a ZIP of the entire PS6 folder, using this filename:"; prefix="2. ", continuation="   ");
+    print_terminal_text("ZIP the whole PS6 folder, using this filename:"; prefix="2. ", continuation="   ");
     println("   CHEME-5660-PS6-<your netid>.zip");
     println("   Replace <your netid> with your own NetID.");
     print_terminal_text("Upload the ZIP to the PS6 assignment on Canvas."; prefix="3. ", continuation="   ");
 
     # The course's rules for late and revised work -
     println();
-    print_terminal_text("Submit attempted work by the initial deadline even if checks fail or cannot run.");
-    print_terminal_text("For eligible revisions, use New Attempt on the same Canvas assignment.");
+    print_terminal_text("Submit attempted work by the deadline, even if checks fail or cannot run.");
+    print_terminal_text("To revise your work, use New Attempt on the same Canvas assignment.");
     return nothing;
 end
 
@@ -406,7 +406,7 @@ function main(setup::NamedTuple)::Nothing
     elseif documented
         println("Docstrings: All required functions have docstrings.");
     else
-        print_terminal_text("Docstrings: Restore the supplied documentation for " * join(string.(missing_docs), ", ") * ".");
+        print_terminal_text("Docstrings: Restore the supplied docstrings for " * join(string.(missing_docs), ", ") * ".");
     end
 
     # A solution run stops here, because the response files are not part of the solution -
@@ -420,7 +420,7 @@ function main(setup::NamedTuple)::Nothing
     if track_known
         println("Answers: ", response_path);
         if answers
-            print_terminal_text("All three answer blocks contain text without TODO. The teaching team will review the answers.");
+            print_terminal_text("All three questions have answers. The teaching team will review your answers.");
         else
             for issue ∈ answer_issues
                 print_terminal_text(issue; prefix="  - ", continuation="    ");
@@ -437,7 +437,7 @@ function main(setup::NamedTuple)::Nothing
     if all_passed
         println("The teaching team must still review your code, documentation, and answers.");
     end
-    println("Wrote MANIFEST.txt. This script has not uploaded your work.");
+    println("Wrote MANIFEST.txt. The checker does not upload your work.");
     print_next_steps();
     return nothing;
 end

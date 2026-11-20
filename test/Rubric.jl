@@ -1,5 +1,5 @@
 # SHA-256 of the supplied config/defaults.toml; the checker warns when a student edits the file -
-const PS6_DEFAULTS_SHA256 = "98d757e95289cd50f48dd55d1eba935752f2cc04c9c1e57d7930a239961330a4";
+const PS6_DEFAULTS_SHA256 = "f82fbd6d7e50aa917750265b3efb531cf993c7d37b6f00761de7adf5cfdb86bf";
 
 """
     run_public_check(check::NamedTuple)
@@ -249,9 +249,9 @@ function response_issues(path::String)::Vector{String}
 
         # An answer needs a letter or a number, and must not still contain TODO -
         if !occursin(r"[\p{L}\p{N}]", answer)
-            push!(issues, "Question $(index) has no answer. Write your response between its answer markers.");
+            push!(issues, "Question $(index) has no answer. Write your answer between its marker lines.");
         elseif occursin(r"\bTODO\b"i, answer)
-            push!(issues, "Question $(index) still contains TODO. Replace the placeholder with your response.");
+            push!(issues, "Question $(index) still contains TODO. Replace the TODO line with your answer.");
         end
     end
     return issues;

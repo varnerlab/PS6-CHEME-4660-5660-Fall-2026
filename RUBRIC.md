@@ -1,6 +1,6 @@
 # PS6 grading rubric
 
-Your selected track is graded out of **4**:
+Your track is graded out of **4**:
 
 | Score | What earns the score |
 |:--:|:--|

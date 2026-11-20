@@ -1,5 +1,4 @@
 # Exploration settings for explore.jl: you may edit this file freely, and it is never graded.
-# Each setting has a short note above it.
 
 # Number of trading days in one year. The time step of the market is one trading day, 1/252 of a year.
 steps_per_year = 252
@@ -35,7 +34,7 @@ trend_T_max = 4.0
 trend_tau_min = -0.2
 trend_tau_max = 0.0
 
-# Value investors: range of the offset v, from v_min to v_max. Each investor draws one offset, and perceives the log value plus its offset.
+# Value investors: range of the offset v, from v_min to v_max. Each investor draws one offset, and adds the offset to the log value to estimate the value.
 value_v_min = -2.0
 value_v_max = 2.0
 

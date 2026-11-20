@@ -301,8 +301,9 @@ $p<1$.}
 \begin{frame}{The transition matrix of one trader}
 At a fixed signal $z$, a hesitant trader's state follows a Markov chain: the next
 state depends only on the current state. In the transition matrix $\Pb$, row and
-column $i$ hold state $i-K-1$. With $r'$ the conviction rule's proposal from the state $r$ of row $i$, the probability of moving from the
-state of row $i$ to the state of column $j$ in one step is:
+column $i$ hold state $i-K-1$. Let $r$ be the state of row $i$, and $r'$ the
+conviction rule's proposal from $r$. The probability of moving from $r$ to the
+state of column $j$ in one step is:
 \begin{columns}[T,onlytextwidth]
 \begin{column}{0.56\textwidth}
 \[
@@ -333,8 +334,9 @@ The column of state $r$ is $r+K+1$.}
 
 \begin{frame}{Steps from flat to long}\label{fr:steps}
 At a strong signal, $z>\cin$ and $z>-\cout$, every state below $K$ proposes the
-state above it. The block $\Qb$ of $\Pb$ for states $-K$ to $K-1$, labeled by state, is $\Qb=(1-p)\,\Ib+p\,\Jb$, where $\Jb$ is
-the $2K\times2K$ matrix with ones just above the diagonal. Entry $N_{rm}$ of the
+state above it. The block of $\Pb$ for states $-K$ to $K-1$ is
+$\Qb=(1-p)\,\Ib+p\,\Jb$, where $\Jb$ is the $2K\times2K$ matrix with ones just
+above the diagonal. For states $r$ and $m$, entry $N_{rm}$ of the
 fundamental matrix $\Nb=(\Ib-\Qb)^{-1}$ is the expected number of steps in state
 $m$, from state $r$, before reaching state $K$. Because $\Jb^{2K}=0$, $\Nb$ is a
 finite sum:

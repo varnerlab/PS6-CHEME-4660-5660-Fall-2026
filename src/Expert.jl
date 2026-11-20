@@ -1,18 +1,16 @@
-# PS6 Expert: complete the 6 functions below: the 4 Advanced functions and 2 for hesitant traders.
-# The simulator calls three_state_rule for every trader at every step of the first table and
-# conviction_rule for every trader at every step of the second table. In the Expert table, it
-# calls hesitant_rule only when p is below 1. The report calls excess_kurtosis and
-# volatility_clustering on the growth rates of each market and transition_matrix for the
-# expected number of steps to a long position.
+# PS6 Expert: complete the 6 functions below, the 4 Advanced functions, hesitant_rule, and transition_matrix.
+# The simulator calls three_state_rule for every trader at every step of the first table, and
+# conviction_rule for every trader at every step of the other two tables. The simulator calls
+# hesitant_rule only when p is below 1. The report calls excess_kurtosis and volatility_clustering
+# on the growth rates of each market, and transition_matrix for the steps from flat to long.
 # Keep the function names, arguments, return types, and docstrings.
-# Replace each error("Complete ...") expression with your calculation.
-# Each TODO asks for a few lines; the rest of each function is supplied.
+# Replace each error("Complete ...") line with your calculation. The rest of each function is supplied.
 # Save your code, then run from the PS6 folder:
 # julia --project=. --startup-file=no check_submission.jl
 #
-# Each docstring ends with Course references: the part of the course material that does the
-# same calculation, and the matching slide in the PS6 mathematical companion. Copy only the
-# lines you need and rename variables to match this file.
+# The Course references at the end of each docstring name the course material that does the same
+# calculation, and the companion slide with the formulas. Copy only the lines you need, and rename
+# the variables to match this file.
 
 """
     three_state_rule(state::Int, z::Float64, T::Float64, τ::Float64) -> Int
