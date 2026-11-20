@@ -1,4 +1,3 @@
-.superpowers/
 docs/build/
 __pycache__/
 .DS_Store
@@ -12,16 +11,6 @@ instructor/validation/*.log
 
 # Keep reference solutions and numerical answers out of the public repository.
 instructor/reference/
-# Only the release tools, the data build, the release notes, and the Canvas copy are tracked.
-# instructor/*
-# !instructor/build_release.py
-# !instructor/validate_release.py
-# !instructor/release-notes.md
-# !instructor/canvas-assignment-description.html
-# !instructor/build_strike_increments.jl
-# !instructor/build_trades.jl
-# !instructor/TradeSelection.jl
-# !instructor/trade_selection.toml
 
 # Keep the private build notes out of the public repository.
 .superpowers/
