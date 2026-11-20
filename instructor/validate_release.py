@@ -80,7 +80,7 @@ def check_starter_run(student, track, total):
     require(f"Track: {track}" in output, f"{track} starter checker reported the wrong track")
     require(f"Public tests: 0/{total} passed" in output,
             f"{track} starter did not report 0/{total}:\n{output[-8000:]}")
-    require("UNAVAILABLE" in output, f"{track} starter report did not mark unfinished calculations")
+    require("Local rubric score: 0" in output, f"{track} starter did not score 0")
     for number in (1, 2, 3):
         require(f"Question {number} still contains TODO" in output,
                 f"{track} starter did not warn about question {number}")
@@ -91,7 +91,9 @@ def check_starter_run(student, track, total):
     require(f"public tests passed: 0/{total}" in manifest, f"{track} manifest omitted the check count")
     require("tests ran: true" in manifest and "local solution: false" in manifest,
             f"{track} manifest recorded the wrong run state")
-    require((student / "results/Report.md").exists(), f"{track} starter did not write the report")
+    report = student / "results/Report.md"
+    require(report.exists(), f"{track} starter did not write the report")
+    require("UNAVAILABLE" in report.read_text(), f"{track} starter report did not mark unfinished calculations")
 
 
 def main():
