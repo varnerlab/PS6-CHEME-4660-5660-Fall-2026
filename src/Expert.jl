@@ -1,8 +1,8 @@
-# PS6 Expert: complete the 6 functions below, the 4 Advanced functions, hesitant_rule, and transition_matrix.
-# The simulator calls three_state_rule for every trader at every step of the first table, and
-# conviction_rule for every trader at every step of the other two tables. The simulator calls
-# hesitant_rule only when p is below 1. The report calls excess_kurtosis and volatility_clustering
-# on the growth rates of each market, and transition_matrix for the steps from flat to long.
+# PS6 Expert: complete the 6 functions below, the 4 Advanced functions, unmix_factors, and mix_factors.
+# The supplied code in src/Model.jl calls sector_matrix to build the sector matrix B, least_squares_fit
+# in fitting steps 1, 2, and 3, and compose_growth_rates to build each synthetic stock.
+# It calls economic_factor to turn each FRED series into a daily factor, unmix_factors before it fits
+# the jump hidden Markov models of the factors, and mix_factors after it draws the factors.
 # Keep the function names, arguments, return types, and docstrings.
 # Replace each error("Complete ...") line with your calculation. The rest of each function is supplied.
 # Save your code, then run from the PS6 folder:
@@ -13,294 +13,295 @@
 # the variables to match this file.
 
 """
-    three_state_rule(state::Int, z::Float64, T::Float64, τ::Float64) -> Int
+    least_squares_fit(X::Matrix{Float64}, y::Vector{Float64}) -> Vector{Float64}
 
-Give a trader's next state in the three-state Farmer–Joshi rule.
+Solve the least-squares problem `X'X θ = X'y` for `θ`. The answer is the pseudo-inverse
+solution, `θ = pinv(X) * y`. The general factor model uses this one solve in fitting steps 1, 2,
+and 3, with a different `X` and `y` in each step:
+
+- Step 1, the market and economic loadings of stock `i`: `X` is `[1, g_m, x_1, ..., x_K]` (days ×
+  columns), `y` is the growth rates of stock `i`, and `θ` is `(α_i, β_i, η_i1, ..., η_iK)`. On the
+  Standard track, `X` is `[1, g_m]`.
+- Step 2, the sector factors on day `t`: `X` is the sector matrix `B` (stocks × sectors), `y` is the
+  residual of every stock on day `t`, and `θ` is the sector factors on day `t`.
+- Step 3, the sector loadings of stock `i`: `X` is the sector factors `F` (days × sectors), `y` is the
+  residual of stock `i`, and `θ` is the sector loadings `δ_i`.
 
 ### Arguments
 
-- `state`: The trader's current state: `-1` (short), `0` (flat), or `1` (long).
-- `z`: The trader's signal (dimensionless). A positive `z` favors a long position.
-- `T`: The trader's entry threshold (dimensionless, positive).
-- `τ`: The trader's exit threshold (dimensionless, below `T`).
+- `X`: The matrix of the problem, one row per observation and one column per unknown.
+- `y`: The observations, one per row of `X`.
 
 ### Returns
 
-- The trader's next state: `-1`, `0`, or `1`.
+- `θ`: The least-squares solution, one entry per column of `X`.
 
 ### Method
 
-All comparisons are strict.
-
-- From state `0`, the trader enters a long position (state `1`) when `z` is above `T`, and enters a
-  short position (state `-1`) when `z` is below `-T`. Otherwise the trader stays in state `0`.
-- From state `1`, the trader exits to state `0` when `z` is below `τ`. Otherwise the trader stays in state `1`.
-- From state `-1`, the trader exits to state `0` when `z` is above `-τ`. Otherwise the trader stays in state `-1`.
+Form the matrix `X' * X` and the vector `X' * y`, and solve the linear system with the backslash
+operator.
 
 ### Course references
 
-- Course lecture L12a, section 'The Farmer–Joshi algorithm'.
-- PS6 companion: slide 6, 'The three-state rule'.
+- Course lecture L14a, section 'Building a General Factor Model', fitting algorithm, steps 1, 2, and 3.
+- PS6 companion: slide 'One least-squares solve for fitting steps 1, 2, and 3'.
 """
-function three_state_rule(state::Int, z::Float64, T::Float64, τ::Float64)::Int
+function least_squares_fit(X::Matrix{Float64}, y::Vector{Float64})::Vector{Float64}
 
-    # From state 0 (flat), the trader enters on a strong signal, and otherwise stays flat -
-    if state == 0
-        # TODO 1: Return 1 when z is above T, and return -1 when z is below -T.
-        # Hint: write one if-block for each entry.
-        error("Complete three_state_rule: the entry rule from state 0.");
-        return 0;
-    end
+    # TODO: Solve X'X θ = X'y for θ.
+    # Hint: θ = (X' * X) \ (X' * y);
+    θ = error("Complete least_squares_fit: solve X'X θ = X'y for θ.");
 
-    # From state 1 (long), the trader exits when the signal falls below τ, and otherwise stays long -
-    if state == 1
-        # TODO 2: Return 0 when z is below τ.
-        error("Complete three_state_rule: the exit rule from state 1.");
-        return 1;
-    end
-
-    # From state -1 (short), the trader exits when the signal rises above -τ, and otherwise stays short -
-    # TODO 3: Return 0 when z is above -τ.
-    error("Complete three_state_rule: the exit rule from state -1.");
-    return -1;
+    return θ;
 end
 
 """
-    excess_kurtosis(g::Vector{Float64}) -> Float64
+    sector_matrix(sectors::Vector{String}, sector_names::Vector{String}) -> Matrix{Float64}
 
-Compute the excess kurtosis of the growth rates `g`, from population moments.
+Build the sector matrix `B` of the general factor model: `B[i, s]` is `1.0` when stock `i` is in
+sector `s`, and `0.0` otherwise.
 
 ### Arguments
 
-- `g`: The growth rates of one market (1/yr).
+- `sectors`: The GICS sector of each stock, one entry per stock.
+- `sector_names`: The sectors, in the order of the columns of `B`.
 
 ### Returns
 
-- `κ`: The excess kurtosis of `g` (dimensionless). A Normal distribution has `κ = 0`.
+- `B`: The sector matrix, stocks × sectors. Each row holds exactly one `1.0`.
+
+### Errors
+
+- An `ArgumentError` when the sector of a stock is not in `sector_names`.
 
 ### Method
 
-Compute the mean of `g` and the population standard deviation of `g` (divide by `N`, not by `N - 1`).
-Standardize each growth rate, raise each standardized value to the fourth power, and average
-these values over the `N` growth rates. Subtract `3.0`.
+Start from a matrix of zeros. For each stock, find the column of the stock's sector in
+`sector_names`, and set the stock's entry in that column to `1.0`.
 
 ### Course references
 
-- Course example 'The Farmer–Joshi Market', Task 2: the line that defines `excess_kurtosis`.
-- PS6 companion: slide 7, 'Fat tails: excess kurtosis'.
+- Course lecture L14a, section 'Building a General Factor Model', fitting algorithm: the
+  Initialize line that defines the sector matrix `B`.
+- PS6 companion: slide 'The sector matrix B'.
 """
-function excess_kurtosis(g::Vector{Float64})::Float64
+function sector_matrix(sectors::Vector{String}, sector_names::Vector{String})::Matrix{Float64}
 
-    # The mean and the population standard deviation of g -
-    center = mean(g);
-    spread = std(g, corrected = false);
+    # Start with no stock in any sector -
+    number_of_stocks = length(sectors);
+    number_of_sectors = length(sector_names);
+    B = zeros(number_of_stocks, number_of_sectors);
 
-    # Add up the fourth power of each standardized growth rate -
-    total = 0.0;
-    for value ∈ g
-        # TODO 1: Add the fourth power of the standardized growth rate to total.
-        # Hint: total += ((value - center) / spread)^4;
-        error("Complete excess_kurtosis: add the fourth power of each standardized growth rate.");
+    # Put each stock in its sector -
+    for i ∈ 1:number_of_stocks
+
+        # Find the column s of the stock's sector; s stays 0 when the sector is not in sector_names -
+        s = 0;
+        for k ∈ 1:number_of_sectors
+            # TODO 1: Set s to k when sector_names[k] is the sector of stock i.
+            # Hint: if sector_names[k] == sectors[i] ... end
+            error("Complete sector_matrix: find the column of the stock's sector.");
+        end
+
+        # A sector that is not in sector_names stops with a message -
+        if s == 0
+            throw(ArgumentError("Stock $(i) is in the sector $(sectors[i]), which is not in sector_names."));
+        end
+
+        # TODO 2: Set the entry of stock i in column s to 1.0.
+        # Hint: B[i, s] = 1.0;
+        error("Complete sector_matrix: set B[i, s] to 1.0.");
     end
 
-    # TODO 2: Divide total by the number of growth rates, then subtract 3.0.
-    # Hint: length(g) is the number of growth rates.
-    κ = error("Complete excess_kurtosis: compute the excess kurtosis.");
-
-    return κ;
+    return B;
 end
 
 """
-    volatility_clustering(g::Vector{Float64}, lags::Vector{Int}) -> Float64
+    compose_growth_rates(X::Matrix{Float64}, θ::Vector{Float64}, F::Matrix{Float64},
+        δ::Vector{Float64}, u::Vector{Float64}) -> Vector{Float64}
 
-Compute the volatility clustering of the growth rates `g`: the mean autocorrelation of `abs.(g)`
-over `lags`.
+Compose the growth rates of one synthetic stock (sampling step 3): the market and economic part
+`X θ`, plus the sector part `F δ`, plus the stock-specific part `u`.
 
 ### Arguments
 
-- `g`: The growth rates of one market (1/yr).
-- `lags`: The lags at which to compute the autocorrelation (steps, positive integers).
+- `X`: The synthetic columns `[1, g_m, x_1, ..., x_K]`, days × columns. On the Standard track, `X`
+  is `[1, g_m]`.
+- `θ`: The baseline, market sensitivity, and economic loadings of the stock, `(α, β, η_1, ..., η_K)`.
+- `F`: The synthetic sector factors, days × sectors. `F` has zero columns when a market has no
+  sector factors.
+- `δ`: The sector loadings of the stock, one per column of `F`.
+- `u`: The synthetic stock-specific growth rates of the stock, one per day (1/yr).
 
 ### Returns
 
-- `ρ`: The mean of the autocorrelations of `abs.(g)` at the lags in `lags` (dimensionless).
+- `g`: The synthetic growth rates of the stock, one per day (1/yr).
 
 ### Method
 
-Take the absolute value of each growth rate. Compute the autocorrelation of these absolute
-values at each lag in `lags` with the course `sample_autocorrelation` function, which takes the
-data and the vector of lags, and returns one autocorrelation for each lag. Average these
-autocorrelations.
+Multiply `X` by `θ` and `F` by `δ`. Each product holds one value per day. Add the two products
+and `u`.
 
 ### Course references
 
-- Course example 'The Farmer–Joshi Market', Task 2: the plot cell that calls `sample_autocorrelation`
-  on `abs.(g)`.
-- PS6 companion: slide 8, 'Volatility clustering'.
+- Course lecture L14a, section 'Building a General Factor Model', sampling algorithm, step 3 (Compose).
+- PS6 companion: slide 'Sampling: draw, mix, and compose'.
 """
-function volatility_clustering(g::Vector{Float64}, lags::Vector{Int})::Float64
+function compose_growth_rates(X::Matrix{Float64}, θ::Vector{Float64}, F::Matrix{Float64},
+    δ::Vector{Float64}, u::Vector{Float64})::Vector{Float64}
 
-    # TODO 1: Compute the autocorrelation of abs.(g) at each lag in lags.
-    # Hint: sample_autocorrelation(abs.(g), lags).
-    autocorrelations = error("Complete volatility_clustering: compute the autocorrelations of abs.(g).");
+    # TODO: Add the market and economic part, the sector part, and the stock-specific part.
+    # Hint: g = X * θ + F * δ + u;
+    g = error("Complete compose_growth_rates: compose the growth rates.");
 
-    # TODO 2: Average the autocorrelations over the lags.
-    # Hint: mean(autocorrelations).
-    ρ = error("Complete volatility_clustering: average the autocorrelations.");
-
-    return ρ;
+    return g;
 end
 
 """
-    conviction_rule(state::Int, z::Float64, T::Float64, τ::Float64, K::Int) -> Int
+    economic_factor(levels::Vector{Float64}, kind::String, Δt::Float64) -> Vector{Float64}
 
-Give a trader's next state under the conviction rule, with states from `-K` to `K`.
+Turn a FRED series, one level per trading day, into a daily economic factor. A rate becomes its
+daily change, and a price becomes its growth rate, like the growth rates of the stocks.
 
 ### Arguments
 
-- `state`: The trader's current state, from `-K` to `K`. The trader holds a long position only in state `K`,
-  a short position only in state `-K`, and no position in every other state.
-- `z`: The trader's signal (dimensionless). A positive `z` favors a long position.
-- `T`: The trader's entry threshold (dimensionless, positive).
-- `τ`: The trader's exit threshold (dimensionless, below `T`).
-- `K`: The top state (positive integer). The trader has `2K + 1` states.
+- `levels`: The level of the series on each trading day, such as the 10-year Treasury yield
+  (percent) or the Brent oil price (USD/barrel).
+- `kind`: `"change"` for a rate, or `"growth"` for a price.
+- `Δt`: One trading day, in years (`1/252`).
 
 ### Returns
 
-- The trader's next state, from `-K` to `K`.
+- `x`: The factor, `length(levels) - 1` values: one for each day after the first.
+
+### Errors
+
+- An `ArgumentError` when `kind` is not `"change"` or `"growth"`.
 
 ### Method
 
-All comparisons are strict.
-
-- In a flat state (`-K < state < K`), the trader moves up one state when `z` is above `T`, and down one state
-  when `z` is below `-T`. Otherwise conviction fades: the trader moves one state toward state `0`, and stays
-  in state `0` if the trader is already there.
-- In state `K`, the trader exits to state `K - 1` when `z` is below `τ`. Otherwise the trader stays in
-  state `K`.
-- In state `-K`, the trader exits to state `-(K - 1)` when `z` is above `-τ`. Otherwise the trader stays in
-  state `-K`.
-
-With `K = 1`, this rule gives the Standard three-state rule for every input.
+For `"change"`, `x[t]` is `levels[t+1] - levels[t]`. For `"growth"`, `x[t]` is the growth rate
+`log(levels[t+1] / levels[t]) / Δt` (1/yr).
 
 ### Course references
 
-- Course lecture L12a, section 'The Farmer–Joshi algorithm'.
-- PS6 companion: slide 10, 'The conviction rule'.
+- Course lecture L14a, section 'Building a General Factor Model': each economic factor must be a
+  daily series, such as the daily change in the 10-year Treasury yield.
+- Course example 'A Synthetic Market of Many Stocks' (L14a), Constants cell: the growth rates
+  from `JumpHMM.excess_growth_rates` with `rf = 0.0`.
+- PS6 companion: slide 'Economic factors from FRED'.
 """
-function conviction_rule(state::Int, z::Float64, T::Float64, τ::Float64, K::Int)::Int
+function economic_factor(levels::Vector{Float64}, kind::String, Δt::Float64)::Vector{Float64}
 
-    # In the top state (long), the trader exits to state K - 1 when the signal falls below τ -
-    if state == K
-        # TODO 1: Return K - 1 when z is below τ.
-        error("Complete conviction_rule: the exit rule from state K.");
-        return K;
+    # Check the kind of the series -
+    if kind != "change" && kind != "growth"
+        throw(ArgumentError("The kind must be \"change\" or \"growth\", not \"$(kind)\"."));
     end
 
-    # In the bottom state (short), the trader exits to state -(K - 1) when the signal rises above -τ -
-    if state == -K
-        # TODO 2: Return -(K - 1) when z is above -τ.
-        error("Complete conviction_rule: the exit rule from state -K.");
-        return -K;
+    # One value for each day after the first -
+    number_of_days = length(levels) - 1;
+    x = zeros(number_of_days);
+    for t ∈ 1:number_of_days
+        if kind == "change"
+            # TODO 1: The change in the level from day t to day t + 1.
+            # Hint: x[t] = levels[t+1] - levels[t];
+            error("Complete economic_factor: the daily change of a rate.");
+        else
+            # TODO 2: The growth rate of the price from day t to day t + 1.
+            # Hint: x[t] = log(levels[t+1] / levels[t]) / Δt;
+            error("Complete economic_factor: the growth rate of a price.");
+        end
     end
 
-    # In a flat state, a strong signal moves the trader one state toward the signal's side -
-    # TODO 3: Return state + 1 when z is above T, and return state - 1 when z is below -T.
-    error("Complete conviction_rule: the entry rule in a flat state.");
-
-    # Otherwise the trader's conviction fades one state toward state 0 -
-    if state > 0
-        return state - 1;
-    end
-    if state < 0
-        return state + 1;
-    end
-    return 0;
+    return x;
 end
 
 """
-    hesitant_rule(state::Int, proposed::Int, p::Float64, u::Float64) -> Int
+    unmix_factors(Φ::Matrix{Float64}) -> Tuple{Vector{Float64},Matrix{Float64},Matrix{Float64}}
 
-Give a hesitant trader's next state: the trader moves to the proposed state only with probability `p`.
+Unmix the factors (fitting step 4): turn the correlated factors in `Φ` into uncorrelated factors
+`Z`, so that a jump hidden Markov model can draw each column of `Z` on its own.
 
 ### Arguments
 
-- `state`: The trader's current state.
-- `proposed`: The state that `conviction_rule` proposes for the trader.
-- `p`: The probability that the trader moves to the proposed state (between `0` and `1`).
-- `u`: A random number drawn uniformly on [0, 1). The simulator draws one `u` for every trader at every step.
+- `Φ`: The factor matrix `[g_m, x_1, ..., x_K, F]`, days × factors: the market, the economic
+  factors, and the sector factors.
 
 ### Returns
 
-- The trader's next state: `proposed` or `state`.
+- `μ`: The average of each column of `Φ`.
+- `A`: The lower-triangular Cholesky factor of the covariance matrix of `Φ`, so that `A A'` equals
+  the covariance matrix.
+- `Z`: The uncorrelated factors, days × factors. Each column has an average of 0 and a variance of 1.
 
 ### Method
 
-The trader moves to the proposed state when the proposed state differs from the current state and `u < p`.
-Otherwise the trader stays in the current state. Entries and exits are both hesitant.
+Compute the average of each column of `Φ`, and the covariance matrix of `Φ`. Factor the covariance
+matrix with `cholesky`, and keep its lower factor as an ordinary matrix. Subtract `μ'` from each
+row of `Φ`, then divide on the right by `A'` with the `/` operator.
 
 ### Course references
 
-- Course lecture L13a, section 'Markov Chains and Hidden Markov Models'.
-- PS6 companion: slide 11, 'Hesitant traders'.
+- Course lecture L14a, section 'Building a General Factor Model', fitting algorithm, step 4 (Unmix
+  the factors), and the note 'Why unmix the factors?'.
+- Course example 'Simulating a Portfolio with Multiple Asset Geometric Brownian Motion' (L6a),
+  Task 1, 'Construct the price model': the line that computes `A` with `cholesky`.
+- PS6 companion: slide 'Fitting step 4: unmix the factors'.
 """
-function hesitant_rule(state::Int, proposed::Int, p::Float64, u::Float64)::Int
+function unmix_factors(Φ::Matrix{Float64})::Tuple{Vector{Float64},Matrix{Float64},Matrix{Float64}}
 
-    # TODO 1: Return proposed when proposed differs from state and u is below p.
-    # Hint: use one if-block with both conditions joined by &&.
-    error("Complete hesitant_rule: the hesitant move.");
+    # TODO 1: The average of each column of Φ, as a vector.
+    # Hint: μ = vec(mean(Φ, dims = 1));
+    μ = error("Complete unmix_factors: the column averages of Φ.");
 
-    # Otherwise the trader stays in the current state -
-    return state;
+    # The covariance matrix of Φ; Symmetric tells cholesky that the matrix is symmetric -
+    Σ = Symmetric(cov(Φ));
+
+    # TODO 2: The lower Cholesky factor of Σ, as an ordinary matrix.
+    # Hint: A = Matrix(cholesky(Σ).L);
+    A = error("Complete unmix_factors: the lower Cholesky factor of Σ.");
+
+    # TODO 3: Subtract the averages from each row of Φ, then divide on the right by A'.
+    # Hint: Z = (Φ .- μ') / A';
+    Z = error("Complete unmix_factors: compute Z.");
+
+    return (μ, A, Z);
 end
 
 """
-    transition_matrix(z::Float64, T::Float64, τ::Float64, K::Int, p::Float64) -> Matrix{Float64}
+    mix_factors(Z::Matrix{Float64}, μ::Vector{Float64}, A::Matrix{Float64}) -> Matrix{Float64}
 
-Give the one-step transition matrix of one trader's state at a fixed signal `z`.
+Mix draws of the uncorrelated factors back into correlated factors (sampling step 1): multiply `Z`
+by `A'`, and add the averages `μ'` to each row.
 
 ### Arguments
 
-- `z`: The trader's signal (dimensionless), held fixed.
-- `T`: The trader's entry threshold (dimensionless, positive).
-- `τ`: The trader's exit threshold (dimensionless, below `T`).
-- `K`: The top state (positive integer). The trader has `2K + 1` states.
-- `p`: The probability that the trader moves to the proposed state (between `0` and `1`).
+- `Z`: Draws of the uncorrelated factors, days × factors: one column per jump hidden Markov model.
+- `μ`: The column averages from `unmix_factors`.
+- `A`: The Cholesky factor from `unmix_factors`.
 
 ### Returns
 
-- `P`: The `(2K + 1) × (2K + 1)` transition matrix. Row and column `i` hold state `i - K - 1`, so `P[i, j]`
-  is the probability of moving from state `i - K - 1` to state `j - K - 1`.
+- `Φ`: The synthetic factors, days × factors: the market, the economic factors, and the sector
+  factors, in the order of the columns of `Φ` in `unmix_factors`.
 
 ### Method
 
-Each row puts probability `p` in the state that `conviction_rule` proposes and probability `1 - p` on
-staying in the current state. When the proposed state equals the current state, the row puts probability `1`
-on staying.
+Multiply `Z` by `A'`. Add `μ'` to each row of the product.
 
 ### Course references
 
-- Course lecture L13a, section 'Markov Chains and Hidden Markov Models'.
-- PS6 companion: slide 12, 'The transition matrix of one trader'.
+- Course lecture L14a, section 'Building a General Factor Model', sampling algorithm, step 1
+  (Factor draws).
+- Course example 'Simulating a Portfolio with Multiple Asset Geometric Brownian Motion' (L6a),
+  Task 1, 'Simulate correlated price paths': the step that correlates independent draws with `A`.
+- PS6 companion: slide 'Sampling: draw, mix, and compose'.
 """
-function transition_matrix(z::Float64, T::Float64, τ::Float64, K::Int, p::Float64)::Matrix{Float64}
+function mix_factors(Z::Matrix{Float64}, μ::Vector{Float64}, A::Matrix{Float64})::Matrix{Float64}
 
-    # A (2K + 1) × (2K + 1) matrix of zeros -
-    number_of_states = 2 * K + 1;
-    P = zeros(number_of_states, number_of_states);
+    # TODO: Multiply Z by A', then add μ' to each row.
+    # Hint: Φ = μ' .+ Z * A';
+    Φ = error("Complete mix_factors: mix the draws.");
 
-    # Fill one row for each state -
-    for i ∈ 1:number_of_states
-
-        # The state of row i, and the state that conviction_rule proposes -
-        state = i - K - 1;
-        proposed = conviction_rule(state, z, T, τ, K);
-
-        # TODO 1: When proposed equals state, put 1.0 in column i. Otherwise put p in the column of
-        # the proposed state and 1.0 - p in column i.
-        # Hint: the column of state r is r + K + 1.
-        error("Complete transition_matrix: fill row $(i).");
-    end
-
-    return P;
+    return Φ;
 end
