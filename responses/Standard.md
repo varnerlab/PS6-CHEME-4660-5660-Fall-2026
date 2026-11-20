@@ -1,15 +1,8 @@
 # PS6 Standard responses
 
-**Central question:** Do hidden states, and random moves between them, help the
-Farmer–Joshi market reproduce the stylized facts of the daily growth rates of
-SPY?
-
-The Standard track measures the Farmer–Joshi market before the Advanced and
-Expert tracks add hidden states.
-
-Write one or two paragraphs for each question. Cite numbers from
-`results/Report.md`. Replace the TODO between each question's
-`<!-- answer-N:start -->` and `<!-- answer-N:end -->` markers with your answer.
+Write one or two paragraphs for each question, and cite numbers from
+`results/Report.md`. Replace each `TODO` line with your answer, and keep the
+marker lines around each answer, since the checker reads them.
 
 ## 1. Which stylized facts will the market reproduce?
 
