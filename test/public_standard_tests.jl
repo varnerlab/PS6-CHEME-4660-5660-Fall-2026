@@ -113,10 +113,15 @@ end
 A stock whose sector is not in `sector_names` raises an `ArgumentError`.
 """
 function check_sector_matrix_unknown()::Bool
+
+    # An ArgumentError passes; any other error goes to the checker, so that its message is shown -
     try
         sector_matrix(["Energy", "Bananas"], ["Energy", "Utilities"]);
     catch caught
-        return caught isa ArgumentError;
+        if caught isa ArgumentError
+            return true;
+        end
+        rethrow(caught);
     end
     return false;
 end

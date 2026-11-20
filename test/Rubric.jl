@@ -1,5 +1,5 @@
 # SHA-256 of the supplied config/defaults.toml; the checker warns when a student edits the file -
-const PS6_DEFAULTS_SHA256 = "f82fbd6d7e50aa917750265b3efb531cf993c7d37b6f00761de7adf5cfdb86bf";
+const PS6_DEFAULTS_SHA256 = "5dd61b907d022ea9796aa85dbc7ae8a7776b38603958420faddd1843bf49cb38";
 
 """
     run_public_check(check::NamedTuple)
@@ -308,8 +308,8 @@ end
 
 
 # Functions that must have docstrings -
-const STANDARD_DOCUMENTED_FUNCTIONS = [:three_state_rule, :excess_kurtosis, :volatility_clustering];
+const STANDARD_DOCUMENTED_FUNCTIONS = [:least_squares_fit, :sector_matrix, :compose_growth_rates];
 
-const ADVANCED_DOCUMENTED_FUNCTIONS = vcat(STANDARD_DOCUMENTED_FUNCTIONS, [:conviction_rule]);
+const ADVANCED_DOCUMENTED_FUNCTIONS = vcat(STANDARD_DOCUMENTED_FUNCTIONS, [:economic_factor]);
 
-const EXPERT_DOCUMENTED_FUNCTIONS = vcat(ADVANCED_DOCUMENTED_FUNCTIONS, [:hesitant_rule, :transition_matrix]);
+const EXPERT_DOCUMENTED_FUNCTIONS = vcat(ADVANCED_DOCUMENTED_FUNCTIONS, [:unmix_factors, :mix_factors]);
