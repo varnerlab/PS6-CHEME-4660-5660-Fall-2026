@@ -191,7 +191,7 @@ function expert_public_checks()::Vector{NamedTuple}
     push!(checks, (name = "Hesitant rule: p = 1 accepts every draw", test = check_hesitant_certain));
     push!(checks, (name = "Hesitant rule: a proposal equal to the state returns the state", test = check_hesitant_same_state));
     push!(checks, (name = "Transition matrix: size and row sums", test = check_transition_rows));
-    push!(checks, (name = "Transition matrix: p = 1 matches the conviction state", test = check_transition_certain));
+    push!(checks, (name = "Transition matrix: p = 1 matches conviction_rule", test = check_transition_certain));
     push!(checks, (name = "Transition matrix: hand-computed matrix for K = 1", test = check_transition_by_hand));
     push!(checks, (name = "Transition matrix: expected steps from state 0 to state K", test = check_transition_steps_to_long));
     return checks;
