@@ -6,8 +6,7 @@
 # expected number of steps to a long position.
 # Keep the function names, arguments, return types, and docstrings.
 # Replace each error("Complete ...") expression with your calculation.
-# The return statements of excess_kurtosis, volatility_clustering, and transition_matrix are
-# supplied. In three_state_rung, conviction_rung, and hesitant_rung, you write the returns.
+# Each TODO asks for a few lines; the rest of each function is supplied.
 # Save your code, then run from the PS6 folder:
 # julia --project=. --startup-file=no check_submission.jl
 #
@@ -47,16 +46,25 @@ All comparisons are strict.
 """
 function three_state_rung(rung::Int, z::Float64, T::Float64, τ::Float64)::Int
 
-    # TODO 1: From rung 0, return 1 when z is above T, return -1 when z is below -T, and
-    # otherwise return 0.
-    # Hint: use an if-block on rung == 0, with one if-block inside it for each entry.
-    error("Complete three_state_rung: the entry rule from rung 0.");
+    # From rung 0 (flat), the trader enters on a strong signal, and otherwise stays flat -
+    if rung == 0
+        # TODO 1: Return 1 when z is above T, and return -1 when z is below -T.
+        # Hint: write one if-block for each entry.
+        error("Complete three_state_rung: the entry rule from rung 0.");
+        return 0;
+    end
 
-    # TODO 2: From rung 1, return 0 when z is below τ, and otherwise return 1.
-    error("Complete three_state_rung: the exit rule from rung 1.");
+    # From rung 1 (long), the trader exits when the signal falls below τ, and otherwise stays long -
+    if rung == 1
+        # TODO 2: Return 0 when z is below τ.
+        error("Complete three_state_rung: the exit rule from rung 1.");
+        return 1;
+    end
 
-    # TODO 3: From rung -1, return 0 when z is above -τ, and otherwise return -1.
+    # From rung -1 (short), the trader exits when the signal rises above -τ, and otherwise stays short -
+    # TODO 3: Return 0 when z is above -τ.
     error("Complete three_state_rung: the exit rule from rung -1.");
+    return -1;
 end
 
 """
@@ -85,14 +93,21 @@ these values over the `N` growth rates. Subtract `3.0`.
 """
 function excess_kurtosis(g::Vector{Float64})::Float64
 
-    # TODO 1: Compute the mean and the population standard deviation of g.
-    # Hint: mean(g) and std(g, corrected = false).
-    center = error("Complete excess_kurtosis: compute the mean of g.");
-    spread = error("Complete excess_kurtosis: compute the population standard deviation of g.");
+    # The mean and the population standard deviation of g -
+    center = mean(g);
+    spread = std(g, corrected = false);
 
-    # TODO 2: Average the fourth power of each standardized growth rate over g, then subtract 3.0.
-    # Hint: use a for loop that adds ((value - center) / spread)^4 to a running total.
-    κ = error("Complete excess_kurtosis: compute the fourth standardized moment minus 3.");
+    # Add up the fourth power of each standardized growth rate -
+    total = 0.0;
+    for value in g
+        # TODO 1: Add the fourth power of the standardized growth rate to total.
+        # Hint: total += ((value - center) / spread)^4;
+        error("Complete excess_kurtosis: add the fourth power of each standardized growth rate.");
+    end
+
+    # TODO 2: Divide total by the number of growth rates, then subtract 3.0.
+    # Hint: length(g) is the number of growth rates.
+    κ = error("Complete excess_kurtosis: compute the excess kurtosis.");
 
     return κ;
 end
@@ -132,6 +147,7 @@ function volatility_clustering(g::Vector{Float64}, lags::Vector{Int})::Float64
     values = error("Complete volatility_clustering: compute the autocorrelations of abs.(g).");
 
     # TODO 2: Average the autocorrelations over the lags.
+    # Hint: mean(values).
     ρ = error("Complete volatility_clustering: average the autocorrelations.");
 
     return ρ;
@@ -176,17 +192,32 @@ With `K = 1`, this rule gives the Standard three-state rule for every input.
 """
 function conviction_rung(rung::Int, z::Float64, T::Float64, τ::Float64, K::Int)::Int
 
-    # TODO 1: On rung K, return K - 1 when z is below τ, and otherwise return K.
-    error("Complete conviction_rung: the exit rule from rung K.");
+    # On the top rung (long), the trader exits to rung K - 1 when the signal falls below τ -
+    if rung == K
+        # TODO 1: Return K - 1 when z is below τ.
+        error("Complete conviction_rung: the exit rule from rung K.");
+        return K;
+    end
 
-    # TODO 2: On rung -K, return -(K - 1) when z is above -τ, and otherwise return -K.
-    error("Complete conviction_rung: the exit rule from rung -K.");
+    # On the bottom rung (short), the trader exits to rung -(K - 1) when the signal rises above -τ -
+    if rung == -K
+        # TODO 2: Return -(K - 1) when z is above -τ.
+        error("Complete conviction_rung: the exit rule from rung -K.");
+        return -K;
+    end
 
-    # TODO 3: On a flat rung, return rung + 1 when z is above T, and return rung - 1 when z is below -T.
+    # On a flat rung, a strong signal moves the trader one rung toward the signal's side -
+    # TODO 3: Return rung + 1 when z is above T, and return rung - 1 when z is below -T.
     error("Complete conviction_rung: the entry rule on a flat rung.");
 
-    # TODO 4: Otherwise return the rung one step closer to 0: rung - 1 above 0, rung + 1 below 0, and 0 on rung 0.
-    error("Complete conviction_rung: the fade toward rung 0.");
+    # Otherwise the trader's conviction fades one rung toward rung 0 -
+    if rung > 0
+        return rung - 1;
+    end
+    if rung < 0
+        return rung + 1;
+    end
+    return 0;
 end
 
 """
@@ -217,9 +248,12 @@ Otherwise the trader stays on the current rung. Entries and exits are both hesit
 """
 function hesitant_rung(rung::Int, proposed::Int, p::Float64, u::Float64)::Int
 
-    # TODO 1: Return proposed when proposed differs from rung and u is below p, and otherwise return rung.
-    # Hint: use one if-block with both conditions.
+    # TODO 1: Return proposed when proposed differs from rung and u is below p.
+    # Hint: use one if-block with both conditions joined by &&.
     error("Complete hesitant_rung: the hesitant move.");
+
+    # Otherwise the trader stays on the current rung -
+    return rung;
 end
 
 """
@@ -257,10 +291,16 @@ function transition_matrix(z::Float64, T::Float64, τ::Float64, K::Int, p::Float
     number_of_rungs = 2 * K + 1;
     P = zeros(number_of_rungs, number_of_rungs);
 
-    # TODO 1: For each row i, find the current rung (i - K - 1) and the rung that conviction_rung proposes.
-    # Put p in the column of the proposed rung and 1 - p in column i, or 1 in column i when the two rungs match.
-    # Hint: the column of rung r is r + K + 1.
+    # Fill one row for each rung -
     for i in 1:number_of_rungs
+
+        # The rung of row i, and the rung that conviction_rung proposes -
+        rung = i - K - 1;
+        proposed = conviction_rung(rung, z, T, τ, K);
+
+        # TODO 1: When proposed equals rung, put 1.0 in column i. Otherwise put p in the column of
+        # the proposed rung and 1.0 - p in column i.
+        # Hint: the column of rung r is r + K + 1.
         error("Complete transition_matrix: fill row $(i).");
     end
 
