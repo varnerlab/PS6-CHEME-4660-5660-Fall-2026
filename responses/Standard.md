@@ -4,13 +4,13 @@
 Farmer–Joshi market reproduce the stylized facts of the daily growth rates of
 SPY?
 
-The Standard track measures the Farmer–Joshi market without hidden states, the
-baseline that the Advanced and Expert tracks change.
+The Standard track measures the Farmer–Joshi market before the Advanced and
+Expert tracks add hidden states.
 
 Write a few sentences for each lettered part, and label each part with its
-letter. Cite numbers from `results/Report.md`. Put your answer between each
-question's `<!-- answer-N:start -->` and `<!-- answer-N:end -->` markers, in
-place of the TODO.
+letter. Cite numbers from `results/Report.md`. Replace the TODO between each
+question's `<!-- answer-N:start -->` and `<!-- answer-N:end -->` markers with
+your answer.
 
 ## 1. Which stylized facts will the market reproduce?
 
@@ -20,11 +20,12 @@ a weak autocorrelation. Which of these stylized facts will the market with both
 value investors and trend followers reproduce? Which group of traders do you
 expect to cause each stylized fact, and why?
 
-**b. What are the stylized facts of SPY?** In **Farmer–Joshi and SPY**, use the
-row **SPY (daily closes)**. Cite the excess kurtosis, the clustering at
-lags 1–10 and at lags 11–50, and the autocorrelation at lag 1. Do the two
-clustering values and the autocorrelation at lag 1 lie outside the white-noise
-band for SPY? What does each value say about the daily growth rates of SPY?
+**b. What are the stylized facts of SPY?** In the table
+**Farmer–Joshi and SPY**, read the row **SPY (daily closes)**. Cite the
+excess kurtosis, the clustering at lags 1–10 and 11–50, and the
+autocorrelation at lag 1. Do the two clustering values and the autocorrelation
+at lag 1 lie outside the white-noise band for SPY? What does each value say
+about the daily growth rates of SPY?
 
 <!-- answer-1:start -->
 TODO: Answer parts a and b.
@@ -32,17 +33,17 @@ TODO: Answer parts a and b.
 
 ## 2. How does each group of traders shape the growth rates?
 
-**a. What does each group produce alone?** In **Farmer–Joshi and SPY**, compare
-the rows **value investors only** and **trend followers only** with SPY. Cite
-the excess kurtosis, the clustering at lags 1–10, and the autocorrelation at
-lag 1. Which stylized facts does each group produce alone? Explain each group's
-autocorrelation at lag 1 with the group's rule for buying and selling.
+**a. What does each group produce alone?** In the table
+**Farmer–Joshi and SPY**, compare the rows **value investors only** and
+**trend followers only** with SPY. Cite the excess kurtosis, the clustering at
+lags 1–10, and the autocorrelation at lag 1. Which stylized facts does each
+group produce alone? Use each group's rule for buying and selling to explain
+the group's autocorrelation at lag 1.
 
 **b. What changes when both groups trade?** Compare the row **both groups** with
-the rows **value investors only** and **trend followers only**. How do the value
-investors change the autocorrelation at lag 1 and the gap spread, compared with
-the market of trend followers only? Explain the change with the value investors'
-rule.
+the rows **value investors only** and **trend followers only**. How do the
+autocorrelation at lag 1 and the gap spread change when value investors join
+the trend followers? Use the value investors' rule to explain the change.
 
 <!-- answer-2:start -->
 TODO: Answer parts a and b.
@@ -51,7 +52,7 @@ TODO: Answer parts a and b.
 ## 3. What can we conclude?
 
 **a. What does the Farmer–Joshi market reproduce and miss?** Compare the row
-**both groups** with SPY: the excess kurtosis, the clustering at both lag
+**both groups** with SPY. Cite the excess kurtosis, the clustering at both lag
 ranges, and the autocorrelation at lag 1. Which stylized facts of SPY does the
 market reproduce, and which does the market miss?
 
