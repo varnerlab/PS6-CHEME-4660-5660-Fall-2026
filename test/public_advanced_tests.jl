@@ -22,10 +22,10 @@ With `K = 1`, `conviction_rule` matches the course `threshold_position` for thre
 function check_conviction_k1_matches_course()::Bool
 
     # Compare conviction_rule with the course function on every case -
-    for (T, τ) in ((0.5, -0.1), (2.0, 0.0), (3.7, -0.2))
+    for (T, τ) ∈ ((0.5, -0.1), (2.0, 0.0), (3.7, -0.2))
         signals = ps6_signal_grid(T, τ);
-        for state in -1:1
-            for z in signals
+        for state ∈ -1:1
+            for z ∈ signals
                 expected = Int(threshold_position(Float64(state), z, T, τ, 1.0, 1));
                 if conviction_rule(state, z, T, τ, 1) != expected
                     return false;
@@ -55,7 +55,7 @@ function check_conviction_by_hand()::Bool
     );
 
     # conviction_rule must give the expected next state in every case -
-    for (K, state, z, expected) in cases
+    for (K, state, z, expected) ∈ cases
         if conviction_rule(state, z, T, τ, K) != expected
             return false;
         end
@@ -77,9 +77,9 @@ function check_conviction_range()::Bool
     signals = ps6_signal_grid(T, τ);
 
     # For every K, state, and signal: an Int in -K:K, at most one state from the current state -
-    for K in 1:4
-        for state in -K:K
-            for z in signals
+    for K ∈ 1:4
+        for state ∈ -K:K
+            for z ∈ signals
                 result = conviction_rule(state, z, T, τ, K);
                 if !(result isa Int) || result < -K || result > K || abs(result - state) > 1
                     return false;
@@ -104,9 +104,9 @@ function check_conviction_symmetry()::Bool
     signals = ps6_signal_grid(T, τ);
 
     # For every K, state, and signal: the mirrored case gives the mirrored next state -
-    for K in 1:3
-        for state in -K:K
-            for z in signals
+    for K ∈ 1:3
+        for state ∈ -K:K
+            for z ∈ signals
                 if conviction_rule(-state, -z, T, τ, K) != -conviction_rule(state, z, T, τ, K)
                     return false;
                 end

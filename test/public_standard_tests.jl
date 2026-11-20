@@ -17,7 +17,7 @@ function ps6_regime_growth_rates()::Vector{Float64}
     # Draw each block of 500 steps with the standard deviation of its regime -
     rng = Xoshiro(11);
     g = zeros(5000);
-    for k in 1:5000
+    for k ∈ 1:5000
         block = div(k - 1, 500);
         if iseven(block)
             g[k] = 0.5 * randn(rng);
@@ -39,10 +39,10 @@ end
 function check_three_state_matches_course()::Bool
 
     # Compare three_state_rule with the course function on every case -
-    for (T, τ) in ((0.5, -0.1), (2.0, 0.0), (3.7, -0.2))
+    for (T, τ) ∈ ((0.5, -0.1), (2.0, 0.0), (3.7, -0.2))
         signals = vcat(collect(range(-5, 5, length = 201)), [T, -T, τ, -τ]);
-        for state in -1:1
-            for z in signals
+        for state ∈ -1:1
+            for z ∈ signals
                 expected = Int(threshold_position(Float64(state), z, T, τ, 1.0, 1));
                 if three_state_rule(state, z, T, τ) != expected
                     return false;
@@ -86,7 +86,7 @@ function check_three_state_type()::Bool
 
     # Draw a random state, signal, entry threshold, and exit threshold for each case -
     rng = Xoshiro(5660);
-    for i in 1:1000
+    for i ∈ 1:1000
         state = rand(rng, -1:1);
         result = three_state_rule(state, 6.0 * rand(rng) - 3.0, 3.0 * rand(rng) + 0.1, 0.4 * rand(rng) - 0.2);
 

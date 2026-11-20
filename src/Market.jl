@@ -188,13 +188,13 @@ function simulate_market(model::MyFarmerJoshiMarketModel, rule::Symbol, K::Int, 
     =#
 
     # One loop pass per daily step -
-    for k in 1:total
+    for k ∈ 1:total
 
         # The net demand of every trader this step -
         net = 0.0;
 
         # Value investors first. A positive signal means the price is below the value.
-        for i in eachindex(value_states)
+        for i ∈ eachindex(value_states)
             z = -(log_price[k] - (log_value[k] + model.value_offset[i]));
             u = rand(action_rng);
             old_state = value_states[i];
@@ -205,7 +205,7 @@ function simulate_market(model::MyFarmerJoshiMarketModel, rule::Symbol, K::Int, 
         end
 
         # Trend followers next. Each trend follower draws its uniform number, then waits until it has a full lag of history.
-        for j in eachindex(trend_states)
+        for j ∈ eachindex(trend_states)
             u = rand(action_rng);
             lag = model.trend_lag[j];
             if k - 1 >= lag
@@ -221,7 +221,7 @@ function simulate_market(model::MyFarmerJoshiMarketModel, rule::Symbol, K::Int, 
         # Just for fun: the noise-trader loop. Delete the #= and =# lines to add it, with the block above the loop.
         #=
         # Noise traders last. Each noise trader's signal is a standard Normal random number that the market cannot see.
-        for n in eachindex(noise_states)
+        for n ∈ eachindex(noise_states)
             z = randn(signal_rng);
             u = rand(signal_rng);
             old_state = noise_states[n];

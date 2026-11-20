@@ -77,7 +77,7 @@ function config_list(settings::Dict, key::String, T::Type)
 
     # Convert each entry, one at a time -
     result = T[];
-    for value in settings[key]
+    for value ∈ settings[key]
         if !(value isa Real) || (T <: Integer && !(value isa Integer))
             if T <: Integer
                 throw(ArgumentError("Setting '$key' must be a list of whole numbers."));
@@ -235,13 +235,13 @@ function load_config(path::AbstractString)::NamedTuple
     check_setting(!isempty(benchmark_ticker), "The benchmark_ticker must not be empty.");
 
     # Every number of states is odd and at least 3 -
-    for value in number_of_states
+    for value ∈ number_of_states
         check_odd_states(value, "number_of_states");
     end
     check_odd_states(expert_states, "expert_states");
 
     # Every probability is above 0 and at most 1 -
-    for value in probabilities
+    for value ∈ probabilities
         check_setting(0 < value && value <= 1, "Every probability in 'probabilities' must be above 0 and at most 1.");
     end
 

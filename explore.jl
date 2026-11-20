@@ -42,7 +42,7 @@ function load_message(caught)::String
         end
     else
         detail = string(typeof(caught));
-        for line in split(text, '\n')
+        for line ∈ split(text, '\n')
             # Base.strip: the course package has its own strip -
             if !isempty(Base.strip(line))
                 detail = String(Base.strip(line));

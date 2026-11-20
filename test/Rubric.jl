@@ -61,7 +61,7 @@ function number_passed(results::AbstractVector{<:NamedTuple})::Int
 
     # Count one for each check that passed -
     passed = 0;
-    for result in results
+    for result ∈ results
         if result.passed
             passed = passed + 1;
         end
@@ -88,7 +88,7 @@ function failed_public_checks(checks::AbstractVector{<:NamedTuple},
 
     # One failed result for each check -
     results = NamedTuple[];
-    for check in checks
+    for check ∈ checks
         push!(results, (name = check.name, passed = false, detail = detail));
     end
     return results;
@@ -125,7 +125,7 @@ function print_public_test_report(results::AbstractVector{<:NamedTuple},
 
     # The distinct error messages of the failed checks, each printed once -
     details = String[];
-    for result in results
+    for result ∈ results
         if !result.passed && !isempty(result.detail) && !(result.detail in details)
             push!(details, result.detail);
         end
@@ -143,7 +143,7 @@ function print_public_test_report(results::AbstractVector{<:NamedTuple},
         else
             status = "FAIL";
             reference = "";
-            for (index, detail) in enumerate(details)
+            for (index, detail) ∈ enumerate(details)
                 if detail == result.detail
                     reference = " [$(index)]";
                 end
@@ -159,7 +159,7 @@ function print_public_test_report(results::AbstractVector{<:NamedTuple},
     # The error messages -
     if !isempty(details)
         print_terminal_section("Check details");
-        for (index, detail) in enumerate(details)
+        for (index, detail) ∈ enumerate(details)
             println("Error $(index)");
             print_terminal_detail(detail);
             if index < length(details)
@@ -188,7 +188,7 @@ function missing_docstrings(function_names::Vector{Symbol})::Vector{Symbol}
 
     # A required function must be defined and have a docstring; student code is loaded into Main -
     missing_names = Symbol[];
-    for name in function_names
+    for name ∈ function_names
         has_docstring = isdefined(Main, name) && Base.Docs.hasdoc(Main, name);
         if !has_docstring
             push!(missing_names, name);
@@ -248,7 +248,7 @@ function response_issues(path::String)::Vector{String}
     issues = String[];
 
     # main loop: check the answer block of each of the three questions -
-    for index in 1:3
+    for index ∈ 1:3
 
         # Find the markers and the text between them -
         start_marker = "<!-- answer-$(index):start -->";

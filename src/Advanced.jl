@@ -97,7 +97,7 @@ function excess_kurtosis(g::Vector{Float64})::Float64
 
     # Add up the fourth power of each standardized growth rate -
     total = 0.0;
-    for value in g
+    for value ∈ g
         # TODO 1: Add the fourth power of the standardized growth rate to total.
         # Hint: total += ((value - center) / spread)^4;
         error("Complete excess_kurtosis: add the fourth power of each standardized growth rate.");

@@ -26,12 +26,12 @@ function print_terminal_text(text::AbstractString; prefix::String="",
     continuation::String=prefix, width::Int=_TERMINAL_WIDTH)::Nothing
 
     # main loop: each explicit line break starts a new paragraph -
-    for paragraph in split(text, '\n')
+    for paragraph ∈ split(text, '\n')
         line = prefix; # the line being built
         has_word = false; # true once the line holds a word
 
         # one word at a time -
-        for word in split(paragraph)
+        for word ∈ split(paragraph)
 
             # Start a new line when the word and its space do not fit -
             if has_word && textwidth(line) + 1 + textwidth(word) > width
@@ -46,7 +46,7 @@ function print_terminal_text(text::AbstractString; prefix::String="",
             end
 
             # Add the word one character at a time, so that a long word can be split -
-            for character in word
+            for character ∈ word
                 if textwidth(line) + textwidth(character) > width
                     println(rstrip(line));
                     line = continuation;
@@ -78,7 +78,7 @@ cannot fit within the display width.
 function print_terminal_detail(text::AbstractString; prefix::String="  ", width::Int=_TERMINAL_WIDTH)::Nothing
 
     # main loop: one line of the original text at a time -
-    for original in split(replace(text, '\t' => "    "), '\n')
+    for original ∈ split(replace(text, '\t' => "    "), '\n')
         characters = collect(original);
 
         # An empty line stays empty -
@@ -105,7 +105,7 @@ function print_terminal_detail(text::AbstractString; prefix::String="  ", width:
                 # Check that some character before the space is not a space -
                 has_text = false;
                 if gap !== nothing
-                    for position in start:(start + gap - 2)
+                    for position ∈ start:(start + gap - 2)
                         if !isspace(characters[position])
                             has_text = true;
                         end

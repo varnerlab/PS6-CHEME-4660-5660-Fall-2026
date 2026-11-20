@@ -158,15 +158,15 @@ function write_file_record(io::IO, root::String, track::String, source_path::Str
 
     # The files to record -
     paths = String[];
-    for name in ("TRACK.txt", "Include.jl", "Project.toml", "Manifest.toml", "config/defaults.toml")
+    for name ∈ ("TRACK.txt", "Include.jl", "Project.toml", "Manifest.toml", "config/defaults.toml")
         push!(paths, joinpath(root, name));
     end
     if !isempty(source_path)
         push!(paths, source_path);
     end
     if isdir(joinpath(root, "src"))
-        for (folder, _, names) in walkdir(joinpath(root, "src"))
-            for name in names
+        for (folder, _, names) ∈ walkdir(joinpath(root, "src"))
+            for name ∈ names
                 push!(paths, joinpath(folder, name));
             end
         end
@@ -177,7 +177,7 @@ function write_file_record(io::IO, root::String, track::String, source_path::Str
     end
 
     # One line per file: its SHA-256 value (or MISSING) and its path -
-    for path in sort(unique(paths))
+    for path ∈ sort(unique(paths))
         relative = replace(relpath(path, root), '\\' => '/');
         if isfile(path)
             value = bytes2hex(open(sha256, path));
@@ -414,7 +414,7 @@ function main(setup::NamedTuple)::Nothing
         if answers
             print_terminal_text("All three answer blocks contain text without TODO. The teaching team will review the answers.");
         else
-            for issue in answer_issues
+            for issue ∈ answer_issues
                 print_terminal_text(issue; prefix="  - ", continuation="    ");
             end
             println("Save your answers and run the checker again.");

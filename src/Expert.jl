@@ -99,7 +99,7 @@ function excess_kurtosis(g::Vector{Float64})::Float64
 
     # Add up the fourth power of each standardized growth rate -
     total = 0.0;
-    for value in g
+    for value ∈ g
         # TODO 1: Add the fourth power of the standardized growth rate to total.
         # Hint: total += ((value - center) / spread)^4;
         error("Complete excess_kurtosis: add the fourth power of each standardized growth rate.");
@@ -292,7 +292,7 @@ function transition_matrix(z::Float64, T::Float64, τ::Float64, K::Int, p::Float
     P = zeros(number_of_states, number_of_states);
 
     # Fill one row for each state -
-    for i in 1:number_of_states
+    for i ∈ 1:number_of_states
 
         # The state of row i, and the state that conviction_rule proposes -
         state = i - K - 1;

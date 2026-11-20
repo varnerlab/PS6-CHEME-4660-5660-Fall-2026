@@ -13,7 +13,7 @@ function check_hesitant_accepts()::Bool
 
     # Each case is (state, proposed, p, u, expected state) -
     cases = ((0, 1, 0.5, 0.3, 1), (2, 1, 0.2, 0.1, 1));
-    for (state, proposed, p, u, expected) in cases
+    for (state, proposed, p, u, expected) ∈ cases
         if hesitant_rule(state, proposed, p, u) != expected
             return false;
         end
@@ -30,7 +30,7 @@ function check_hesitant_holds()::Bool
 
     # Each case is (state, proposed, p, u, expected state) -
     cases = ((0, 1, 0.5, 0.5, 0), (0, 1, 0.5, 0.9, 0));
-    for (state, proposed, p, u, expected) in cases
+    for (state, proposed, p, u, expected) ∈ cases
         if hesitant_rule(state, proposed, p, u) != expected
             return false;
         end
@@ -46,7 +46,7 @@ With `p = 1.0`, `hesitant_rule` takes the proposed state for every draw `u` from
 function check_hesitant_certain()::Bool
 
     # A trader in state -1 with the proposed state 0 must move for every draw -
-    for k in 0:999
+    for k ∈ 0:999
         u = k / 1000;
         if hesitant_rule(-1, 0, 1.0, u) != 0
             return false;
@@ -63,7 +63,7 @@ When the proposed state equals the current state, `hesitant_rule` returns that s
 function check_hesitant_same_state()::Bool
 
     # A draw below p and a draw above p must both keep state 1 -
-    for u in (0.1, 0.9)
+    for u ∈ (0.1, 0.9)
         if hesitant_rule(1, 1, 0.5, u) != 1
             return false;
         end
@@ -84,9 +84,9 @@ function check_transition_rows()::Bool
     # The entry and exit thresholds of every case -
     T = 1.0;
     τ = -0.1;
-    for K in 1:3
-        for p in (1.0, 0.5, 0.2)
-            for z in (-2.0, -0.5, 0.0, 0.5, 2.0)
+    for K ∈ 1:3
+        for p ∈ (1.0, 0.5, 0.2)
+            for z ∈ (-2.0, -0.5, 0.0, 0.5, 2.0)
 
                 # The matrix must have one row and one column for each state -
                 P = transition_matrix(z, T, τ, K, p);
@@ -95,7 +95,7 @@ function check_transition_rows()::Bool
                 end
 
                 # Each row must sum to 1 -
-                for i in 1:(2 * K + 1)
+                for i ∈ 1:(2 * K + 1)
                     if !isapprox(sum(P[i, :]), 1.0, atol = 1e-12)
                         return false;
                     end
@@ -117,14 +117,14 @@ function check_transition_certain()::Bool
     # The entry and exit thresholds of every case -
     T = 1.0;
     τ = -0.1;
-    for K in 1:3
-        for z in (-2.0, -0.5, 0.0, 0.5, 2.0)
+    for K ∈ 1:3
+        for z ∈ (-2.0, -0.5, 0.0, 0.5, 2.0)
             P = transition_matrix(z, T, τ, K, 1.0);
-            for i in 1:(2 * K + 1)
+            for i ∈ 1:(2 * K + 1)
 
                 # Row i must hold 1 in the column of the state that conviction_rule gives, and 0 everywhere else -
                 target = conviction_rule(i - K - 1, z, T, τ, K);
-                for j in 1:(2 * K + 1)
+                for j ∈ 1:(2 * K + 1)
                     expected = 0.0;
                     if j - K - 1 == target
                         expected = 1.0;
@@ -165,8 +165,8 @@ function check_transition_steps_to_long()::Bool
     τ = -0.1;
 
     # For every K and p, the expected steps from state 0 to state K must be K / p -
-    for K in 1:3
-        for p in (1.0, 0.5, 0.2)
+    for K ∈ 1:3
+        for p ∈ (1.0, 0.5, 0.2)
             P = transition_matrix(10.0, T, τ, K, p);
             if !isapprox(expected_steps_to_long(P, K), K / p)
                 return false;

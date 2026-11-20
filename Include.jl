@@ -14,7 +14,7 @@ else
 end
 
 # The checker accepts no other command-line argument -
-for argument in ARGS
+for argument ∈ ARGS
     if argument != "--solution"
         throw(ArgumentError("The only optional argument is --solution."));
     end

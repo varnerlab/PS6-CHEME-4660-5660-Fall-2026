@@ -77,7 +77,7 @@ function expected_steps_to_long(P::Matrix{Float64}, K::Int)::Float64
 
     # Expected steps starting from state 0, which is state K + 1 -
     steps = 0.0;
-    for j in 1:(number_of_states - 1)
+    for j ∈ 1:(number_of_states - 1)
         steps += N[K + 1, j];
     end
     return steps;
@@ -103,7 +103,7 @@ function market_facts(g::Vector{Float64}, gap::Vector{Float64}, settings::NamedT
 
     # A frozen or broken price has no statistics -
     broken = false;
-    for value in g
+    for value ∈ g
         if !isfinite(value)
             broken = true;
         end

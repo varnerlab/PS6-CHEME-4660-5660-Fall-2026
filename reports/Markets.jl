@@ -39,7 +39,7 @@ function market_row(settings::NamedTuple, label::String, rule::Symbol, K::Int, p
         lag_one = 0.0, volatility = 0.0, gap_spread = 0.0);
 
     # One simulated market per run number -
-    for seed in settings.seeds
+    for seed ∈ settings.seeds
 
         # Draw the traders, run the market, and summarize the growth rates -
         model = build_market(settings, seed; value_number = value_number, trend_number = trend_number);
@@ -105,7 +105,7 @@ function problem_text(caught)::String
 
     # The first non-empty line of the message -
     first_line = "";
-    for line in split(sprint(showerror, caught), '\n')
+    for line ∈ split(sprint(showerror, caught), '\n')
         cleaned = Base.strip(line);
         if isempty(first_line) && !isempty(cleaned)
             first_line = String(cleaned);
@@ -156,7 +156,7 @@ function more_states_table(settings::NamedTuple)::Union{Vector{NamedTuple},Strin
         push!(rows, benchmark_row(settings));
 
         # One row for each number of states; n states have the top state K = (n - 1) / 2 -
-        for n in settings.number_of_states
+        for n ∈ settings.number_of_states
             K = (n - 1) ÷ 2;
             push!(rows, market_row(settings, "both groups, $(n) states", :conviction, K, 1.0;
                 value_number = settings.value_number, trend_number = settings.trend_number));
@@ -182,7 +182,7 @@ function hesitant_table(settings::NamedTuple)::Union{Vector{NamedTuple},String}
 
         # One row for each probability -
         K = (settings.expert_states - 1) ÷ 2;
-        for p in settings.probabilities
+        for p ∈ settings.probabilities
             label = "$(settings.expert_states) states, p = $(probability_text(p))";
             row = market_row(settings, label, :conviction, K, p;
                 value_number = settings.value_number, trend_number = settings.trend_number);
@@ -263,7 +263,7 @@ function write_table(io::IO, title::String, description::String, rows, settings:
     println(io, "|", join(alignments, "|"), "|");
 
     # One line per row; kurtosis has 1 decimal and the other numbers have 2 -
-    for row in rows
+    for row ∈ rows
         cells = [row.label, number_text(row.kurtosis, 1), number_text(row.clustering_short, 2),
             number_text(row.clustering_long, 2), number_text(row.lag_one, 2),
             number_text(row.volatility, 2), number_text(row.gap_spread, 2)];
