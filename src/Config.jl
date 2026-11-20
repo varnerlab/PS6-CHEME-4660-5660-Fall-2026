@@ -1,6 +1,13 @@
 # PS6 settings: read a TOML settings file and check every value.
 using TOML, SHA
 
+# The columns of the FRED file, data/fred-levels-2014-2024.csv -
+const FRED_COLUMNS = ["DGS10", "T10YIE", "DCOILBRENTEU", "DTWEXBGS"];
+
+# The 11 sectors of the Global Industry Classification Standard (GICS) -
+const GICS_SECTORS = ["Communication Services", "Consumer Discretionary", "Consumer Staples", "Energy",
+    "Financials", "Health Care", "Industrials", "Information Technology", "Materials", "Real Estate", "Utilities"];
+
 """
     config_setting(settings::Dict, key::String, T::Type)
 
@@ -16,7 +23,7 @@ Read one setting from a parsed TOML file and convert it to type `T`.
 
 - The setting converted to `T`. Throws an `ArgumentError` when the setting is
   missing or cannot be converted. An integer setting must be written as a whole
-  number (`60`, not `60.0`).
+  number (`100`, not `100.0`).
 """
 function config_setting(settings::Dict, key::String, T::Type)
 
@@ -43,6 +50,39 @@ function config_setting(settings::Dict, key::String, T::Type)
 end
 
 """
+    config_list(settings::Dict, key::String) -> Vector{String}
+
+Read one list of text values from a parsed TOML file.
+
+### Arguments
+
+- `settings`: The parsed TOML file, from `TOML.parsefile`.
+- `key`: The name of the setting.
+
+### Returns
+
+- A `Vector{String}` with the entries of the list. Throws an `ArgumentError` when
+  the setting is missing, is not a list, or has an entry that is not text in quotes.
+"""
+function config_list(settings::Dict, key::String)::Vector{String}
+
+    # Is the setting in the file, and is it a list?
+    if !haskey(settings, key) || !(settings[key] isa AbstractVector)
+        throw(ArgumentError("Setting '$key' must be a list of text values in quotes."));
+    end
+
+    # Copy each entry, one at a time; every entry must be text -
+    result = String[];
+    for value ∈ settings[key]
+        if !(value isa AbstractString)
+            throw(ArgumentError("Setting '$key' must be a list of text values in quotes."));
+        end
+        push!(result, String(value));
+    end
+    return result;
+end
+
+"""
     check_setting(ok::Bool, message::String)
 
 Throw an `ArgumentError` with `message` when a setting fails a check.
@@ -51,85 +91,6 @@ function check_setting(ok::Bool, message::String)
     if !ok
         throw(ArgumentError(message));
     end
-    return nothing;
-end
-
-"""
-    config_list(settings::Dict, key::String, T::Type) -> Vector
-
-Read one list setting from a parsed TOML file and convert each entry to type `T`.
-
-### Arguments
-
-- `settings`: The parsed TOML file, from `TOML.parsefile`.
-- `key`: The name of the setting.
-- `T`: The type of each entry, such as `Int` or `Float64`.
-
-### Returns
-
-- A `Vector{T}` with the entries of the list. Throws an `ArgumentError` when the
-  setting is missing, is not a list, or has an entry that cannot be converted.
-  An integer entry must be written as a whole number.
-"""
-function config_list(settings::Dict, key::String, T::Type)
-
-    # Is the setting in the file, and is it a list?
-    if !haskey(settings, key) || !(settings[key] isa AbstractVector)
-        throw(ArgumentError("Setting '$key' must be a list of numbers."));
-    end
-
-    # Convert each entry, one at a time -
-    result = T[];
-    for value ∈ settings[key]
-        if !(value isa Real) || (T <: Integer && !(value isa Integer))
-            if T <: Integer
-                throw(ArgumentError("Setting '$key' must be a list of whole numbers."));
-            end
-            throw(ArgumentError("Setting '$key' must be a list of numbers."));
-        end
-        push!(result, T(value));
-    end
-    return result;
-end
-
-"""
-    expand_lags(first_last::Vector{Int}, key::String, number_of_steps::Int) -> Vector{Int}
-
-Expand a pair `[first, last]` into every lag from the first to the last.
-
-### Arguments
-
-- `first_last`: The first and the last lag, in days.
-- `key`: The name of the setting, used in the error message.
-- `number_of_steps`: The number of daily steps in a run. Every lag must be shorter.
-
-### Returns
-
-- The lags `first, first+1, ..., last` as a `Vector{Int}`. Throws an `ArgumentError`
-  unless `1 ≤ first ≤ last < number_of_steps`.
-"""
-function expand_lags(first_last::Vector{Int}, key::String, number_of_steps::Int)::Vector{Int}
-
-    # The setting is exactly two numbers -
-    check_setting(length(first_last) == 2, "Setting '$key' must list the first and the last lag.");
-
-    # The pair must be a valid range of lags -
-    first_lag = first_last[1];
-    last_lag = first_last[2];
-    check_setting(1 <= first_lag && first_lag <= last_lag && last_lag < number_of_steps,
-        "Setting '$key' must satisfy 1 <= first <= last < number_of_steps.");
-
-    # Every lag from the first to the last -
-    return collect(first_lag:last_lag);
-end
-
-"""
-    check_odd_states(value::Int, key::String)
-
-Throw an `ArgumentError` unless `value` is odd and at least 3.
-"""
-function check_odd_states(value::Int, key::String)
-    check_setting(value >= 3 && isodd(value), "Every number of states in '$key' must be odd and at least 3.");
     return nothing;
 end
 
@@ -145,14 +106,11 @@ Read a TOML settings file and check every value.
 ### Returns
 
 - A `NamedTuple` with the fields `Δt` (one trading day, `1/steps_per_year`, in yr),
-  `sigma_S`, `sigma_v`, `mu_v`, `value_number`, `trend_number`, the ranges
-  `value_T_min`, `value_T_max`, `value_tau_min`, `value_tau_max`, the same four
-  for `trend_`, `value_v_min`, `value_v_max`, `trend_lag_min`, `trend_lag_max`,
-  `capital_scale`, `liquidity`, `number_of_steps`, `burn_in`, `base_seed`, `seeds`,
-  `short_lags`, `long_lags` (each expanded to every lag from the first to the last),
-  `number_of_states`, `expert_states`, `probabilities`, and `benchmark_ticker`.
-  Throws an `ArgumentError` with a one-sentence message when a setting is missing
-  or invalid.
+  `number_of_states`, `ν`, `ϵ`, and `λ` (the settings of each jump hidden Markov
+  model), `number_of_paths`, `seed`, `benchmark_ticker`, the FRED lists
+  `fred_series`, `fred_kinds`, and `fred_names`, and the sector lists `pair_first`
+  and `pair_second`. Throws an `ArgumentError` with a one-sentence message when a
+  setting is missing or not valid.
 """
 function load_config(path::AbstractString)::NamedTuple
 
@@ -164,108 +122,60 @@ function load_config(path::AbstractString)::NamedTuple
         throw(ArgumentError("The config file could not be read as TOML."));
     end
 
-    # Read each scalar setting with its type: the time step, the noise, and the number of traders -
+    # Read each single setting with its type -
     steps_per_year = config_setting(settings, "steps_per_year", Int);
-    sigma_S = config_setting(settings, "sigma_S", Float64);
-    sigma_v = config_setting(settings, "sigma_v", Float64);
-    mu_v = config_setting(settings, "mu_v", Float64);
-    value_number = config_setting(settings, "value_number", Int);
-    trend_number = config_setting(settings, "trend_number", Int);
-
-    # The ranges of the entry and exit thresholds of each group -
-    value_T_min = config_setting(settings, "value_T_min", Float64);
-    value_T_max = config_setting(settings, "value_T_max", Float64);
-    value_tau_min = config_setting(settings, "value_tau_min", Float64);
-    value_tau_max = config_setting(settings, "value_tau_max", Float64);
-    trend_T_min = config_setting(settings, "trend_T_min", Float64);
-    trend_T_max = config_setting(settings, "trend_T_max", Float64);
-    trend_tau_min = config_setting(settings, "trend_tau_min", Float64);
-    trend_tau_max = config_setting(settings, "trend_tau_max", Float64);
-
-    # The ranges of the value offsets and the trend lags -
-    value_v_min = config_setting(settings, "value_v_min", Float64);
-    value_v_max = config_setting(settings, "value_v_max", Float64);
-    trend_lag_min = config_setting(settings, "trend_lag_min", Int);
-    trend_lag_max = config_setting(settings, "trend_lag_max", Int);
-
-    # The market maker, the runs, and the benchmark -
-    capital_scale = config_setting(settings, "capital_scale", Float64);
-    liquidity = config_setting(settings, "liquidity", Float64);
-    number_of_steps = config_setting(settings, "number_of_steps", Int);
-    burn_in = config_setting(settings, "burn_in", Int);
-    base_seed = config_setting(settings, "base_seed", Int);
-    expert_states = config_setting(settings, "expert_states", Int);
+    number_of_states = config_setting(settings, "number_of_states", Int);
+    nu = config_setting(settings, "nu", Float64);
+    epsilon = config_setting(settings, "epsilon", Float64);
+    lambda = config_setting(settings, "lambda", Float64);
+    number_of_paths = config_setting(settings, "number_of_paths", Int);
+    seed = config_setting(settings, "seed", Int);
     benchmark_ticker = config_setting(settings, "benchmark_ticker", String);
 
     # Read each list setting -
-    seeds = config_list(settings, "seeds", Int);
-    short_pair = config_list(settings, "short_lags", Int);
-    long_pair = config_list(settings, "long_lags", Int);
-    number_of_states = config_list(settings, "number_of_states", Int);
-    probabilities = config_list(settings, "probabilities", Float64);
+    fred_series = config_list(settings, "fred_series");
+    fred_kinds = config_list(settings, "fred_kinds");
+    fred_names = config_list(settings, "fred_names");
+    pair_first = config_list(settings, "pair_first");
+    pair_second = config_list(settings, "pair_second");
 
-    # Check the time step, the noise, and the number of traders -
+    # Check the single settings -
     check_setting(steps_per_year >= 1, "The steps_per_year must be at least 1.");
-    check_setting(sigma_S >= 0, "The sigma_S must not be negative.");
-    check_setting(sigma_v >= 0, "The sigma_v must not be negative.");
-    check_setting(value_number >= 0, "The value_number must not be negative.");
-    check_setting(trend_number >= 0, "The trend_number must not be negative.");
-    check_setting(value_number + trend_number > 0, "The value_number and trend_number must not both be zero.");
-
-    # Check the thresholds: every exit threshold is below every entry threshold of its group -
-    check_setting(0 < value_T_min && value_T_min <= value_T_max,
-        "The value_T_min must be positive and not above value_T_max.");
-    check_setting(value_tau_min <= value_tau_max && value_tau_max < value_T_min,
-        "The value_tau_min must not exceed value_tau_max, and value_tau_max must be below value_T_min.");
-    check_setting(0 < trend_T_min && trend_T_min <= trend_T_max,
-        "The trend_T_min must be positive and not above trend_T_max.");
-    check_setting(trend_tau_min <= trend_tau_max && trend_tau_max < trend_T_min,
-        "The trend_tau_min must not exceed trend_tau_max, and trend_tau_max must be below trend_T_min.");
-
-    # Check the offsets, the lags, the market maker, and the runs -
-    check_setting(value_v_min <= value_v_max, "The value_v_min must not exceed value_v_max.");
-    check_setting(1 <= trend_lag_min && trend_lag_min <= trend_lag_max,
-        "The trend_lag_min must be at least 1 and not above trend_lag_max.");
-    check_setting(capital_scale > 0, "The capital_scale must be positive.");
-    check_setting(liquidity > 0, "The liquidity must be positive.");
-    check_setting(number_of_steps >= 100, "The number_of_steps must be at least 100.");
-    check_setting(burn_in >= 0, "The burn_in must not be negative.");
-
-    # Check that no list and no ticker is empty -
-    check_setting(!isempty(seeds), "The seeds list must not be empty.");
-    check_setting(!isempty(number_of_states), "The number_of_states list must not be empty.");
-    check_setting(!isempty(probabilities), "The probabilities list must not be empty.");
+    check_setting(number_of_states >= 2, "The number_of_states must be at least 2.");
+    check_setting(nu > 0, "The nu must be positive.");
+    check_setting(0 <= epsilon && epsilon <= 1, "The epsilon must be from 0 to 1.");
+    check_setting(lambda > 0, "The lambda must be positive.");
+    check_setting(number_of_paths >= 1, "The number_of_paths must be at least 1.");
     check_setting(!isempty(benchmark_ticker), "The benchmark_ticker must not be empty.");
 
-    # Every number of states is odd and at least 3 -
-    for value ∈ number_of_states
-        check_odd_states(value, "number_of_states");
+    # Check the FRED series: at least one, each a column of the FRED file, each with a kind and a name -
+    check_setting(!isempty(fred_series), "The fred_series list must name at least one series.");
+    for series ∈ fred_series
+        check_setting(series in FRED_COLUMNS, "Every entry of fred_series must be one of $(join(FRED_COLUMNS, ", ")).");
     end
-    check_odd_states(expert_states, "expert_states");
-
-    # Every probability is above 0 and at most 1 -
-    for value ∈ probabilities
-        check_setting(0 < value && value <= 1, "Every probability in 'probabilities' must be above 0 and at most 1.");
+    check_setting(length(fred_kinds) == length(fred_series),
+        "The fred_kinds list must have one entry for each series in fred_series.");
+    for kind ∈ fred_kinds
+        check_setting(kind == "change" || kind == "growth", "Every entry of fred_kinds must be \"change\" or \"growth\".");
     end
+    check_setting(length(fred_names) == length(fred_series),
+        "The fred_names list must have one entry for each series in fred_series.");
 
-    # Expand each pair of first and last lag into the full range of lags -
-    short_lags = expand_lags(short_pair, "short_lags", number_of_steps);
-    long_lags = expand_lags(long_pair, "long_lags", number_of_steps);
+    # Check the pairs of sectors: at least one pair, and each pair names two different GICS sectors -
+    check_setting(!isempty(pair_first), "The pair_first list must name at least one sector.");
+    check_setting(length(pair_second) == length(pair_first),
+        "The pair_second list must have one sector for each sector in pair_first.");
+    for k ∈ 1:length(pair_first)
+        check_setting(pair_first[k] in GICS_SECTORS, "Every entry of pair_first must be a GICS sector, such as \"Utilities\".");
+        check_setting(pair_second[k] in GICS_SECTORS, "Every entry of pair_second must be a GICS sector, such as \"Utilities\".");
+        check_setting(pair_first[k] != pair_second[k], "Each pair in pair_first and pair_second must name two different sectors.");
+    end
 
     # The settings, with the time step of one trading day -
-    return (Δt = 1.0 / steps_per_year, sigma_S = sigma_S, sigma_v = sigma_v, mu_v = mu_v,
-        value_number = value_number, trend_number = trend_number,
-        value_T_min = value_T_min, value_T_max = value_T_max,
-        value_tau_min = value_tau_min, value_tau_max = value_tau_max,
-        trend_T_min = trend_T_min, trend_T_max = trend_T_max,
-        trend_tau_min = trend_tau_min, trend_tau_max = trend_tau_max,
-        value_v_min = value_v_min, value_v_max = value_v_max,
-        trend_lag_min = trend_lag_min, trend_lag_max = trend_lag_max,
-        capital_scale = capital_scale, liquidity = liquidity,
-        number_of_steps = number_of_steps, burn_in = burn_in, base_seed = base_seed,
-        seeds = seeds, short_lags = short_lags, long_lags = long_lags,
-        number_of_states = number_of_states, expert_states = expert_states,
-        probabilities = probabilities, benchmark_ticker = benchmark_ticker);
+    return (Δt = 1.0 / steps_per_year, number_of_states = number_of_states, ν = nu, ϵ = epsilon, λ = lambda,
+        number_of_paths = number_of_paths, seed = seed, benchmark_ticker = benchmark_ticker,
+        fred_series = fred_series, fred_kinds = fred_kinds, fred_names = fred_names,
+        pair_first = pair_first, pair_second = pair_second);
 end
 
 """

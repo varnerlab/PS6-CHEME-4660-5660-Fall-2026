@@ -1,79 +1,38 @@
 # Graded settings: do not edit. Every graded run reads this file.
 
-# Number of trading days in one year. The time step of the market is one trading day, 1/252 of a year.
+# Number of trading days in one year. A growth rate is the daily log return divided by one trading day, 1/252 of a year.
 steps_per_year = 252
 
-# Volatility of the noise in the log price, annualized (1/sqrt(yr)).
-sigma_S = 0.8
+# Number of hidden states in each jump hidden Markov model.
+number_of_states = 100
 
-# Volatility of the noise in the log value, annualized (1/sqrt(yr)).
-sigma_v = 0.16
+# Degrees of freedom of the Student-t distribution of each hidden state.
+nu = 5.0
 
-# Drift of the log value (1/yr).
-mu_v = 0.0
+# Probability that a jump episode starts on a given day. The value comes from the tuned SPY model of L13a.
+epsilon = 1.0e-4
 
-# Number of value investors in the market.
-value_number = 1200
+# Mean length of a jump episode, in trading days. The value comes from the tuned SPY model of L13a.
+lambda = 100.0
 
-# Number of trend followers in the market.
-trend_number = 1200
+# Number of synthetic markets behind each synthetic row of the report. Each synthetic market is as long as the data.
+number_of_paths = 10
 
-# Value investors: range of the entry threshold T, from T_min to T_max. Each trader draws one T from the range.
-value_T_min = 0.2
-value_T_max = 4.0
+# Seed of the random numbers, so that every run draws the same synthetic markets.
+seed = 5660
 
-# Value investors: range of the exit threshold tau, from tau_min to tau_max. Each trader draws one tau from the range.
-value_tau_min = -0.2
-value_tau_max = 0.0
-
-# Trend followers: range of the entry threshold T, from T_min to T_max. Each trader draws one T from the range.
-trend_T_min = 0.2
-trend_T_max = 4.0
-
-# Trend followers: range of the exit threshold tau, from tau_min to tau_max. Each trader draws one tau from the range.
-trend_tau_min = -0.2
-trend_tau_max = 0.0
-
-# Value investors: range of the offset v, from v_min to v_max. Each investor draws one offset, and adds the offset to the log value to estimate the value.
-value_v_min = -2.0
-value_v_max = 2.0
-
-# Trend followers: shortest and longest lag (days) a trader can look back. Each trader draws one lag.
-trend_lag_min = 1
-trend_lag_max = 100
-
-# Capital scale a of every trader. A trader's position size is a times (T minus tau).
-capital_scale = 0.0025
-
-# Market liquidity. The market maker divides the net demand of the traders by the liquidity, so a larger liquidity moves the price less.
-liquidity = 1.0
-
-# Number of daily steps kept in one simulated market run, after the burn-in.
-number_of_steps = 20000
-
-# Number of first daily steps dropped from every run before any statistic is computed.
-burn_in = 2000
-
-# Base seed of the trader draws. Run k draws its traders with the base seed plus k.
-base_seed = 5660
-
-# Run numbers k, one simulated market per number.
-seeds = [1, 2, 3, 4, 5]
-
-# Short lags in days, given as the first and the last lag. `load_config` fills in every lag between them. The last lag must be smaller than number_of_steps and smaller than the number of daily growth rates of the benchmark.
-short_lags = [1, 10]
-
-# Long lags in days, given as the first and the last lag, with the same limits as the short lags.
-long_lags = [11, 50]
-
-# Numbers of states the Advanced track compares. Each number is odd and at least 3.
-number_of_states = [3, 5, 7]
-
-# Number of states the Expert track uses.
-expert_states = 5
-
-# Probabilities of acting on a move to another state, compared in the Expert track.
-probabilities = [1.0, 0.5, 0.2]
-
-# Ticker of the benchmark market data.
+# The market: SPY, the exchange-traded fund that tracks the S&P 500.
 benchmark_ticker = "SPY"
+
+# FRED series used as economic factors on the Advanced and Expert tracks: column names in data/fred-levels-2014-2024.csv.
+fred_series = ["DGS10", "T10YIE", "DCOILBRENTEU", "DTWEXBGS"]
+
+# How each FRED series becomes a daily factor: "change" for a rate (the daily change), "growth" for a price (the growth rate).
+fred_kinds = ["change", "change", "growth", "growth"]
+
+# The name of each FRED series in the report.
+fred_names = ["10-year Treasury yield", "10-year breakeven inflation", "Brent oil price", "US dollar index"]
+
+# Pairs of sectors in the report: the first sector of each pair, then the second sector of each pair.
+pair_first = ["Real Estate", "Consumer Staples", "Energy"]
+pair_second = ["Utilities", "Information Technology", "Information Technology"]
