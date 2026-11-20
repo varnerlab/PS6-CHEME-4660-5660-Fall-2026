@@ -1,4 +1,4 @@
-# PS6 Advanced: complete the 4 functions below: the 3 Standard functions and 1 for the conviction ladder.
+# PS6 Advanced: complete the 4 functions below: the 3 Standard functions and 1 for the conviction rule.
 # The simulator calls three_state_rule for every trader at every step of the first table and
 # conviction_rule for every trader at every step of the second table. The report calls
 # excess_kurtosis and volatility_clustering on the growth rates of each market.
@@ -154,7 +154,7 @@ end
 """
     conviction_rule(state::Int, z::Float64, T::Float64, τ::Float64, K::Int) -> Int
 
-Give a trader's next state on the conviction ladder, which runs from `-K` to `K`.
+Give a trader's next state under the conviction rule, with states from `-K` to `K`.
 
 ### Arguments
 
@@ -163,7 +163,7 @@ Give a trader's next state on the conviction ladder, which runs from `-K` to `K`
 - `z`: The trader's signal (dimensionless). A positive `z` favors a long position.
 - `T`: The trader's entry threshold (dimensionless, positive).
 - `τ`: The trader's exit threshold (dimensionless, below `T`).
-- `K`: The top state of the ladder (positive integer). The ladder has `2K + 1` states.
+- `K`: The top state (positive integer). The trader has `2K + 1` states.
 
 ### Returns
 
@@ -186,7 +186,7 @@ With `K = 1`, this rule gives the Standard three-state rule for every input.
 ### Course references
 
 - Course lecture L12a, section 'The Farmer–Joshi algorithm'.
-- PS6 companion: slide 10, 'The conviction ladder'.
+- PS6 companion: slide 10, 'The conviction rule'.
 """
 function conviction_rule(state::Int, z::Float64, T::Float64, τ::Float64, K::Int)::Int
 

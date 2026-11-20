@@ -156,7 +156,7 @@ end
 """
     conviction_rule(state::Int, z::Float64, T::Float64, τ::Float64, K::Int) -> Int
 
-Give a trader's next state on the conviction ladder, which runs from `-K` to `K`.
+Give a trader's next state under the conviction rule, with states from `-K` to `K`.
 
 ### Arguments
 
@@ -165,7 +165,7 @@ Give a trader's next state on the conviction ladder, which runs from `-K` to `K`
 - `z`: The trader's signal (dimensionless). A positive `z` favors a long position.
 - `T`: The trader's entry threshold (dimensionless, positive).
 - `τ`: The trader's exit threshold (dimensionless, below `T`).
-- `K`: The top state of the ladder (positive integer). The ladder has `2K + 1` states.
+- `K`: The top state (positive integer). The trader has `2K + 1` states.
 
 ### Returns
 
@@ -188,7 +188,7 @@ With `K = 1`, this rule gives the Standard three-state rule for every input.
 ### Course references
 
 - Course lecture L12a, section 'The Farmer–Joshi algorithm'.
-- PS6 companion: slide 10, 'The conviction ladder'.
+- PS6 companion: slide 10, 'The conviction rule'.
 """
 function conviction_rule(state::Int, z::Float64, T::Float64, τ::Float64, K::Int)::Int
 
@@ -266,7 +266,7 @@ Give the one-step transition matrix of one trader's state at a fixed signal `z`.
 - `z`: The trader's signal (dimensionless), held fixed.
 - `T`: The trader's entry threshold (dimensionless, positive).
 - `τ`: The trader's exit threshold (dimensionless, below `T`).
-- `K`: The top state of the ladder (positive integer). The ladder has `2K + 1` states.
+- `K`: The top state (positive integer). The trader has `2K + 1` states.
 - `p`: The probability that the trader moves to the proposed state (between `0` and `1`).
 
 ### Returns

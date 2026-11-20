@@ -4,7 +4,7 @@
 % \chi^{in}_i and \chi^{out}_i, position size c_i, offset v^{(i)}, lag \theta_i,
 % position x_t^{(i)}, order \omega_{t+1}^{(i)}, liquidity \lambda, and growth rate g_{t+1}.
 % The starter docstrings cite six slides by number and title: 6 'The three-state rule',
-% 7 'Fat tails: excess kurtosis', 8 'Volatility clustering', 10 'The conviction ladder',
+% 7 'Fat tails: excess kurtosis', 8 'Volatility clustering', 10 'The conviction rule',
 % 11 'Hesitant traders', and 12 'The transition matrix of one trader'. Update those
 % citations if the slide order changes.
 % Settings the slides quote. Check each one after an edit of config/defaults.toml or
@@ -62,14 +62,14 @@ growth rates.
 \item \hilite{Standard: the three-state rule.} Each trader is short, flat, or
 long, as in the course example. We'll measure the stylized facts of the
 market and compare them with those of SPY.
-\item \hilite{Advanced: the conviction ladder.} Each trader has extra flat
+\item \hilite{Advanced: more states.} Each trader has extra flat
 states, in which the trader builds conviction before taking a position. We'll
 compare markets with 3, 5, and 7 states.
 \item \hilite{Expert: hesitant traders.} Each trader moves to a new state only
 with probability $p$. We'll compare $p=1$, $0.5$, and $0.2$.
 \end{itemize}
 \slidenote{Reading guide}{All tracks use slides 4–\pageref{fr:columns}. Slide
-\pageref{fr:ladder} is for Advanced and Expert, and slides
+\pageref{fr:conviction} is for Advanced and Expert, and slides
 \pageref{fr:hesitant}–\pageref{fr:steps} are for Expert only.}
 \end{frame}
 
@@ -221,7 +221,7 @@ no autocorrelation, each sample autocorrelation lies within this band with
 probability about 0.95.
 \end{frame}
 
-\begin{frame}{The conviction ladder}\label{fr:ladder}
+\begin{frame}{The conviction rule}\label{fr:conviction}
 \begin{columns}[T,onlytextwidth]
 \begin{column}{0.61\textwidth}
 Advanced gives each trader $2K+1$ states, the states from $-K$ to $K$. The
@@ -291,7 +291,7 @@ conviction rule proposes, the trader's next state is:
  \end{cases}
 \]
 Each proposed move, an entry, a fade, or an exit, happens with probability $p$, and
-$p=1$ gives the conviction ladder of slide \pageref{fr:ladder}. Expert uses 5
+$p=1$ gives the conviction rule of slide \pageref{fr:conviction}. Expert uses 5
 states ($K=2$) and compares $p=1$, $0.5$, and $0.2$.
 \slidenote{Code}{\texttt{hesitant\_rule(state, proposed, p, u)} returns
 $r_{t+1}$, with \texttt{proposed} $=r'$. The simulator calls it only when

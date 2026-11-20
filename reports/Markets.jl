@@ -145,12 +145,12 @@ function standard_table(settings::NamedTuple)::Union{Vector{NamedTuple},String}
 end
 
 """
-    ladder_table(settings) -> Union{Vector{NamedTuple}, String}
+    more_states_table(settings) -> Union{Vector{NamedTuple}, String}
 
-Rows of the table "Conviction ladders": the benchmark, and both groups for each number of states in
+Rows of the table "More states": the benchmark, and both groups for each number of states in
 `settings.number_of_states`. Returns `"UNAVAILABLE: ..."` when a function throws.
 """
-function ladder_table(settings::NamedTuple)::Union{Vector{NamedTuple},String}
+function more_states_table(settings::NamedTuple)::Union{Vector{NamedTuple},String}
     try
         rows = NamedTuple[];
         push!(rows, benchmark_row(settings));
@@ -297,9 +297,9 @@ function write_report(track::String, settings::NamedTuple, path::String)::Nothin
 
     # Run the tables of the track; Base.invokelatest lets the report call functions defined after it was loaded -
     standard = Base.invokelatest(standard_table, settings);
-    ladders = "";
+    more_states = "";
     if track == "advanced" || track == "expert"
-        ladders = Base.invokelatest(ladder_table, settings);
+        more_states = Base.invokelatest(more_states_table, settings);
     end
     hesitant = "";
     if track == "expert"
@@ -318,9 +318,9 @@ function write_report(track::String, settings::NamedTuple, path::String)::Nothin
 
         # The second table, on the Advanced and Expert tracks -
         if track == "advanced" || track == "expert"
-            write_table(io, "Conviction ladders",
+            write_table(io, "More states",
                 "Each row has value investors and trend followers with the listed number of states.",
-                ladders, settings);
+                more_states, settings);
         end
 
         # The third table, on the Expert track -

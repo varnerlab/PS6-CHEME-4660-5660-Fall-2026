@@ -6,7 +6,7 @@ Download **Source code (zip)** below, extract it, and begin with `README.md`. Th
 
 Set `TRACK.txt` to `standard`, `advanced`, or `expert`.
 * __Standard__ measures the course example's market, which has no hidden states, and compares the market with SPY.
-* __Advanced__ adds a conviction ladder, extra flat states in which a trader builds conviction before taking a position, and compares markets with 3, 5, and 7 states.
+* __Advanced__ adds extra flat states, in which a trader builds conviction before taking a position, and compares markets with 3, 5, and 7 states.
 * __Expert__ adds hesitant traders, who move to a new state only with a fixed probability, and compares three values of that probability.
 
 Write your prediction in Question 1 before you write any code.

@@ -7,7 +7,7 @@
   stylized facts of the daily growth rates of SPY? The market model is from
   lecture L12a; the benchmark is the daily SPY data (`benchmark_ticker`).
 - Three tracks. Standard: the 3-state rule, excess kurtosis, and volatility
-  clustering. Advanced: Standard plus the conviction ladder. Expert: Advanced
+  clustering. Advanced: Standard plus more states. Expert: Advanced
   plus hesitant moves between states and the transition matrix.
 - All settings live in `config/defaults.toml`, read by `load_config` in
   `src/Config.jl`. The file is graded, so students do not edit it. The track

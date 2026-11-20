@@ -32,9 +32,9 @@ hidden Markov model.
 
 We'll explore this question on three tracks, and you will choose one.
 **Standard** measures the course example's market, which has no hidden states,
-and compares the market with SPY. **Advanced** adds a **conviction ladder**:
-extra flat states in which a trader builds conviction before taking a position.
-Advanced compares markets with 3, 5, and 7 states. **Expert** adds **hesitant
+and compares the market with SPY. **Advanced** adds **extra flat states**, in
+which a trader builds conviction before taking a position, and compares markets
+with 3, 5, and 7 states. **Expert** adds **hesitant
 traders**, who move to a new state only with a fixed probability, and compares
 three values of that probability.
 
@@ -118,14 +118,15 @@ call the course example's rule the **three-state rule**:
   threshold, and to state `-1` when the signal is below minus the entry
   threshold.
 - A trader in state `1` exits to state `0` when the signal falls below the exit
-  threshold. A trader in state `-1` exits to state `0` when the signal rises above
-  minus the exit threshold.
+  threshold. A trader in state `-1` exits to state `0` when the signal rises
+  above minus the exit threshold.
 
-A **conviction ladder** has more states. With 5 states, the states run from `-2`
-to `2`. A trader holds a long position only in the top state and a short position
-only in the bottom state, and holds no position in any state in between. With 5
-states, the market cannot tell a trader in state `1` from a trader in state `0`,
-because neither trader holds a position, so the trader's state is hidden.
+The Advanced track gives each trader more states. With 5 states, the states run
+from `-2` to `2`. A trader holds a long position only in the top state and a
+short position only in the bottom state, and holds no position in any state in
+between. With 5 states, the market cannot tell a trader in state `1` from a
+trader in state `0`, because neither trader holds a position, so the trader's
+state is hidden.
 
 **The simulator.** The supplied code in `src/Market.jl` runs the course
 package's Farmer–Joshi market one step at a time. One step is one trading day.
@@ -179,23 +180,23 @@ and answer Question 2. The table compares SPY with three markets: **value
 investors only**, **trend followers only**, and **both groups**. Standard
 students also answer Question 3 from this table.
 
-## Advanced: the conviction ladder
+## Advanced: more states
 
 Complete the Advanced copies of the three Standard functions, then complete one
 more function:
 
-4. **`conviction_rule`** returns a trader's next state on a conviction ladder
-   with states from `-K` (the bottom state) to `K` (the top state). In every other
-   state, the trader is flat. A flat trader moves up one state when the signal is
-   above the entry threshold, and down one state when the signal is below minus
-   the entry threshold. Otherwise the trader's conviction fades, and the trader
-   moves one state toward state `0`, or stays in state `0` if the trader is already
-   there. In the top state, the trader exits to the state below when the signal
-   falls below the exit threshold. In the bottom state, the trader exits to the
-   state above when the signal rises above minus the exit threshold. With 3
-   states, this rule is the three-state rule.
+4. **`conviction_rule`** returns a trader's next state when the states run
+   from `-K` (the bottom state) to `K` (the top state). In every other state,
+   the trader is flat. A flat trader moves up one state when the signal is
+   above the entry threshold, and down one state when the signal is below
+   minus the entry threshold. Otherwise the trader's conviction fades, and the
+   trader moves one state toward state `0`, or stays in state `0` if the trader
+   is already there. In the top state, the trader exits to the state below when
+   the signal falls below the exit threshold. In the bottom state, the trader
+   exits to the state above when the signal rises above minus the exit
+   threshold. With 3 states, this rule is the three-state rule.
 
-Rerun the checker, read the table **Conviction ladders**, and answer Question 3.
+Rerun the checker, read the table **More states**, and answer Question 3.
 The table compares SPY with the market with both groups at 3, 5, and 7 states.
 
 ## Expert: hesitant traders
@@ -206,8 +207,8 @@ more functions:
 5. **`hesitant_rule`** returns a hesitant trader's next state. At each step, the
    simulator draws one random number for each trader, uniformly between `0` and
    `1`. The trader moves to the state that `conviction_rule` proposes when that
-   number is below the probability `p`, and otherwise stays in the current state.
-   Entries and exits are both hesitant.
+   number is below the probability `p`, and otherwise stays in the current
+   state. Entries and exits are both hesitant.
 6. **`transition_matrix`** returns the one-step transition matrix of one
    trader's state at a fixed signal. Each entry is the probability of moving in
    one step from the row's state to the column's state, so each row sums to one.
@@ -215,7 +216,7 @@ more functions:
 The report uses your `transition_matrix` to compute the expected number of steps
 a trader takes to go from state `0` (flat) to the top state (long) while the
 signal stays above the entry threshold. Rerun the checker, read the tables
-**Conviction ladders** and **Hesitant traders**, and answer Question 3. The
+**More states** and **Hesitant traders**, and answer Question 3. The
 table **Hesitant traders** compares SPY with the market with both groups at 5
 states, with `p` set to `1`, `0.5`, and `0.2`.
 

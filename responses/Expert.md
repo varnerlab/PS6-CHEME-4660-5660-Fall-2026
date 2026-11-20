@@ -14,8 +14,8 @@ Answer before you write any code; accuracy is not graded. The daily growth rates
 of SPY have fat tails, volatility clustering, and a weak autocorrelation.
 Predict which of these stylized facts the market with both value investors and
 trend followers will reproduce, and which group of traders will cause each
-stylized fact. Explain why. Also predict whether a conviction ladder with 5
-or 7 states, or hesitant traders, will move the market closer to SPY.
+stylized fact. Explain why. Also predict whether 5 or 7 states, or hesitant
+traders, will move the market closer to SPY.
 
 <!-- answer-1:start -->
 TODO: Answer Question 1.
@@ -37,7 +37,7 @@ TODO: Answer Question 2.
 
 ## 3. Do hidden states and hesitant traders move the market toward SPY?
 
-In the tables **Conviction ladders** and **Hesitant traders**, compare each row
+In the tables **More states** and **Hesitant traders**, compare each row
 with SPY. Cite the excess kurtosis, the clustering at lags 1–10 and 11–50, and
 the autocorrelation at lag 1, and say which values move toward SPY as the number
 of states rises and as the probability `p` falls. To explain the changes, use
