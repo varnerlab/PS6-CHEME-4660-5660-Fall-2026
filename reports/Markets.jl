@@ -28,8 +28,8 @@ Simulate one market for every run number in `settings.seeds` and average the fac
 
 ### Returns
 
-- A `NamedTuple` with `label`, `kurtosis`, `clustering_short`, `clustering_long`, `lag_one`,
-  `volatility`, and `gap_spread`, each a mean over the runs.
+- A `NamedTuple` with the row's `label`, and the means over the runs of `kurtosis`, `clustering_short`,
+  `clustering_long`, `lag_one`, `volatility`, and `gap_spread`.
 """
 function market_row(settings::NamedTuple, label::String, rule::Symbol, K::Int, p::Float64;
     value_number::Int, trend_number::Int)::NamedTuple
@@ -70,12 +70,21 @@ end
     benchmark_row(settings) -> NamedTuple
 
 Compute the facts of the daily closes of the benchmark ticker. The `gap_spread` is `NaN`, because
-the benchmark has no value.
+the benchmark has no value. Throws an `ArgumentError` when a lag is not shorter than the benchmark's
+series of growth rates.
 """
 function benchmark_row(settings::NamedTuple)::NamedTuple
 
-    # The growth rates of the benchmark, and its facts without a gap -
+    # The growth rates of the benchmark -
     g = benchmark_growth_rates(settings);
+
+    # Every lag must be shorter than the benchmark's series of growth rates -
+    longest_lag = max(last(settings.short_lags), last(settings.long_lags));
+    if longest_lag >= length(g)
+        throw(ArgumentError("The last lag, $(longest_lag), must be smaller than the $(length(g)) growth rates of $(settings.benchmark_ticker)."));
+    end
+
+    # The facts of the benchmark, without a gap -
     facts = market_facts(g, zeros(length(g)), settings);
 
     # The label names the ticker -
@@ -122,8 +131,9 @@ end
 """
     standard_table(settings) -> Union{Vector{NamedTuple}, String}
 
-Rows of the table "Farmer–Joshi and SPY": the benchmark, value investors only, trend followers only,
-and both groups with 3 states. Returns `"UNAVAILABLE: ..."` when a function throws.
+Rows of the table "Farmer–Joshi and SPY" (named for the benchmark ticker): the benchmark, value
+investors only, trend followers only, and both groups with 3 states. Returns `"UNAVAILABLE: ..."`
+when a function throws.
 """
 function standard_table(settings::NamedTuple)::Union{Vector{NamedTuple},String}
     try
@@ -187,7 +197,8 @@ function hesitant_table(settings::NamedTuple)::Union{Vector{NamedTuple},String}
             row = market_row(settings, label, :conviction, K, p;
                 value_number = settings.value_number, trend_number = settings.trend_number);
 
-            # The expected steps from flat to long, from the transition matrix -
+            # The expected steps from flat to long, from your transition matrix at a strong buy signal held
+            # fixed: z = 10, far above the entry threshold T = 1, with the exit threshold τ = -0.1 -
             P = transition_matrix(10.0, 1.0, -0.1, K, p);
             push!(rows, merge(row, (steps = expected_steps_to_long(P, K),)));
         end
@@ -312,7 +323,7 @@ function write_report(track::String, settings::NamedTuple, path::String)::Nothin
         println(io, "# PS6 report\n");
 
         # The first table, on every track -
-        write_table(io, "Farmer–Joshi and SPY",
+        write_table(io, "Farmer–Joshi and $(settings.benchmark_ticker)",
             "Each simulated row is the mean over $(length(settings.seeds)) runs of $(settings.number_of_steps) daily steps; the gap spread is the standard deviation of the log price minus the log value.",
             standard, settings);
 

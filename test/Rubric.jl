@@ -1,5 +1,5 @@
 # SHA-256 of the supplied config/defaults.toml; the checker warns when a student edits the file -
-const PS6_DEFAULTS_SHA256 = "5ff3e1ac85218e3f4657d75286d70732ad3726e2668872d596a7e28efdd04812";
+const PS6_DEFAULTS_SHA256 = "98d757e95289cd50f48dd55d1eba935752f2cc04c9c1e57d7930a239961330a4";
 
 """
     run_public_check(check::NamedTuple)
@@ -43,8 +43,8 @@ function evaluate_public_checks(checks::AbstractVector{<:NamedTuple})::Vector{Na
             if !passed
                 detail = "check returned $(repr(value))";
             end
-        catch error
-            detail = sprint(showerror, error);
+        catch caught
+            detail = sprint(showerror, caught);
         end
         push!(results, (name = check.name, passed = passed, detail = detail));
     end
@@ -199,24 +199,6 @@ end
 
 
 """
-    code_is_documented(function_names::Vector{Symbol}) -> Bool
-
-Check whether all required functions have docstrings.
-
-### Arguments
-
-- `function_names`: Names of the functions required for the selected track.
-
-### Returns
-
-`true` when every named function is defined and has a docstring in `Main`.
-"""
-function code_is_documented(function_names::Vector{Symbol})::Bool
-    return isempty(missing_docstrings(function_names));
-end
-
-
-"""
     response_issues(path::String) -> Vector{String}
 
 Find missing or unfinished answers and describe how to fix them.
@@ -243,7 +225,7 @@ function response_issues(path::String)::Vector{String}
         return ["Response file is missing. Restore it from the PS6 ZIP and answer all three questions."];
     end
 
-    # Initialize -
+    # Read the response file, and start an empty list of issues -
     text = read(path, String);
     issues = String[];
 
@@ -277,29 +259,6 @@ end
 
 
 """
-    response_is_complete(path::String) -> Bool
-
-Check whether all three answer blocks contain text without TODO.
-
-### Arguments
-
-- `path`: Selected track's Markdown response file.
-
-### Returns
-
-`true` when `response_issues` returns an empty list. This checks that answers
-are present; the teaching team reviews whether they meet the requirements.
-
-### Errors
-
-An unreadable file raises a file-read error.
-"""
-function response_is_complete(path::String)::Bool
-    return isempty(response_issues(path));
-end
-
-
-"""
     rubric_score(results; tests_ran, completion) -> Int
 
 Calculate the rubric score from the check results and the teaching team's review.
@@ -329,7 +288,7 @@ It leaves the choice between 3 and 4 to the teaching team.
 function rubric_score(results::AbstractVector{<:NamedTuple};
     tests_ran::Bool, completion::Bool)::Int
 
-    # Initialize -
+    # Count the checks that passed, out of all the checks -
     passed = number_passed(results);
     total = length(results);
 

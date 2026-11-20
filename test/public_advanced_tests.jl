@@ -39,7 +39,8 @@ end
 """
     check_conviction_by_hand() -> Bool
 
-Hand-computed states for `K = 2` and `K = 3`, with `T = 1.0` and `τ = -0.1`.
+Hand-computed states for `K = 2` and `K = 3`, with `T = 1.0` and `τ = -0.1`, including five signals exactly
+at a threshold.
 """
 function check_conviction_by_hand()::Bool
 
@@ -47,11 +48,12 @@ function check_conviction_by_hand()::Bool
     T = 1.0;
     τ = -0.1;
 
-    # Each case is (K, state, z, expected next state) -
+    # Each case is (K, state, z, expected next state); the last five cases put z exactly at a threshold -
     cases = (
         (2, 0, 1.5, 1), (2, 1, 1.5, 2), (2, 1, 0.5, 0), (2, 1, -1.5, 0), (2, 2, 0.5, 2),
         (2, 2, -0.2, 1), (2, -1, -1.5, -2), (2, -2, 0.2, -1), (2, 0, 0.5, 0),
         (3, 2, 0.5, 1), (3, 3, -0.2, 2),
+        (2, 0, 1.0, 0), (2, 1, 1.0, 0), (2, -1, -1.0, 0), (2, 2, -0.1, 2), (2, -2, 0.1, -2),
     );
 
     # conviction_rule must give the expected next state in every case -

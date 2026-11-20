@@ -1,6 +1,7 @@
 # The PS6 public checks for the Expert track: the sixteen Advanced checks, then eight checks of
-# hesitant_rule and transition_matrix. Each check calls one student function, so an unfinished
-# function does not block the checks of the others.
+# hesitant_rule and transition_matrix. Each hesitant_rule check calls only hesitant_rule. The
+# transition_matrix checks also need a finished conviction_rule, because transition_matrix calls
+# conviction_rule.
 
 # --- hesitant_rule checks ---
 
@@ -24,12 +25,12 @@ end
 """
     check_hesitant_holds() -> Bool
 
-`hesitant_rule` keeps the current state when the draw `u` is at least `p`.
+`hesitant_rule` keeps the current state when the draw `u` is at least `p`, for entries and for exits.
 """
 function check_hesitant_holds()::Bool
 
-    # Each case is (state, proposed, p, u, expected state) -
-    cases = ((0, 1, 0.5, 0.5, 0), (0, 1, 0.5, 0.9, 0));
+    # Each case is (state, proposed, p, u, expected state): two entries, then an exit from long and an exit from short -
+    cases = ((0, 1, 0.5, 0.5, 0), (0, 1, 0.5, 0.9, 0), (1, 0, 0.5, 0.7, 1), (-2, -1, 0.2, 0.5, -2));
     for (state, proposed, p, u, expected) ∈ cases
         if hesitant_rule(state, proposed, p, u) != expected
             return false;
@@ -74,6 +75,32 @@ end
 # --- transition_matrix checks ---
 
 """
+    ps6_transition_entry(state::Int, proposed::Int, column_state::Int, p::Float64) -> Float64
+
+The probability that a trader in `state` is in `column_state` one step later, when `conviction_rule`
+proposes `proposed` and the trader acts on a proposed move with probability `p`.
+"""
+function ps6_transition_entry(state::Int, proposed::Int, column_state::Int, p::Float64)::Float64
+
+    # When the proposed state is the current state, the trader stays -
+    if proposed == state
+        if column_state == state
+            return 1.0;
+        end
+        return 0.0;
+    end
+
+    # Otherwise the trader moves with probability p and stays with probability 1 - p -
+    if column_state == proposed
+        return p;
+    end
+    if column_state == state
+        return 1.0 - p;
+    end
+    return 0.0;
+end
+
+"""
     check_transition_rows() -> Bool
 
 `transition_matrix` returns a `(2K+1) × (2K+1)` matrix whose rows each sum to 1, for `K` from 1 to 3,
@@ -107,30 +134,31 @@ function check_transition_rows()::Bool
 end
 
 """
-    check_transition_certain() -> Bool
+    check_transition_entries() -> Bool
 
-With `p = 1.0`, `transition_matrix` puts probability 1 in the state that `conviction_rule` gives
-and probability 0 in every other state.
+Every entry of `transition_matrix` is `p` in the column of the state that `conviction_rule` proposes,
+`1 - p` in the column of the current state, and `0` in every other column, or `1` on the diagonal when
+the proposed state is the current state. The check covers `K` from 1 to 3, three values of `p`, and
+five signals.
 """
-function check_transition_certain()::Bool
+function check_transition_entries()::Bool
 
     # The entry and exit thresholds of every case -
     T = 1.0;
     τ = -0.1;
     for K ∈ 1:3
-        for z ∈ (-2.0, -0.5, 0.0, 0.5, 2.0)
-            P = transition_matrix(z, T, τ, K, 1.0);
-            for i ∈ 1:(2 * K + 1)
+        for p ∈ (1.0, 0.5, 0.2)
+            for z ∈ (-2.0, -0.5, 0.0, 0.5, 2.0)
+                P = transition_matrix(z, T, τ, K, p);
 
-                # Row i must hold 1 in the column of the state that conviction_rule gives, and 0 everywhere else -
-                target = conviction_rule(i - K - 1, z, T, τ, K);
-                for j ∈ 1:(2 * K + 1)
-                    expected = 0.0;
-                    if j - K - 1 == target
-                        expected = 1.0;
-                    end
-                    if P[i, j] != expected
-                        return false;
+                # Row i must match the state that conviction_rule proposes for state i - K - 1 -
+                for i ∈ 1:(2 * K + 1)
+                    proposed = conviction_rule(i - K - 1, z, T, τ, K);
+                    for j ∈ 1:(2 * K + 1)
+                        expected = ps6_transition_entry(i - K - 1, proposed, j - K - 1, p);
+                        if !isapprox(P[i, j], expected, atol = 1e-12)
+                            return false;
+                        end
                     end
                 end
             end
@@ -191,7 +219,7 @@ function expert_public_checks()::Vector{NamedTuple}
     push!(checks, (name = "Hesitant rule: p = 1 accepts every draw", test = check_hesitant_certain));
     push!(checks, (name = "Hesitant rule: a proposal equal to the state returns the state", test = check_hesitant_same_state));
     push!(checks, (name = "Transition matrix: size and row sums", test = check_transition_rows));
-    push!(checks, (name = "Transition matrix: p = 1 matches conviction_rule", test = check_transition_certain));
+    push!(checks, (name = "Transition matrix: every entry matches conviction_rule and p", test = check_transition_entries));
     push!(checks, (name = "Transition matrix: hand-computed matrix for K = 1", test = check_transition_by_hand));
     push!(checks, (name = "Transition matrix: expected steps from state 0 to state K", test = check_transition_steps_to_long));
     return checks;

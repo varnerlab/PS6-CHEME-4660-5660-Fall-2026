@@ -80,15 +80,16 @@ end
 """
     check_three_state_type() -> Bool
 
-`three_state_rule` returns an `Int` in `-1:1` for 1,000 random inputs.
+`three_state_rule` returns an `Int` in `-1:1` for 1,000 random inputs, each with an exit threshold below
+its entry threshold.
 """
 function check_three_state_type()::Bool
 
-    # Draw a random state, signal, entry threshold, and exit threshold for each case -
+    # Draw a random state, signal, entry threshold from 0.3 to 3.3, and exit threshold from -0.2 to 0.2 for each case -
     rng = Xoshiro(5660);
     for i ∈ 1:1000
         state = rand(rng, -1:1);
-        result = three_state_rule(state, 6.0 * rand(rng) - 3.0, 3.0 * rand(rng) + 0.1, 0.4 * rand(rng) - 0.2);
+        result = three_state_rule(state, 6.0 * rand(rng) - 3.0, 3.0 * rand(rng) + 0.3, 0.4 * rand(rng) - 0.2);
 
         # The next state must be an Int from -1 to 1 -
         if !(result isa Int) || result < -1 || result > 1

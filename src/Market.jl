@@ -199,6 +199,7 @@ function simulate_market(model::MyFarmerJoshiMarketModel, rule::Symbol, K::Int, 
             u = rand(action_rng);
             old_state = value_states[i];
             new_state = next_state(rule, old_state, z, model.value_entry[i], model.value_exit[i], K, p, u);
+            # The trader's order is the change in the trader's position, and adds to the net demand -
             c = model.value_capital[i];
             net += state_position(new_state, K, c) - state_position(old_state, K, c);
             value_states[i] = new_state;
@@ -212,6 +213,7 @@ function simulate_market(model::MyFarmerJoshiMarketModel, rule::Symbol, K::Int, 
                 z = log_price[k] - log_price[k - lag];
                 old_state = trend_states[j];
                 new_state = next_state(rule, old_state, z, model.trend_entry[j], model.trend_exit[j], K, p, u);
+                # The trader's order is the change in the trader's position, and adds to the net demand -
                 c = model.trend_capital[j];
                 net += state_position(new_state, K, c) - state_position(old_state, K, c);
                 trend_states[j] = new_state;
@@ -226,6 +228,8 @@ function simulate_market(model::MyFarmerJoshiMarketModel, rule::Symbol, K::Int, 
             u = rand(signal_rng);
             old_state = noise_states[n];
             new_state = next_state(rule, old_state, z, noise_entry, noise_exit, K, p, u);
+
+            # The trader's order is the change in the trader's position, and adds to the net demand -
             net += state_position(new_state, K, noise_capital) - state_position(old_state, K, noise_capital);
             noise_states[n] = new_state;
         end

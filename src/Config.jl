@@ -31,10 +31,13 @@ function config_setting(settings::Dict, key::String, T::Type)
         throw(ArgumentError("Setting '$key' must be a whole number."));
     end
 
-    # Convert the value to T -
+    # Convert the value to T; a text setting such as benchmark_ticker needs quotes -
     try
         return T(value);
     catch
+        if T == String
+            throw(ArgumentError("Setting '$key' must be text in quotes."));
+        end
         throw(ArgumentError("Setting '$key' must be a number."));
     end
 end

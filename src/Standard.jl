@@ -141,10 +141,10 @@ function volatility_clustering(g::Vector{Float64}, lags::Vector{Int})::Float64
 
     # TODO 1: Compute the autocorrelation of abs.(g) at each lag in lags.
     # Hint: sample_autocorrelation(abs.(g), lags).
-    values = error("Complete volatility_clustering: compute the autocorrelations of abs.(g).");
+    autocorrelations = error("Complete volatility_clustering: compute the autocorrelations of abs.(g).");
 
     # TODO 2: Average the autocorrelations over the lags.
-    # Hint: mean(values).
+    # Hint: mean(autocorrelations).
     ρ = error("Complete volatility_clustering: average the autocorrelations.");
 
     return ρ;

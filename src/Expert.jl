@@ -144,10 +144,10 @@ function volatility_clustering(g::Vector{Float64}, lags::Vector{Int})::Float64
 
     # TODO 1: Compute the autocorrelation of abs.(g) at each lag in lags.
     # Hint: sample_autocorrelation(abs.(g), lags).
-    values = error("Complete volatility_clustering: compute the autocorrelations of abs.(g).");
+    autocorrelations = error("Complete volatility_clustering: compute the autocorrelations of abs.(g).");
 
     # TODO 2: Average the autocorrelations over the lags.
-    # Hint: mean(values).
+    # Hint: mean(autocorrelations).
     ρ = error("Complete volatility_clustering: average the autocorrelations.");
 
     return ρ;
@@ -178,10 +178,10 @@ All comparisons are strict.
 - In a flat state (`-K < state < K`), the trader moves up one state when `z` is above `T`, and down one state
   when `z` is below `-T`. Otherwise conviction fades: the trader moves one state toward state `0`, and stays
   in state `0` if the trader is already there.
-- In state `K`, the trader exits to the lean-long state `K - 1` when `z` is below `τ`. Otherwise the trader
-  stays in state `K`.
-- In state `-K`, the trader exits to the lean-short state `-(K - 1)` when `z` is above `-τ`. Otherwise the
-  trader stays in state `-K`.
+- In state `K`, the trader exits to state `K - 1` when `z` is below `τ`. Otherwise the trader stays in
+  state `K`.
+- In state `-K`, the trader exits to state `-(K - 1)` when `z` is above `-τ`. Otherwise the trader stays in
+  state `-K`.
 
 With `K = 1`, this rule gives the Standard three-state rule for every input.
 

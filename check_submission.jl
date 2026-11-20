@@ -222,7 +222,11 @@ function write_manifest(path::String, record::NamedTuple)::Nothing
     println(io, "required function docstrings present: ", record.documented);
     println(io, "three answer blocks contain text without TODO: ", record.answers);
     println(io, "local rubric score: ", record.score);
-    println(io, "defaults.toml changed: ", record.defaults_changed);
+    if record.defaults_checked
+        println(io, "defaults.toml changed: ", record.defaults_changed);
+    else
+        println(io, "defaults.toml changed: not checked");
+    end
     if record.defaults_changed
         println(io, "defaults.toml sha256: ", record.defaults_hash);
     end
@@ -284,7 +288,7 @@ Does not upload files or edit the student's code or answers.
 """
 function main(setup::NamedTuple)::Nothing
 
-    # Initialize -
+    # The track, whether the checks can run, and the name of the source file -
     track = setup.track;
     tests_ran = setup.tests_ran;
     track_known = track in ("standard", "advanced", "expert");
@@ -346,18 +350,22 @@ function main(setup::NamedTuple)::Nothing
         score = string(rubric_score(results; tests_ran=tests_ran, completion=false));
     end
 
-    # Compare the settings file with the supplied copy (config_hash needs a loaded Include.jl) -
+    # Compare the settings file with the supplied copy, whenever Include.jl got far enough to load config_hash -
     defaults_path = joinpath(_CHECK_ROOT, "config", "defaults.toml");
     defaults_hash = "MISSING";
+    defaults_checked = isdefined(Main, :config_hash);
     defaults_changed = false;
-    if tests_ran
+    if defaults_checked
         if isfile(defaults_path)
             defaults_hash = config_hash(defaults_path);
         end
         defaults_changed = defaults_hash != PS6_DEFAULTS_SHA256;
     end
-    if defaults_changed
+    if defaults_changed && tests_ran
         print_terminal_text("Warning: config/defaults.toml differs from the supplied copy; the report uses your edited settings, but grading uses the supplied file.");
+    end
+    if defaults_changed && !tests_ran
+        print_terminal_text("Warning: config/defaults.toml differs from the supplied copy, and grading uses the supplied file.");
     end
 
     # Write the report; a table that cannot be calculated shows UNAVAILABLE in the report -
@@ -379,8 +387,8 @@ function main(setup::NamedTuple)::Nothing
     record_path = joinpath(setup.output_root, "MANIFEST.txt");
     record = (track = track, source_name = source_name, solution = setup.solution, tests_ran = tests_ran,
         passed = passed, total = length(results), documented = documented, answers = answers,
-        score = score, defaults_changed = defaults_changed, defaults_hash = defaults_hash,
-        detail = setup.detail, source_path = setup.source_path);
+        score = score, defaults_checked = defaults_checked, defaults_changed = defaults_changed,
+        defaults_hash = defaults_hash, detail = setup.detail, source_path = setup.source_path);
     write_manifest(record_path, record);
 
     # Show what to finish before submitting -

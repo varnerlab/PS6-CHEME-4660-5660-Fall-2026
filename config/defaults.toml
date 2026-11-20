@@ -49,7 +49,7 @@ capital_scale = 0.0025
 # Market liquidity. The market maker divides the net demand of the traders by the liquidity, so a larger liquidity moves the price less.
 liquidity = 1.0
 
-# Number of daily steps in one simulated market run.
+# Number of daily steps kept in one simulated market run, after the burn-in.
 number_of_steps = 20000
 
 # Number of first daily steps dropped from every run before any statistic is computed.
@@ -61,10 +61,10 @@ base_seed = 5660
 # Run numbers k, one simulated market per number.
 seeds = [1, 2, 3, 4, 5]
 
-# Short lags in days, given as the first and the last lag. `load_config` fills in every lag between them. The last lag must be smaller than the number of daily growth rates of the benchmark.
+# Short lags in days, given as the first and the last lag. `load_config` fills in every lag between them. The last lag must be smaller than number_of_steps and smaller than the number of daily growth rates of the benchmark.
 short_lags = [1, 10]
 
-# Long lags in days, given as the first and the last lag.
+# Long lags in days, given as the first and the last lag, with the same limits as the short lags.
 long_lags = [11, 50]
 
 # Numbers of states the Advanced track compares. Each number is odd and at least 3.

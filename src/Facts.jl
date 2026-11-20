@@ -31,7 +31,8 @@ end
 """
     white_noise_band(n::Int) -> Float64
 
-Compute the 95 percent band, `1.96 / sqrt(n)`, inside which the autocorrelations of `n` white-noise values fall.
+Compute `1.96 / sqrt(n)`. About 95 percent of the autocorrelations of `n` white-noise values fall between
+minus and plus this number.
 """
 function white_noise_band(n::Int)::Float64
     return 1.96 / sqrt(n);
@@ -75,7 +76,7 @@ function expected_steps_to_long(P::Matrix{Float64}, K::Int)::Float64
     # The fundamental matrix gives the expected visits to each state before reaching K -
     N = inv(I - Q);
 
-    # Expected steps starting from state 0, which is state K + 1 -
+    # Expected steps starting from state 0, which is row K + 1 -
     steps = 0.0;
     for j ∈ 1:(number_of_states - 1)
         steps += N[K + 1, j];
