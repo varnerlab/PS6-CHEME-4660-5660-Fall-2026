@@ -1,5 +1,5 @@
 # PS6 market: the Farmer-Joshi market, written as a loop that calls your functions for each trader's next state.
-# This file is supplied. Do not edit it.
+# This file is supplied. Do not edit it, except to try the noise traders in a copy of your PS6 folder.
 
 """
     build_market(settings::NamedTuple, seed::Int; value_number::Int = settings.value_number,
@@ -171,6 +171,21 @@ function simulate_market(model::MyFarmerJoshiMarketModel, rule::Symbol, K::Int, 
     trend_states = zeros(Int, length(model.trend_entry));
     sqrt_dt = sqrt(model.Δt);
 
+    # Just for fun, and not graded: noise traders. To add them, work in a copy of your PS6 folder, and
+    # delete the #= and =# lines around this block and around the noise-trader loop below. The noise
+    # traders then join every market the simulator runs.
+    #=
+    # The noise traders: how many, their thresholds, and their position size (capital scale times T minus tau) -
+    noise_number = 1200;
+    noise_entry = 1.0;
+    noise_exit = 0.0;
+    noise_capital = 0.0025 * (noise_entry - noise_exit);
+    noise_states = zeros(Int, noise_number);
+
+    # A third random stream, for the noise traders' signals and actions -
+    signal_rng = Xoshiro(seed + 3);
+    =#
+
     # One loop pass per daily step -
     for k in 1:total
 
@@ -201,6 +216,19 @@ function simulate_market(model::MyFarmerJoshiMarketModel, rule::Symbol, K::Int, 
                 trend_states[j] = new_state;
             end
         end
+
+        # Just for fun: the noise-trader loop. Delete the #= and =# lines to add it, with the block above the loop.
+        #=
+        # Noise traders last. Each noise trader's signal is a standard Normal random number that the market cannot see.
+        for n in eachindex(noise_states)
+            z = randn(signal_rng);
+            u = rand(signal_rng);
+            old_state = noise_states[n];
+            new_state = next_state(rule, old_state, z, noise_entry, noise_exit, K, p, u);
+            net += state_position(new_state, K, noise_capital) - state_position(old_state, K, noise_capital);
+            noise_states[n] = new_state;
+        end
+        =#
 
         # The net demand moves the price, and the value takes its own step -
         log_price[k + 1] = log_price[k] + net / model.λ + model.σ_S * sqrt_dt * randn(noise_rng);
