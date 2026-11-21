@@ -29,7 +29,7 @@ def check_starter(root: Path) -> None:
         raise ValueError("Reset TRACK.txt to standard before building the release.")
 
     # Each track's source must hold only its unfinished functions, and each response file its placeholders.
-    for track, count in (("Standard", 3), ("Advanced", 4), ("Expert", 6)):
+    for track, count in (("Standard", 3), ("Advanced", 5), ("Expert", 6)):
         source = (root / f"src/{track}.jl").read_text()
         if len(re.findall(r'^function ', source, re.M)) != count or len(set(
             re.findall(r'error\("Complete ([A-Za-z_0-9]+):', source))) != count:

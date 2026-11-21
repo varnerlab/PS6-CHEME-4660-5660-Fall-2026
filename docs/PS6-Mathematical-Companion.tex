@@ -69,14 +69,14 @@ stocks move together.
 \begin{itemize}\setlength{\itemsep}{0.3em}
 \item \hilite{Standard: the market and the sectors.} Fitting steps 1, 2, 3,
 and 5, with SPY and the 11 sector factors.
-\item \hilite{Advanced: economic factors from FRED.} Standard plus four daily
-economic factors in fitting step 1.
-\item \hilite{Expert: the Cholesky step.} Advanced plus fitting step 4, which
+\item \hilite{Advanced: the Cholesky step.} Standard plus fitting step 4, which
 keeps the correlations between the factors in the synthetic market.
+\item \hilite{Expert: economic factors from FRED.} Advanced plus four daily
+economic factors in fitting step 1.
 \end{itemize}
 \slidenote{Reading guide}{All tracks use slides 4–\pageref{fr:residuals} and
-\pageref{fr:jump}–\pageref{fr:report}. Slide \pageref{fr:fred} is for
-Advanced and Expert, and slide \pageref{fr:unmix} is for Expert only.}
+\pageref{fr:jump}–\pageref{fr:report}. Slide \pageref{fr:unmix} is for
+Advanced and Expert, and slide \pageref{fr:fred} is for Expert only.}
 \end{frame}
 
 \begin{frame}{The data and the growth rates}\label{fr:data}
@@ -106,18 +106,20 @@ market, $K$ economic factors, and the 11 sector factors:
  +\underbrace{u_{i}(t)}_{\text{stock-specific}}.
 \]
 \begin{center}\small
-\begin{tabular}{lll}
+\begin{tabular}{lccc}
 \toprule
-Market in the report & Economic factors & Sector factors \\
+Market in the report & $K$ & Sectors & Step 4 \\
 \midrule
-single index model & none ($K=0$) & none \\
-market and sectors (Standard) & none ($K=0$) & 11 \\
-market, FRED series, and sectors (Advanced) & four FRED series ($K=4$) & 11 \\
+single index model & 0 & none & no \\
+market and sectors & 0 & 11 & no \\
+market and sectors, with the Cholesky step & 0 & 11 & yes \\
+market, FRED series, and sectors, with the Cholesky step & 4 & 11 & yes \\
 \bottomrule
 \end{tabular}
 \end{center}
-\slidenote{Expert}{The Expert market adds fitting step 4 to the Advanced
-market, slide \pageref{fr:unmix}.}
+\slidenote{Tracks}{Standard reports the first two markets, Advanced adds the
+third, and Expert adds the fourth, with the four FRED series of slide
+\pageref{fr:fred}.}
 \end{frame}
 
 \begin{frame}{One solve for fitting steps 1, 2, and 3}\label{fr:solve}
@@ -229,15 +231,14 @@ Julia, \texttt{M / transpose(A)} computes $\mathbf{M}\Ab^{-\top}$.}
 Fitting step 5 fits one single-asset jump hidden Markov model to each series:
 \begin{itemize}\setlength{\itemsep}{0.3em}
 \item each column of $\Phib$, or each column of $\Zb$ after fitting step 4
-(Expert);
+(Advanced and Expert);
 \item the stock-specific part $\ub_i$ of each stock.
 \end{itemize}
 Each model draws its paths independently of the other models, so without
 fitting step 4 the synthetic factors are uncorrelated.
 \slidenote{Code}{\texttt{fit\_jump\_model} and \texttt{draw\_series} in
 \texttt{src/Model.jl}. Every model uses the settings of the tuned SPY model of
-L13a, in \texttt{config/defaults.toml}. \texttt{spread\_rate\_changes} first
-spreads each FRED rate change over its 0.01 recording step.}
+L13a, in \texttt{config/defaults.toml}.}
 \end{frame}
 
 \begin{frame}{Sampling: draw, mix, and compose}\label{fr:sampling}

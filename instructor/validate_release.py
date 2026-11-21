@@ -131,7 +131,7 @@ def main():
         print("Recorded Julia environment installed.", flush=True)
 
         # All three unfinished starters must score zero and still write their reports.
-        for track, total in (("standard", 12), ("advanced", 16), ("expert", 24)):
+        for track, total in (("standard", 12), ("advanced", 20), ("expert", 24)):
             check_starter_run(student, track, total)
             print(f"{track.title()} starter: 0/{total}, report, manifest, and answer warnings passed.", flush=True)
     print("The student source archive is ready for a draft GitHub release.")

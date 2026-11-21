@@ -8,13 +8,12 @@
   'Building a General Factor Model'; the real market is SPY
   (`benchmark_ticker`) and its 375 stocks.
 - Three tracks. Standard: the market and the sector factors (`least_squares_fit`,
-  `sector_matrix`, `compose_growth_rates`). Advanced: Standard plus four FRED
-  series as economic factors (`economic_factor`). Expert: Advanced plus the
-  Cholesky step (`unmix_factors`, `mix_factors`).
+  `sector_matrix`, `compose_growth_rates`). Advanced: Standard plus the Cholesky
+  step (`unmix_factors`, `mix_factors`). Expert: Advanced plus four FRED series
+  as economic factors (`economic_factor`).
 - The supplied code in `src/Model.jl` follows the lecture's fitting and sampling
-  algorithms exactly, with one addition: `spread_rate_changes` spreads the
-  recorded rate changes over their 0.01 step before their jump models are fit.
-  `least_squares_fit` is the one solve for fitting steps 1, 2, and 3.
+  algorithms exactly. `least_squares_fit` is the one solve for fitting steps 1,
+  2, and 3.
 - All settings live in `config/defaults.toml`, read by `load_config` in
   `src/Config.jl`. The file is graded, so students do not edit it. The track
   is chosen in `TRACK.txt`.

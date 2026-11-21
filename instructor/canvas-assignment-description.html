@@ -28,9 +28,9 @@ You can also paste this file's contents into the Canvas HTML editor.
   whether a synthetic market built this way moves together like the real
   market. You will fit the general factor model of lecture L14a and compare how
   the real and synthetic stocks move together. Standard fits the market and the
-  sector factors. Advanced adds four economic factors from FRED, such as the
-  daily change in the 10-year Treasury yield. Expert adds the Cholesky step,
-  which keeps the correlations between the factors. You are graded on your
+  sector factors. Advanced adds the Cholesky step, which keeps the correlations
+  between the factors. Expert adds four economic factors from FRED, such as the
+  daily change in the 10-year Treasury yield. You are graded on your
   calculations and interpretation, not on whether the synthetic market matches
   the real market.
 </p>
@@ -65,7 +65,7 @@ You can also paste this file's contents into the Canvas HTML editor.
 <p>
   Set <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">TRACK.txt</code> to <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">standard</code>, <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">advanced</code>, or <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">expert</code>.
   On Standard, you complete three functions in <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">src/Standard.jl</code>; on
-  Advanced, four in <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">src/Advanced.jl</code>; and on Expert, six in
+  Advanced, five in <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">src/Advanced.jl</code>; and on Expert, six in
   <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">src/Expert.jl</code>. Answer your track's three questions in the matching file
   under <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">responses</code>. Replace only the TODO line of each answer, and keep the
   supplied docstrings and marker lines. Put any helper functions in files under
@@ -94,7 +94,7 @@ You can also paste this file's contents into the Canvas HTML editor.
 <pre style="display: block; padding: 10px; margin: 0 0 10px; color: #333333; background-color: #f5f5f5; border: 1px solid #cccccc; border-radius: 4px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 13px; line-height: 1.5; white-space: pre-wrap;"><code style="color: #333333; background-color: #f5f5f5; padding: 0; font-family: inherit; font-size: inherit;">julia --project=. --startup-file=no check_submission.jl</code></pre>
 
 <p>
-  The checker runs your track's 12, 16, or 24 checks and writes the report to
+  The checker runs your track's 12, 20, or 24 checks and writes the report to
   <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">results/Report.md</code>. A row or a table that needs an unfinished function shows
   <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">UNAVAILABLE</code>. Once your functions work, the checker takes less than a
   minute. Use the report to answer your three questions.

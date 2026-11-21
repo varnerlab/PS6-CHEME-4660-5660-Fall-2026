@@ -11,8 +11,10 @@ for accuracy. The synthetic market draws SPY, each sector factor, and the
 stock-specific part of each stock from separate single-asset jump hidden Markov
 models. Will two synthetic stocks in the same sector move together as much as
 two real stocks in the same sector? Will two stocks in different sectors?
-Explain why. Which sectors do you expect to move with the 10-year Treasury
-yield, and in which direction?
+Explain why. In the real market, the sector factors of Real
+Estate and Utilities move together. Will a synthetic stock in Real Estate and a
+synthetic stock in Utilities move together as much as two real stocks do,
+without the Cholesky step and with it?
 
 <!-- answer-1:start -->
 TODO: Answer Question 1.
@@ -29,14 +31,11 @@ sector factors add to the synthetic market? Use the columns **Same sector** and
 TODO: Answer Question 2.
 <!-- answer-2:end -->
 
-## 3. What do the FRED series add?
+## 3. What does the Cholesky step add?
 
-In the table **FRED series**, which sectors have the largest loadings on the
-10-year Treasury yield, and which sector has the largest loading on the Brent
-oil price? Compare the sector-pair columns of the row **market, FRED series,
-and sectors** with the rows **market and sectors** and **real market**. Do the
-FRED series move these columns toward the real market? Was your prediction in
-Question 1 right?
+Compare the row **market and sectors, with the Cholesky step** with the rows
+**market and sectors** and **real market**. Which columns move toward the real
+market, and why? Was your prediction in Question 1 right?
 
 <!-- answer-3:start -->
 TODO: Answer Question 3.

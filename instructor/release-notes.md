@@ -6,8 +6,8 @@ Download **Source code (zip)** below, extract it, and start with `README.md`. Th
 
 Set `TRACK.txt` to `standard`, `advanced`, or `expert`.
 * __Standard__ fits the market and the sector factors of the general factor model, and compares how the real and synthetic stocks move together.
-* __Advanced__ adds four economic factors from FRED, such as the daily change in the 10-year Treasury yield.
-* __Expert__ adds the Cholesky step, which keeps the correlations between the factors in the synthetic market.
+* __Advanced__ adds the Cholesky step, which keeps the correlations between the factors in the synthetic market.
+* __Expert__ adds four economic factors from FRED, such as the daily change in the 10-year Treasury yield.
 
 Answer Question 1, your prediction, before you write any code.
 

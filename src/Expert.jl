@@ -1,8 +1,8 @@
-# PS6 Expert: complete the 6 functions below, the 4 Advanced functions, unmix_factors, and mix_factors.
+# PS6 Expert: complete the 6 functions below, the 5 Advanced functions and economic_factor.
 # The supplied code in src/Model.jl calls sector_matrix to build the sector matrix B, least_squares_fit
 # in fitting steps 1, 2, and 3, and compose_growth_rates to build each synthetic stock.
-# It calls economic_factor to turn each FRED series into a daily factor, unmix_factors before it fits
-# the jump hidden Markov models of the factors, and mix_factors after it draws the factors.
+# It calls unmix_factors before it fits the jump hidden Markov models of the factors, mix_factors
+# after it draws the factors, and economic_factor to turn each FRED series into a daily factor.
 # Keep the function names, arguments, return types, and docstrings.
 # Replace each error("Complete ...") line with your calculation. The rest of each function is supplied.
 # Save your code, then run from the PS6 folder:
@@ -21,7 +21,7 @@ Fitting steps 1, 2, and 3 use this one solve, with a different `X` and `y` in ea
 
 - Step 1, the market and economic loadings of stock `i`: `X` is the design matrix
   `[1, g_m, x_1, ..., x_K]` (days × columns), `y` is the growth rates of stock `i`, and `θ` is
-  `(α_i, β_i, η_i1, ..., η_iK)`. On the Standard track, `X` is `[1, g_m]`.
+  `(α_i, β_i, η_i1, ..., η_iK)`. On the Standard and Advanced tracks, `X` is `[1, g_m]`.
 - Step 2, the sector factors on day `t`: `X` is the sector matrix `B` (stocks × sectors), `y` is the
   residual of every stock on day `t`, and `θ` is the sector factors on day `t`.
 - Step 3, the sector loadings of stock `i`: `X` is the sector factors `F` (days × sectors), `y` is the
@@ -127,8 +127,8 @@ Compose the growth rates of one synthetic stock (sampling step 3): the market an
 
 ### Arguments
 
-- `X`: The synthetic design matrix `[1, g_m, x_1, ..., x_K]`, days × columns. On the Standard
-  track, `X` is `[1, g_m]`.
+- `X`: The synthetic design matrix `[1, g_m, x_1, ..., x_K]`, days × columns. On the Standard and
+  Advanced tracks, `X` is `[1, g_m]`.
 - `θ`: The baseline, market sensitivity, and economic loadings of the stock, `(α, β, η_1, ..., η_K)`.
 - `F`: The synthetic sector factors, days × sectors. `F` has zero columns when a market has no
   sector factors.
@@ -157,6 +157,96 @@ function compose_growth_rates(X::Matrix{Float64}, θ::Vector{Float64}, F::Matrix
     g = error("Complete compose_growth_rates: compose the growth rates.");
 
     return g;
+end
+
+"""
+    unmix_factors(Φ::Matrix{Float64}) -> Tuple{Vector{Float64},Matrix{Float64},Matrix{Float64}}
+
+Unmix the factors (fitting step 4): turn the correlated factors in `Φ` into uncorrelated factors
+`Z`, so that a jump hidden Markov model can draw each column of `Z` on its own.
+
+### Arguments
+
+- `Φ`: The factor matrix `[g_m, x_1, ..., x_K, F]`, days × factors: the market, the economic
+  factors (Expert only), and the sector factors.
+
+### Returns
+
+- `μ`: The average of each column of `Φ`.
+- `A`: The lower-triangular Cholesky factor of the covariance matrix of `Φ`, so that
+  `A * transpose(A)` equals the covariance matrix.
+- `Z`: The uncorrelated factors, days × factors. Each column has an average of 0 and a variance of 1.
+
+### Method
+
+Compute the average of each column of `Φ`, and the covariance matrix of `Φ`. Factor the covariance
+matrix with `cholesky`, and keep its lower factor as an ordinary matrix with `|> Matrix`. Subtract
+`transpose(μ)` from each row of `Φ`, then divide on the right by `transpose(A)` with the `/` operator.
+
+### Course references
+
+- Course lecture L14a, section 'Building a General Factor Model', fitting algorithm, step 4 (Unmix
+  the factors), and the note 'Why unmix the factors?'.
+- Course example 'Simulating a Portfolio with Multiple Asset Geometric Brownian Motion' (L6a),
+  Task 1, 'Construct the price model': the line that computes `A` with `cholesky`.
+- PS6 companion: slide 10, 'Fitting step 4: unmix the factors'.
+"""
+function unmix_factors(Φ::Matrix{Float64})::Tuple{Vector{Float64},Matrix{Float64},Matrix{Float64}}
+
+    # TODO 1: The average of each column of Φ, as a vector.
+    # Hint: μ = vec(mean(Φ, dims = 1));
+    μ = error("Complete unmix_factors: the column averages of Φ.");
+
+    # The covariance matrix of Φ; Symmetric tells cholesky that the matrix is symmetric -
+    Σ = Symmetric(cov(Φ));
+
+    # TODO 2: The lower Cholesky factor of Σ, as an ordinary matrix.
+    # Hint: A = cholesky(Σ).L |> Matrix;
+    A = error("Complete unmix_factors: the lower Cholesky factor of Σ.");
+
+    # TODO 3: Subtract the averages from each row of Φ, then divide on the right by transpose(A).
+    # Hint: Z = (Φ .- transpose(μ)) / transpose(A);
+    Z = error("Complete unmix_factors: compute Z.");
+
+    return (μ, A, Z);
+end
+
+"""
+    mix_factors(Z::Matrix{Float64}, μ::Vector{Float64}, A::Matrix{Float64}) -> Matrix{Float64}
+
+Mix draws of the uncorrelated factors back into correlated factors (sampling step 1): multiply `Z`
+by `transpose(A)`, and add the averages `transpose(μ)` to each row.
+
+### Arguments
+
+- `Z`: Draws of the uncorrelated factors, days × factors: one column per jump hidden Markov model.
+- `μ`: The column averages from `unmix_factors`.
+- `A`: The Cholesky factor from `unmix_factors`.
+
+### Returns
+
+- `Φ`: The synthetic factors, days × factors: the market, the economic factors (Expert only), and
+  the sector factors, in the order of the columns of `Φ` in `unmix_factors`.
+
+### Method
+
+Multiply `Z` by `transpose(A)`. Add `transpose(μ)` to each row of the product.
+
+### Course references
+
+- Course lecture L14a, section 'Building a General Factor Model', sampling algorithm, step 1
+  (Factor draws).
+- Course example 'Simulating a Portfolio with Multiple Asset Geometric Brownian Motion' (L6a),
+  Task 1, 'Simulate correlated price paths': the step that correlates independent draws with `A`.
+- PS6 companion: slide 12, 'Sampling: draw, mix, and compose'.
+"""
+function mix_factors(Z::Matrix{Float64}, μ::Vector{Float64}, A::Matrix{Float64})::Matrix{Float64}
+
+    # TODO: Multiply Z by transpose(A), then add transpose(μ) to each row.
+    # Hint: Φ = transpose(μ) .+ Z * transpose(A);
+    Φ = error("Complete mix_factors: mix the draws.");
+
+    return Φ;
 end
 
 """
@@ -216,94 +306,4 @@ function economic_factor(levels::Vector{Float64}, kind::String, Δt::Float64)::V
     end
 
     return x;
-end
-
-"""
-    unmix_factors(Φ::Matrix{Float64}) -> Tuple{Vector{Float64},Matrix{Float64},Matrix{Float64}}
-
-Unmix the factors (fitting step 4): turn the correlated factors in `Φ` into uncorrelated factors
-`Z`, so that a jump hidden Markov model can draw each column of `Z` on its own.
-
-### Arguments
-
-- `Φ`: The factor matrix `[g_m, x_1, ..., x_K, F]`, days × factors: the market, the economic
-  factors, and the sector factors.
-
-### Returns
-
-- `μ`: The average of each column of `Φ`.
-- `A`: The lower-triangular Cholesky factor of the covariance matrix of `Φ`, so that
-  `A * transpose(A)` equals the covariance matrix.
-- `Z`: The uncorrelated factors, days × factors. Each column has an average of 0 and a variance of 1.
-
-### Method
-
-Compute the average of each column of `Φ`, and the covariance matrix of `Φ`. Factor the covariance
-matrix with `cholesky`, and keep its lower factor as an ordinary matrix with `|> Matrix`. Subtract
-`transpose(μ)` from each row of `Φ`, then divide on the right by `transpose(A)` with the `/` operator.
-
-### Course references
-
-- Course lecture L14a, section 'Building a General Factor Model', fitting algorithm, step 4 (Unmix
-  the factors), and the note 'Why unmix the factors?'.
-- Course example 'Simulating a Portfolio with Multiple Asset Geometric Brownian Motion' (L6a),
-  Task 1, 'Construct the price model': the line that computes `A` with `cholesky`.
-- PS6 companion: slide 10, 'Fitting step 4: unmix the factors'.
-"""
-function unmix_factors(Φ::Matrix{Float64})::Tuple{Vector{Float64},Matrix{Float64},Matrix{Float64}}
-
-    # TODO 1: The average of each column of Φ, as a vector.
-    # Hint: μ = vec(mean(Φ, dims = 1));
-    μ = error("Complete unmix_factors: the column averages of Φ.");
-
-    # The covariance matrix of Φ; Symmetric tells cholesky that the matrix is symmetric -
-    Σ = Symmetric(cov(Φ));
-
-    # TODO 2: The lower Cholesky factor of Σ, as an ordinary matrix.
-    # Hint: A = cholesky(Σ).L |> Matrix;
-    A = error("Complete unmix_factors: the lower Cholesky factor of Σ.");
-
-    # TODO 3: Subtract the averages from each row of Φ, then divide on the right by transpose(A).
-    # Hint: Z = (Φ .- transpose(μ)) / transpose(A);
-    Z = error("Complete unmix_factors: compute Z.");
-
-    return (μ, A, Z);
-end
-
-"""
-    mix_factors(Z::Matrix{Float64}, μ::Vector{Float64}, A::Matrix{Float64}) -> Matrix{Float64}
-
-Mix draws of the uncorrelated factors back into correlated factors (sampling step 1): multiply `Z`
-by `transpose(A)`, and add the averages `transpose(μ)` to each row.
-
-### Arguments
-
-- `Z`: Draws of the uncorrelated factors, days × factors: one column per jump hidden Markov model.
-- `μ`: The column averages from `unmix_factors`.
-- `A`: The Cholesky factor from `unmix_factors`.
-
-### Returns
-
-- `Φ`: The synthetic factors, days × factors: the market, the economic factors, and the sector
-  factors, in the order of the columns of `Φ` in `unmix_factors`.
-
-### Method
-
-Multiply `Z` by `transpose(A)`. Add `transpose(μ)` to each row of the product.
-
-### Course references
-
-- Course lecture L14a, section 'Building a General Factor Model', sampling algorithm, step 1
-  (Factor draws).
-- Course example 'Simulating a Portfolio with Multiple Asset Geometric Brownian Motion' (L6a),
-  Task 1, 'Simulate correlated price paths': the step that correlates independent draws with `A`.
-- PS6 companion: slide 12, 'Sampling: draw, mix, and compose'.
-"""
-function mix_factors(Z::Matrix{Float64}, μ::Vector{Float64}, A::Matrix{Float64})::Matrix{Float64}
-
-    # TODO: Multiply Z by transpose(A), then add transpose(μ) to each row.
-    # Hint: Φ = transpose(μ) .+ Z * transpose(A);
-    Φ = error("Complete mix_factors: mix the draws.");
-
-    return Φ;
 end

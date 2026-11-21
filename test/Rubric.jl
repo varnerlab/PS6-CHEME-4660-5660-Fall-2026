@@ -1,5 +1,5 @@
 # SHA-256 of the supplied config/defaults.toml; the checker warns when a student edits the file -
-const PS6_DEFAULTS_SHA256 = "5dd61b907d022ea9796aa85dbc7ae8a7776b38603958420faddd1843bf49cb38";
+const PS6_DEFAULTS_SHA256 = "affa6d3546bb2cc84cd554775dea521a19739d790ba40f2119a8dc1ba8a8e083";
 
 """
     run_public_check(check::NamedTuple)
@@ -280,8 +280,8 @@ When all checks pass, return 3 if `completion` is `false` and 4 if it is `true`.
 ### Notes
 
 Standard has 12 checks: passing 1–6 gives 1, 7–11 gives 2, and all 12 gives
-3 or 4. Advanced has 16 checks: passing 1–8 gives 1, 9–15 gives 2, and all
-16 gives 3 or 4. Expert has 24 checks: passing 1–12 gives 1, 13–23 gives 2, and all
+3 or 4. Advanced has 20 checks: passing 1–10 gives 1, 11–19 gives 2, and all
+20 gives 3 or 4. Expert has 24 checks: passing 1–12 gives 1, 13–23 gives 2, and all
 24 gives 3 or 4. The local checker prints that the teaching team review is pending when all checks pass.
 It leaves the choice between 3 and 4 to the teaching team.
 """
@@ -310,6 +310,6 @@ end
 # Functions that must have docstrings -
 const STANDARD_DOCUMENTED_FUNCTIONS = [:least_squares_fit, :sector_matrix, :compose_growth_rates];
 
-const ADVANCED_DOCUMENTED_FUNCTIONS = vcat(STANDARD_DOCUMENTED_FUNCTIONS, [:economic_factor]);
+const ADVANCED_DOCUMENTED_FUNCTIONS = vcat(STANDARD_DOCUMENTED_FUNCTIONS, [:unmix_factors, :mix_factors]);
 
-const EXPERT_DOCUMENTED_FUNCTIONS = vcat(ADVANCED_DOCUMENTED_FUNCTIONS, [:unmix_factors, :mix_factors]);
+const EXPERT_DOCUMENTED_FUNCTIONS = vcat(ADVANCED_DOCUMENTED_FUNCTIONS, [:economic_factor]);
