@@ -228,21 +228,16 @@ Julia, \texttt{M / A'} computes $\mathbf{M}\Ab^{-\top}$.}
 \begin{frame}{Fitting step 5: the jump hidden Markov models}\label{fr:jump}
 Fitting step 5 fits one single-asset jump hidden Markov model to each series:
 \begin{itemize}\setlength{\itemsep}{0.3em}
-\item each column of $\Phib$ without fitting step 4 (Standard and Advanced), or
-each column of $\Zb$ with fitting step 4 (Expert);
-\item the stock-specific part $\ub_i$ of each of the 375 stocks.
+\item each column of $\Phib$, or each column of $\Zb$ after fitting step 4
+(Expert);
+\item the stock-specific part $\ub_i$ of each stock.
 \end{itemize}
-Every model has 100 hidden states, a Student-$t$ distribution with $\nu=5$ in
-each state, and the jump settings $\epsilon=10^{-4}$ and $\lambda=100$ days of
-the tuned SPY model of L13a. Each model draws its paths independently of the
-other models. Without fitting step 4, the synthetic factors are uncorrelated,
-so the covariance of two synthetic stocks keeps only the variance of each
-factor, and every covariance term between two different factors drops out.
-\slidenote{Code}{\texttt{fit\_jump\_model} in \texttt{src/Model.jl} calls
-\texttt{JumpHMM.build}; \texttt{draw\_series} calls \texttt{JumpHMM.simulate}.
-FRED records the 10-year yield and breakeven inflation to 0.01 percentage
-point, so \texttt{spread\_rate\_changes} spreads each daily change over its
-0.01 step before the model of that factor is fit.}
+Each model draws its paths independently of the other models, so without
+fitting step 4 the synthetic factors are uncorrelated.
+\slidenote{Code}{\texttt{fit\_jump\_model} and \texttt{draw\_series} in
+\texttt{src/Model.jl}. Every model uses the settings of the tuned SPY model of
+L13a, in \texttt{config/defaults.toml}. \texttt{spread\_rate\_changes} first
+spreads each FRED rate change over its 0.01 recording step.}
 \end{frame}
 
 \begin{frame}{Sampling: draw, mix, and compose}\label{fr:sampling}
