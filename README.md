@@ -10,19 +10,22 @@ own path, and a **factor model** adds the draws into the growth rates of each
 stock.
 
 The example also shows a gap. The models draw the sector factors
-independently, so sectors whose factors move together in the real market, such
-as Real Estate and Utilities, do not move together in the synthetic market. In
-PS6, we'll use the **general factor model** of lecture L14a, with a **Cholesky
-step** that keeps the correlations between the factors and **economic factors**
-such as the daily change in the 10-year Treasury yield.
+independently, so sector factors that move together in the real market, such as
+the sector factors of Real Estate and Utilities, do not move together in the
+synthetic market. In PS6, we'll use the **general factor model** of lecture
+L14a, which adds a **Cholesky step** and **economic factors** to the example.
+The Cholesky step keeps the correlations between the factors. Each economic
+factor is a daily series, such as the daily change in the 10-year Treasury
+yield.
 
 > **Does a synthetic market built from single-asset jump hidden Markov models
 > move together like the real market?**
 
-We'll explore this question on three tracks, and you will choose one.
+We'll explore this question on two tracks, and you will choose one.
 **Standard** fits the market and the sector factors. **Advanced** adds the
-Cholesky step. **Expert** adds four economic factors from FRED, the economic
-database of the Federal Reserve Bank of St. Louis.
+Cholesky step, and asks whether four economic factors from FRED, the economic
+database of the Federal Reserve Bank of St. Louis, can take the place of the
+sector factors.
 
 ## Logistics
 
@@ -61,13 +64,12 @@ package, and the four FRED series come in
    julia --project=. --startup-file=no -e 'using Pkg; Pkg.instantiate()'
    ```
 
-4. Set [TRACK.txt](TRACK.txt) to exactly `standard`, `advanced`, or `expert`:
+4. Set [TRACK.txt](TRACK.txt) to exactly `standard` or `advanced`:
 
    | Track | Functions to complete | Questions to answer |
    |:--|:--|:--|
    | Standard | Three functions in [src/Standard.jl](src/Standard.jl): `least_squares_fit`, `sector_matrix`, and `compose_growth_rates` | [responses/Standard.md](responses/Standard.md) |
-   | Advanced | Five functions in [src/Advanced.jl](src/Advanced.jl): the same three plus `unmix_factors` and `mix_factors` | [responses/Advanced.md](responses/Advanced.md) |
-   | Expert | Six functions in [src/Expert.jl](src/Expert.jl): the same five plus `economic_factor` | [responses/Expert.md](responses/Expert.md) |
+   | Advanced | Six functions in [src/Advanced.jl](src/Advanced.jl): the same three plus `unmix_factors`, `mix_factors`, and `economic_factor` | [responses/Advanced.md](responses/Advanced.md) |
 
 5. Answer Question 1, your prediction, before you write any code.
 6. Replace each `error("Complete ...")` line with your calculation. Follow the
@@ -107,16 +109,15 @@ the sector factors.
 
 **Fitting.** The fitting algorithm has five steps:
 
-1. For each stock, fit the stock's growth rates to SPY and the economic
-   factors. The fit gives the baseline, the market sensitivity, and the
-   economic loadings, and leaves a residual.
+1. For each stock, fit the stock's growth rates to SPY and, on the Advanced
+   track, the economic factors. The fit gives the baseline, the market
+   sensitivity, and the economic loadings, and leaves a residual.
 2. For each day, fit the residuals of all the stocks to the **sector matrix**,
    which marks the sector of each stock. Each sector factor of that day is the
    average residual of the stocks in that sector.
 3. For each stock, fit the residual to the sector factors. The fit gives the
    sector loadings, and the rest of the residual is the stock-specific part.
-4. On the Advanced and Expert tracks, unmix the factors (see the Advanced
-   section).
+4. On the Advanced track, unmix the factors (see the Advanced section).
 5. Fit a single-asset jump hidden Markov model to each factor and to the
    stock-specific part of each stock.
 
@@ -134,29 +135,25 @@ Complete `least_squares_fit`, `sector_matrix`, and `compose_growth_rates`. Run
 the checker, and answer Questions 2 and 3 from the table **Real and synthetic
 markets**. The table compares the real market with two synthetic markets: the
 **single index model**, which has the market part and the stock-specific part
-but no sector factors, and the **market and sectors**. On the Advanced and
-Expert tracks, answer only Question 2 from these rows.
+but no sector factors, and the **market and sectors**.
 
-## Advanced: the Cholesky step
+## Advanced: the Cholesky step and the FRED series
 
 Complete the three Standard functions in `src/Advanced.jl`, then complete
-`unmix_factors` and `mix_factors`. The factors of the real market are
-correlated. Fitting step 4 unmixes the factors: `unmix_factors` computes the
-covariance matrix of the factors and its Cholesky factor, and turns the factors
-into uncorrelated factors. The supplied code fits a jump hidden Markov model to each
-uncorrelated factor, and `mix_factors` mixes the draws back into correlated
-factors. The L6a course example
+`unmix_factors`, `mix_factors`, and `economic_factor`.
+
+The factors of the real market are correlated. Fitting step 4 unmixes the
+factors: `unmix_factors` computes the covariance matrix of the factors and its
+Cholesky factor, and turns the factors into uncorrelated factors. The supplied
+code fits a jump hidden Markov model to each uncorrelated factor, and
+`mix_factors` mixes the draws back into correlated factors. The L6a course
+example
 [Simulating a Portfolio with Multiple Asset Geometric Brownian Motion](https://github.com/varnerlab/CHEME-5660-CourseRepository-Fall-2026/blob/main/lectures/week-6/L6a/CHEME-5660-L6a-Example-MAGBM-Portfolio-Fall-2026.ipynb)
 uses the same mixing.
 
-Rerun the checker, and answer Question 3 from the row **market and sectors,
-with the Cholesky step**.
-
-## Expert: economic factors from FRED
-
-Complete the five Advanced functions in `src/Expert.jl`, then complete
-`economic_factor`. The file `data/fred-levels-2014-2024.csv` holds the level of
-four FRED series on each trading day:
+Your function `economic_factor` turns each FRED series into an economic factor.
+The file `data/fred-levels-2014-2024.csv` holds the level of four FRED series
+on each trading day:
 
 | FRED series | Level | Economic factor |
 |:--|:--|:--|
@@ -165,12 +162,14 @@ four FRED series on each trading day:
 | `DCOILBRENTEU` | Brent crude oil price (USD per barrel) | growth rate |
 | `DTWEXBGS` | US dollar index against a broad basket of currencies | growth rate |
 
-We use the Brent oil price because the WTI oil price
-fell below zero on April 20, 2020, and a growth rate needs a positive price.
+We use the Brent oil price because the WTI oil price fell below zero on April
+20, 2020, and a growth rate needs a positive price.
 
-Rerun the checker, and answer Question 3 from the row **market, FRED series,
-and sectors, with the Cholesky step** and the table **FRED series**, which gives
-the R² and the loadings of fitting step 1 for each sector.
+Rerun the checker. Answer Question 2 from the row **market and sectors, with
+the Cholesky step**. Answer Question 3 from the row **market and FRED series,
+with the Cholesky step**, which uses the four FRED series in place of the 11
+sector factors, and from the table **FRED series**, which gives the R² and the
+loadings of fitting step 1 for each sector.
 
 This product uses the FRED® API but is not endorsed or certified by the Federal
 Reserve Bank of St. Louis.

@@ -22,8 +22,8 @@ end
 
 # The track named in TRACK.txt, and its source file -
 const _TRACK = String(Base.strip(read(joinpath(_ROOT, "TRACK.txt"), String)));
-if !(_TRACK in ("standard", "advanced", "expert"))
-    throw(ArgumentError("TRACK.txt must contain standard, advanced, or expert."));
+if !(_TRACK in ("standard", "advanced"))
+    throw(ArgumentError("TRACK.txt must contain standard or advanced."));
 end
 if _USE_SOLUTION
     const _SOURCE_PATH = joinpath(_ROOT, "instructor", "reference", titlecase(_TRACK)*".jl");
@@ -50,15 +50,12 @@ const _SETTINGS = load_config(joinpath(_ROOT, "config", "defaults.toml"));
 include(joinpath(_ROOT, "reports", "Markets.jl"));
 include(joinpath(_ROOT, "test", "public_standard_tests.jl"));
 include(joinpath(_ROOT, "test", "public_advanced_tests.jl"));
-include(joinpath(_ROOT, "test", "public_expert_tests.jl"));
 
 # The public checks of the selected track -
 if _TRACK == "standard"
     const _PUBLIC_CHECKS = standard_public_checks();
-elseif _TRACK == "advanced"
-    const _PUBLIC_CHECKS = advanced_public_checks();
 else
-    const _PUBLIC_CHECKS = expert_public_checks();
+    const _PUBLIC_CHECKS = advanced_public_checks();
 end
 
 # Load optional student helpers before the selected source file -

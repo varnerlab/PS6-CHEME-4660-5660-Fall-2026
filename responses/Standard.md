@@ -1,8 +1,8 @@
 # PS6 Standard responses
 
-Answer each question in one or two short paragraphs, and cite numbers from
-`results/Report.md`. Replace each `TODO` line with your answer. Keep the marker
-lines around each answer, because the checker reads those lines.
+Answer each question in one or two short paragraphs. In Questions 2 and 3, cite
+numbers from `results/Report.md`. Replace each `TODO` line with your answer.
+Keep the marker lines around each answer, because the checker reads those lines.
 
 ## 1. Will the synthetic stocks move together like the real stocks?
 

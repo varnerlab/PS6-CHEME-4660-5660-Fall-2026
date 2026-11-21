@@ -69,14 +69,13 @@ stocks move together.
 \begin{itemize}\setlength{\itemsep}{0.3em}
 \item \hilite{Standard: the market and the sectors.} Fitting steps 1, 2, 3,
 and 5, with SPY and the 11 sector factors.
-\item \hilite{Advanced: the Cholesky step.} Standard plus fitting step 4, which
-keeps the correlations between the factors in the synthetic market.
-\item \hilite{Expert: economic factors from FRED.} Advanced plus four daily
-economic factors in fitting step 1.
+\item \hilite{Advanced: the Cholesky step and the FRED series.} Standard plus
+fitting step 4, which keeps the correlations between the factors, and a market
+that uses four daily economic factors in place of the 11 sector factors.
 \end{itemize}
-\slidenote{Reading guide}{All tracks use slides 4–\pageref{fr:residuals} and
-\pageref{fr:jump}–\pageref{fr:report}. Slide \pageref{fr:unmix} is for
-Advanced and Expert, and slide \pageref{fr:fred} is for Expert only.}
+\slidenote{Reading guide}{Both tracks use slides 4–\pageref{fr:residuals} and
+\pageref{fr:jump}–\pageref{fr:report}. Slides \pageref{fr:fred} and
+\pageref{fr:unmix} are for Advanced only.}
 \end{frame}
 
 \begin{frame}{The data and the growth rates}\label{fr:data}
@@ -113,13 +112,12 @@ Market in the report & $K$ & Sectors & Step 4 \\
 single index model & 0 & none & no \\
 market and sectors & 0 & 11 & no \\
 market and sectors, with the Cholesky step & 0 & 11 & yes \\
-market, FRED series, and sectors, with the Cholesky step & 4 & 11 & yes \\
+market and FRED series, with the Cholesky step & 4 & none & yes \\
 \bottomrule
 \end{tabular}
 \end{center}
-\slidenote{Tracks}{Standard reports the first two markets, Advanced adds the
-third, and Expert adds the fourth, with the four FRED series of slide
-\pageref{fr:fred}.}
+\slidenote{Tracks}{Standard reports the first two markets. Advanced adds the
+last two, with the four FRED series of slide \pageref{fr:fred}.}
 \end{frame}
 
 \begin{frame}{One solve for fitting steps 1, 2, and 3}\label{fr:solve}
@@ -211,8 +209,9 @@ API but is not endorsed or certified by the Federal Reserve Bank of St.\ Louis.}
 
 \begin{frame}{Fitting step 4: unmix the factors}\label{fr:unmix}
 The factor matrix $\Phib=[\gb_m,\mathbf{x}_1,\dots,\mathbf{x}_K,\Fb]$ is
-$T\times p$, with $p=1+K+11$. Its column averages are $\mub$, and its sample
-covariance matrix is:
+$T\times p$: $p=12$ for the market and sectors, and $p=5$ for the market and
+FRED series. Its column averages are $\mub$, and its sample covariance matrix
+is:
 \[
  \Sigmab_{\Phi}=\frac{1}{T-1}\left(\Phib-\onev\mub^{\top}\right)^{\top}\left(\Phib-\onev\mub^{\top}\right).
 \]
@@ -231,7 +230,7 @@ Julia, \texttt{M / transpose(A)} computes $\mathbf{M}\Ab^{-\top}$.}
 Fitting step 5 fits one single-asset jump hidden Markov model to each series:
 \begin{itemize}\setlength{\itemsep}{0.3em}
 \item each column of $\Phib$, or each column of $\Zb$ after fitting step 4
-(Advanced and Expert);
+(Advanced only);
 \item the stock-specific part $\ub_i$ of each stock.
 \end{itemize}
 Each model draws its paths independently of the other models, so without
@@ -255,7 +254,7 @@ draws back:
 Without fitting step 4, the draws are the columns of $\Phib\syn$.
 \item \hilite{Stock-specific draws.} Draw a path $\ub_i\syn$ from the model of
 each $\ub_i$.
-\item \hilite{Compose.} With $\Xh\syn$ and $\Fb\syn$ taken from the columns of
+\item \hilite{Compose.} With $\Fb\syn$ and $\Xh\syn=[\onev,\gb_m\syn,\mathbf{x}_1\syn,\dots,\mathbf{x}_K\syn]$ built from the columns of
 $\Phib\syn$: $\gb_i\syn=\Xh\syn\thetab_i+\Fb\syn\deltab_i+\ub_i\syn$.
 \end{enumerate}
 \slidenote{Code}{\texttt{mix\_factors(Z, \gm{μ}, A)} returns $\Phib\syn$, and

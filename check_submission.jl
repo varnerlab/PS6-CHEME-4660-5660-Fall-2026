@@ -75,7 +75,7 @@ did not reach.
 
 A `NamedTuple` with:
 
-- `track`: `standard`, `advanced`, `expert`, or `unavailable` when TRACK.txt could not be used.
+- `track`: `standard`, `advanced`, or `unavailable` when TRACK.txt could not be used.
 - `checks`: The track's public checks, or an empty list.
 - `tests_ran`: `true` when there was no loading or setup error.
 - `detail`: The loading or setup error message; empty when there was none.
@@ -87,7 +87,7 @@ function checker_setup(load_error::String)::NamedTuple
 
     # The track, or "unavailable" -
     track = "unavailable";
-    if isdefined(Main, :_TRACK) && _TRACK in ("standard", "advanced", "expert")
+    if isdefined(Main, :_TRACK) && _TRACK in ("standard", "advanced")
         track = _TRACK;
     end
 
@@ -171,7 +171,7 @@ function write_file_record(io::IO, root::String, track::String, source_path::Str
             end
         end
     end
-    if track in ("standard", "advanced", "expert")
+    if track in ("standard", "advanced")
         push!(paths, joinpath(root, "src", titlecase(track)*".jl"));
         push!(paths, joinpath(root, "responses", titlecase(track)*".md"));
     end
@@ -291,7 +291,7 @@ function main(setup::NamedTuple)::Nothing
     # The track, whether the checks can run, and the name of the source file -
     track = setup.track;
     tests_ran = setup.tests_ran;
-    track_known = track in ("standard", "advanced", "expert");
+    track_known = track in ("standard", "advanced");
     if isempty(setup.source_path)
         source_name = "unavailable";
     else
@@ -326,8 +326,6 @@ function main(setup::NamedTuple)::Nothing
         documented_functions = STANDARD_DOCUMENTED_FUNCTIONS;
     elseif track == "advanced"
         documented_functions = ADVANCED_DOCUMENTED_FUNCTIONS;
-    elseif track == "expert"
-        documented_functions = EXPERT_DOCUMENTED_FUNCTIONS;
     end
     missing_docs = Symbol[];
     if tests_ran

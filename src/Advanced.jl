@@ -1,8 +1,9 @@
-# PS6 Advanced: complete the 5 functions below, the 3 Standard functions, unmix_factors, and mix_factors.
+# PS6 Advanced: complete the 6 functions below: the 3 Standard functions, unmix_factors, mix_factors,
+# and economic_factor.
 # The supplied code in src/Model.jl calls sector_matrix to build the sector matrix B, least_squares_fit
 # in fitting steps 1, 2, and 3, and compose_growth_rates to build each synthetic stock.
-# It calls unmix_factors before it fits the jump hidden Markov models of the factors, and
-# mix_factors after it draws the factors.
+# It calls unmix_factors before it fits the jump hidden Markov models of the factors, mix_factors
+# after it draws the factors, and economic_factor to turn each FRED series into a daily factor.
 # Keep the function names, arguments, return types, and docstrings.
 # Replace each error("Complete ...") line with your calculation. The rest of each function is supplied.
 # Save your code, then run from the PS6 folder:
@@ -21,7 +22,7 @@ Fitting steps 1, 2, and 3 use this one solve, with a different `X` and `y` in ea
 
 - Step 1, the market and economic loadings of stock `i`: `X` is the design matrix
   `[1, g_m, x_1, ..., x_K]` (days × columns), `y` is the growth rates of stock `i`, and `θ` is
-  `(α_i, β_i, η_i1, ..., η_iK)`. On the Standard and Advanced tracks, `X` is `[1, g_m]`.
+  `(α_i, β_i, η_i1, ..., η_iK)`. Without the FRED series, `X` is `[1, g_m]`.
 - Step 2, the sector factors on day `t`: `X` is the sector matrix `B` (stocks × sectors), `y` is the
   residual of every stock on day `t`, and `θ` is the sector factors on day `t`.
 - Step 3, the sector loadings of stock `i`: `X` is the sector factors `F` (days × sectors), `y` is the
@@ -101,7 +102,10 @@ function sector_matrix(sectors::Vector{String}, sector_names::Vector{String})::M
         s = 0;
         for k ∈ 1:number_of_sectors
             # TODO 1: Set s to k when sector_names[k] is the sector of stock i.
-            # Hint: if sector_names[k] == sectors[i] ... end
+            # Hint:
+            # if sector_names[k] == sectors[i]
+            #     s = k;
+            # end
             error("Complete sector_matrix: find the column of the stock's sector.");
         end
 
@@ -127,8 +131,8 @@ Compose the growth rates of one synthetic stock (sampling step 3): the market an
 
 ### Arguments
 
-- `X`: The synthetic design matrix `[1, g_m, x_1, ..., x_K]`, days × columns. On the Standard and
-  Advanced tracks, `X` is `[1, g_m]`.
+- `X`: The synthetic design matrix `[1, g_m, x_1, ..., x_K]`, days × columns. Without the FRED
+  series, `X` is `[1, g_m]`.
 - `θ`: The baseline, market sensitivity, and economic loadings of the stock, `(α, β, η_1, ..., η_K)`.
 - `F`: The synthetic sector factors, days × sectors. `F` has zero columns when a market has no
   sector factors.
@@ -168,7 +172,8 @@ Unmix the factors (fitting step 4): turn the correlated factors in `Φ` into unc
 ### Arguments
 
 - `Φ`: The factor matrix `[g_m, x_1, ..., x_K, F]`, days × factors: the market, the economic
-  factors (Expert only), and the sector factors.
+  factors, and the sector factors. A market without economic factors or without sector factors
+  leaves those columns out.
 
 ### Returns
 
@@ -225,8 +230,8 @@ by `transpose(A)`, and add the averages `transpose(μ)` to each row.
 
 ### Returns
 
-- `Φ`: The synthetic factors, days × factors: the market, the economic factors (Expert only), and
-  the sector factors, in the order of the columns of `Φ` in `unmix_factors`.
+- `Φ`: The synthetic factors, days × factors: the market, the economic factors, and the sector
+  factors, in the order of the columns of `Φ` in `unmix_factors`.
 
 ### Method
 
@@ -247,4 +252,63 @@ function mix_factors(Z::Matrix{Float64}, μ::Vector{Float64}, A::Matrix{Float64}
     Φ = error("Complete mix_factors: mix the draws.");
 
     return Φ;
+end
+
+"""
+    economic_factor(levels::Vector{Float64}, kind::String, Δt::Float64) -> Vector{Float64}
+
+Turn a FRED series, one level per trading day, into a daily economic factor. A rate becomes its
+daily change, and a price becomes its growth rate, like the growth rates of the stocks.
+
+### Arguments
+
+- `levels`: The level of the series on each trading day, such as the 10-year Treasury yield
+  (percent) or the Brent oil price (USD/barrel).
+- `kind`: `"change"` for a rate, or `"growth"` for a price.
+- `Δt`: One trading day, in years (`1/252`).
+
+### Returns
+
+- `x`: The factor, `length(levels) - 1` values: one for each day after the first.
+
+### Errors
+
+- An `ArgumentError` when `kind` is not `"change"` or `"growth"`.
+
+### Method
+
+For `"change"`, `x[t]` is `levels[t+1] - levels[t]`. For `"growth"`, `x[t]` is the growth rate
+`log(levels[t+1] / levels[t]) / Δt` (1/yr).
+
+### Course references
+
+- Course lecture L14a, section 'Building a General Factor Model': each economic factor must be a
+  daily series, such as the daily change in the 10-year Treasury yield.
+- Course example 'A Synthetic Market of Many Stocks' (L14a), Constants cell: the growth rates
+  from `JumpHMM.excess_growth_rates` with `rf = 0.0`.
+- PS6 companion: slide 9, 'Economic factors from FRED'.
+"""
+function economic_factor(levels::Vector{Float64}, kind::String, Δt::Float64)::Vector{Float64}
+
+    # Check the kind of the series -
+    if kind != "change" && kind != "growth"
+        throw(ArgumentError("The kind must be \"change\" or \"growth\", not \"$(kind)\"."));
+    end
+
+    # One value for each day after the first -
+    number_of_days = length(levels) - 1;
+    x = zeros(number_of_days);
+    for t ∈ 1:number_of_days
+        if kind == "change"
+            # TODO 1: The change in the level from day t to day t + 1.
+            # Hint: x[t] = levels[t+1] - levels[t];
+            error("Complete economic_factor: the daily change of a rate.");
+        else
+            # TODO 2: The growth rate of the price from day t to day t + 1.
+            # Hint: x[t] = log(levels[t+1] / levels[t]) / Δt;
+            error("Complete economic_factor: the growth rate of a price.");
+        end
+    end
+
+    return x;
 end

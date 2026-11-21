@@ -95,8 +95,8 @@ end
     markets_table(track::String, universe::NamedTuple, settings::NamedTuple) -> Vector{NamedTuple}
 
 Rows of the table "Real and synthetic markets": the real market, the single index model, and the market
-and sectors on every track; the market and sectors with the Cholesky step on the Advanced and Expert
-tracks; and the market, FRED series, and sectors with the Cholesky step on the Expert track.
+and sectors on every track; and, on the Advanced track, the market and sectors with the Cholesky step
+and the market and FRED series with the Cholesky step.
 """
 function markets_table(track::String, universe::NamedTuple, settings::NamedTuple)::Vector{NamedTuple}
 
@@ -108,16 +108,12 @@ function markets_table(track::String, universe::NamedTuple, settings::NamedTuple
     push!(rows, synthetic_row("market and sectors", universe, settings;
         fred = false, sectors = true, cholesky_step = false));
 
-    # The model of the Advanced track -
-    if track == "advanced" || track == "expert"
+    # The two models of the Advanced track, both with the Cholesky step: the sectors, and the FRED series instead -
+    if track == "advanced"
         push!(rows, synthetic_row("market and sectors, with the Cholesky step", universe, settings;
             fred = false, sectors = true, cholesky_step = true));
-    end
-
-    # The model of the Expert track -
-    if track == "expert"
-        push!(rows, synthetic_row("market, FRED series, and sectors, with the Cholesky step", universe, settings;
-            fred = true, sectors = true, cholesky_step = true));
+        push!(rows, synthetic_row("market and FRED series, with the Cholesky step", universe, settings;
+            fred = true, sectors = false, cholesky_step = true));
     end
     return rows;
 end
@@ -281,8 +277,9 @@ function write_fred_table(io::IO, rows, settings::NamedTuple)::Nothing
     # What each column holds -
     println(io, "\nEach row averages over the stocks of one sector. R² is the fraction of the variance of a ",
         "stock's daily growth rates that fitting step 1 explains. Each loading column is the average loading ",
-        "of fitting step 1 on that FRED series, in the units of that series, so compare loadings only within a ",
-        "column, across sectors.\n");
+        "of fitting step 1 on one FRED series: the change in a stock's growth rate (1/yr) when the economic ",
+        "factor of that series changes by one unit. The economic factors have different units, so compare ",
+        "loadings only within a column, across sectors.\n");
     return nothing;
 end
 
@@ -294,9 +291,8 @@ the report to `path`.
 
 ### Arguments
 
-- `track`: `"standard"` (the first table, with the real market and two synthetic markets), `"advanced"`
-  (the first table, and a third synthetic market), or `"expert"` (both tables, and a fourth synthetic
-  market).
+- `track`: `"standard"` (the first table, with the real market and two synthetic markets) or
+  `"advanced"` (both tables, and two more synthetic markets).
 - `settings`: The settings from `load_config`.
 - `path`: The Markdown file to write.
 """
@@ -306,7 +302,7 @@ function write_report(track::String, settings::NamedTuple, path::String)::Nothin
     universe = load_universe(settings);
     markets = Base.invokelatest(markets_table, track, universe, settings);
     fred = "";
-    if track == "expert"
+    if track == "advanced"
         fred = Base.invokelatest(fred_table, universe, settings);
     end
 
@@ -315,7 +311,7 @@ function write_report(track::String, settings::NamedTuple, path::String)::Nothin
     try
         println(io, "# PS6 report\n");
         write_markets_table(io, markets, settings, size(universe.G, 1));
-        if track == "expert"
+        if track == "advanced"
             write_fred_table(io, fred, settings);
         end
     finally

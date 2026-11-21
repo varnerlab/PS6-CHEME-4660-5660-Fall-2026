@@ -29,8 +29,9 @@ You can also paste this file's contents into the Canvas HTML editor.
   market. You will fit the general factor model of lecture L14a and compare how
   the real and synthetic stocks move together. Standard fits the market and the
   sector factors. Advanced adds the Cholesky step, which keeps the correlations
-  between the factors. Expert adds four economic factors from FRED, such as the
-  daily change in the 10-year Treasury yield. You are graded on your
+  between the factors, and asks whether four economic factors from FRED, such as
+  the daily change in the 10-year Treasury yield, can take the place of the
+  sector factors. You are graded on your
   calculations and interpretation, not on whether the synthetic market matches
   the real market.
 </p>
@@ -63,10 +64,9 @@ You can also paste this file's contents into the Canvas HTML editor.
 </p>
 
 <p>
-  Set <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">TRACK.txt</code> to <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">standard</code>, <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">advanced</code>, or <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">expert</code>.
-  On Standard, you complete three functions in <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">src/Standard.jl</code>; on
-  Advanced, five in <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">src/Advanced.jl</code>; and on Expert, six in
-  <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">src/Expert.jl</code>. Answer your track's three questions in the matching file
+  Set <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">TRACK.txt</code> to <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">standard</code> or <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">advanced</code>.
+  On Standard, you complete three functions in <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">src/Standard.jl</code>, and on
+  Advanced, six in <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">src/Advanced.jl</code>. Answer your track's three questions in the matching file
   under <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">responses</code>. Replace only the TODO line of each answer, and keep the
   supplied docstrings and marker lines. Put any helper functions in files under
   <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">src</code>, and load them from <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">Include.jl</code>.
@@ -94,10 +94,10 @@ You can also paste this file's contents into the Canvas HTML editor.
 <pre style="display: block; padding: 10px; margin: 0 0 10px; color: #333333; background-color: #f5f5f5; border: 1px solid #cccccc; border-radius: 4px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 13px; line-height: 1.5; white-space: pre-wrap;"><code style="color: #333333; background-color: #f5f5f5; padding: 0; font-family: inherit; font-size: inherit;">julia --project=. --startup-file=no check_submission.jl</code></pre>
 
 <p>
-  The checker runs your track's 12, 20, or 24 checks and writes the report to
+  The checker runs your track's 12 or 24 checks and writes the report to
   <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">results/Report.md</code>. A row or a table that needs an unfinished function shows
   <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">UNAVAILABLE</code>. Once your functions work, the checker takes less than a
-  minute. Use the report to answer your three questions.
+  minute. Use the report to answer Questions 2 and 3.
 </p>
 
 <p>
@@ -146,8 +146,7 @@ You can also paste this file's contents into the Canvas HTML editor.
   your highest score, including across tracks. To change tracks, update
   <code style="color: #c7254e; background-color: #f5f5f5; padding: 2px 4px; border-radius: 3px; font-family: Menlo, Monaco, Consolas, 'Courier New', monospace; font-size: 90%;">TRACK.txt</code>, complete that track's files, and rerun the checker. A
   confirmed Advanced score of 4, on the first submission or a revision, earns
-  <strong>one Magic Point</strong>, and a confirmed Expert score of 4 earns
-  <strong>two Magic Points</strong>. PS6 earns at most two Magic Points.
+  <strong>one Magic Point</strong>. PS6 earns at most one Magic Point.
 </p>
 
 <h3>Collaboration and academic integrity</h3>

@@ -10,12 +10,11 @@ RELEASE_FILES = [
     "README.md", "RUBRIC.md", "Project.toml", "Manifest.toml", "TRACK.txt",
     "Include.jl", "check_submission.jl", "explore.jl",
     "config/defaults.toml", "config/explore.toml",
-    "src/Standard.jl", "src/Advanced.jl", "src/Expert.jl", "src/Config.jl",
+    "src/Standard.jl", "src/Advanced.jl", "src/Config.jl",
     "src/Data.jl", "src/Model.jl", "data/fred-levels-2014-2024.csv",
     "reports/Markets.jl", "reports/Terminal.jl",
     "test/Rubric.jl", "test/public_standard_tests.jl", "test/public_advanced_tests.jl",
-    "test/public_expert_tests.jl",
-    "responses/Standard.md", "responses/Advanced.md", "responses/Expert.md",
+    "responses/Standard.md", "responses/Advanced.md",
     "docs/PS6-Mathematical-Companion.pdf", "docs/PS6-Mathematical-Companion.tex",
     "docs/style/assets/cornell-seal.pdf", "docs/Makefile", "docs/vnslides.sty",
     "docs/style/vnslides.sty", "docs/style/vnflow.sty",
@@ -29,7 +28,7 @@ def check_starter(root: Path) -> None:
         raise ValueError("Reset TRACK.txt to standard before building the release.")
 
     # Each track's source must hold only its unfinished functions, and each response file its placeholders.
-    for track, count in (("Standard", 3), ("Advanced", 5), ("Expert", 6)):
+    for track, count in (("Standard", 3), ("Advanced", 6)):
         source = (root / f"src/{track}.jl").read_text()
         if len(re.findall(r'^function ', source, re.M)) != count or len(set(
             re.findall(r'error\("Complete ([A-Za-z_0-9]+):', source))) != count:

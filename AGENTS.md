@@ -7,10 +7,10 @@
   market? The model is the general factor model of lecture L14a, section
   'Building a General Factor Model'; the real market is SPY
   (`benchmark_ticker`) and its 375 stocks.
-- Three tracks. Standard: the market and the sector factors (`least_squares_fit`,
+- Two tracks. Standard: the market and the sector factors (`least_squares_fit`,
   `sector_matrix`, `compose_growth_rates`). Advanced: Standard plus the Cholesky
-  step (`unmix_factors`, `mix_factors`). Expert: Advanced plus four FRED series
-  as economic factors (`economic_factor`).
+  step (`unmix_factors`, `mix_factors`) and four FRED series as economic factors
+  (`economic_factor`), used in place of the sector factors.
 - The supplied code in `src/Model.jl` follows the lecture's fitting and sampling
   algorithms exactly. `least_squares_fit` is the one solve for fitting steps 1,
   2, and 3.

@@ -19,7 +19,7 @@ Fitting steps 1, 2, and 3 use this one solve, with a different `X` and `y` in ea
 
 - Step 1, the market and economic loadings of stock `i`: `X` is the design matrix
   `[1, g_m, x_1, ..., x_K]` (days × columns), `y` is the growth rates of stock `i`, and `θ` is
-  `(α_i, β_i, η_i1, ..., η_iK)`. On the Standard and Advanced tracks, `X` is `[1, g_m]`.
+  `(α_i, β_i, η_i1, ..., η_iK)`. Without the FRED series, `X` is `[1, g_m]`.
 - Step 2, the sector factors on day `t`: `X` is the sector matrix `B` (stocks × sectors), `y` is the
   residual of every stock on day `t`, and `θ` is the sector factors on day `t`.
 - Step 3, the sector loadings of stock `i`: `X` is the sector factors `F` (days × sectors), `y` is the
@@ -99,7 +99,10 @@ function sector_matrix(sectors::Vector{String}, sector_names::Vector{String})::M
         s = 0;
         for k ∈ 1:number_of_sectors
             # TODO 1: Set s to k when sector_names[k] is the sector of stock i.
-            # Hint: if sector_names[k] == sectors[i] ... end
+            # Hint:
+            # if sector_names[k] == sectors[i]
+            #     s = k;
+            # end
             error("Complete sector_matrix: find the column of the stock's sector.");
         end
 
@@ -125,8 +128,8 @@ Compose the growth rates of one synthetic stock (sampling step 3): the market an
 
 ### Arguments
 
-- `X`: The synthetic design matrix `[1, g_m, x_1, ..., x_K]`, days × columns. On the Standard and
-  Advanced tracks, `X` is `[1, g_m]`.
+- `X`: The synthetic design matrix `[1, g_m, x_1, ..., x_K]`, days × columns. Without the FRED
+  series, `X` is `[1, g_m]`.
 - `θ`: The baseline, market sensitivity, and economic loadings of the stock, `(α, β, η_1, ..., η_K)`.
 - `F`: The synthetic sector factors, days × sectors. `F` has zero columns when a market has no
   sector factors.

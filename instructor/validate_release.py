@@ -56,7 +56,7 @@ def check_contents(student, names):
     check_starter(student)
 
     # The README explains the task in plain language; the companion holds the math -
-    for name in ("README.md", "RUBRIC.md", "responses/Standard.md", "responses/Advanced.md", "responses/Expert.md"):
+    for name in ("README.md", "RUBRIC.md", "responses/Standard.md", "responses/Advanced.md"):
         text = (student / name).read_text()
         for marker in ("$", "\\(", "\\[", "\\frac", "\\mathbf"):
             require(marker not in text, f"{name} contains math markup: {marker}")
@@ -130,8 +130,8 @@ def main():
         require(code == 0, f"Pkg.instantiate failed:\n{output[-8000:]}")
         print("Recorded Julia environment installed.", flush=True)
 
-        # All three unfinished starters must score zero and still write their reports.
-        for track, total in (("standard", 12), ("advanced", 20), ("expert", 24)):
+        # Both unfinished starters must score zero and still write their reports.
+        for track, total in (("standard", 12), ("advanced", 24)):
             check_starter_run(student, track, total)
             print(f"{track.title()} starter: 0/{total}, report, manifest, and answer warnings passed.", flush=True)
     print("The student source archive is ready for a draft GitHub release.")

@@ -24,7 +24,7 @@ seed = 5660
 # The market: SPY, the exchange-traded fund that tracks the S&P 500.
 benchmark_ticker = "SPY"
 
-# FRED series used as economic factors on the Expert track: column names in data/fred-levels-2014-2024.csv.
+# FRED series used as economic factors on the Advanced track: column names in data/fred-levels-2014-2024.csv.
 fred_series = ["DGS10", "T10YIE", "DCOILBRENTEU", "DTWEXBGS"]
 
 # How each FRED series becomes a daily factor: "change" for a rate (the daily change), "growth" for a price (the growth rate).
