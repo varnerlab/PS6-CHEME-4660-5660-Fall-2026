@@ -37,19 +37,21 @@ Fitting steps 1, 2, and 3 use this one solve, with a different `X` and `y` in ea
 
 ### Method
 
-Form the matrix `X' * X` and the vector `X' * y`, and solve the linear system with the backslash
-operator.
+Form the matrix `transpose(X) * X` and the vector `transpose(X) * y`, and solve the linear system
+with the backslash operator.
 
 ### Course references
 
 - Course lecture L14a, section 'Building a General Factor Model', fitting algorithm, steps 1, 2, and 3.
+- Course example 'Estimating Single Index Models from Historical Data' (L6b), Task 1, 'Solve three
+  ways': the normal-equations line `(transpose(X̂)*X̂) \\ (transpose(X̂)*y)`.
 - PS6 companion: slide 6, 'One solve for fitting steps 1, 2, and 3'.
 """
 function least_squares_fit(X::Matrix{Float64}, y::Vector{Float64})::Vector{Float64}
 
-    # TODO: Solve X'X θ = X'y for θ.
-    # Hint: θ = (X' * X) \ (X' * y);
-    θ = error("Complete least_squares_fit: solve X'X θ = X'y for θ.");
+    # TODO: Solve the normal equations for θ.
+    # Hint: θ = (transpose(X) * X) \ (transpose(X) * y);
+    θ = error("Complete least_squares_fit: solve the normal equations for θ.");
 
     return θ;
 end

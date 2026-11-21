@@ -222,7 +222,7 @@ lower-triangular matrix $\Ab$. The uncorrelated factors are:
  \operatorname{cov}(\Zb)=\Ab^{-1}\Sigmab_{\Phi}\Ab^{-\top}=\Ab^{-1}\Ab\Ab^{\top}\Ab^{-\top}=\Ib.
 \]
 \slidenote{Code}{\texttt{unmix\_factors(\gm{Φ})} returns $(\mub,\Ab,\Zb)$. In
-Julia, \texttt{M / A'} computes $\mathbf{M}\Ab^{-\top}$.}
+Julia, \texttt{M / transpose(A)} computes $\mathbf{M}\Ab^{-\top}$.}
 \end{frame}
 
 \begin{frame}{Fitting step 5: the jump hidden Markov models}\label{fr:jump}

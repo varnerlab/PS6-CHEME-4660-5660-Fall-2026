@@ -38,19 +38,21 @@ Fitting steps 1, 2, and 3 use this one solve, with a different `X` and `y` in ea
 
 ### Method
 
-Form the matrix `X' * X` and the vector `X' * y`, and solve the linear system with the backslash
-operator.
+Form the matrix `transpose(X) * X` and the vector `transpose(X) * y`, and solve the linear system
+with the backslash operator.
 
 ### Course references
 
 - Course lecture L14a, section 'Building a General Factor Model', fitting algorithm, steps 1, 2, and 3.
+- Course example 'Estimating Single Index Models from Historical Data' (L6b), Task 1, 'Solve three
+  ways': the normal-equations line `(transpose(X̂)*X̂) \\ (transpose(X̂)*y)`.
 - PS6 companion: slide 6, 'One solve for fitting steps 1, 2, and 3'.
 """
 function least_squares_fit(X::Matrix{Float64}, y::Vector{Float64})::Vector{Float64}
 
-    # TODO: Solve X'X θ = X'y for θ.
-    # Hint: θ = (X' * X) \ (X' * y);
-    θ = error("Complete least_squares_fit: solve X'X θ = X'y for θ.");
+    # TODO: Solve the normal equations for θ.
+    # Hint: θ = (transpose(X) * X) \ (transpose(X) * y);
+    θ = error("Complete least_squares_fit: solve the normal equations for θ.");
 
     return θ;
 end
@@ -230,15 +232,15 @@ Unmix the factors (fitting step 4): turn the correlated factors in `Φ` into unc
 ### Returns
 
 - `μ`: The average of each column of `Φ`.
-- `A`: The lower-triangular Cholesky factor of the covariance matrix of `Φ`, so that `A A'` equals
-  the covariance matrix.
+- `A`: The lower-triangular Cholesky factor of the covariance matrix of `Φ`, so that
+  `A * transpose(A)` equals the covariance matrix.
 - `Z`: The uncorrelated factors, days × factors. Each column has an average of 0 and a variance of 1.
 
 ### Method
 
 Compute the average of each column of `Φ`, and the covariance matrix of `Φ`. Factor the covariance
-matrix with `cholesky`, and keep its lower factor as an ordinary matrix. Subtract `μ'` from each
-row of `Φ`, then divide on the right by `A'` with the `/` operator.
+matrix with `cholesky`, and keep its lower factor as an ordinary matrix with `|> Matrix`. Subtract
+`transpose(μ)` from each row of `Φ`, then divide on the right by `transpose(A)` with the `/` operator.
 
 ### Course references
 
@@ -258,11 +260,11 @@ function unmix_factors(Φ::Matrix{Float64})::Tuple{Vector{Float64},Matrix{Float6
     Σ = Symmetric(cov(Φ));
 
     # TODO 2: The lower Cholesky factor of Σ, as an ordinary matrix.
-    # Hint: A = Matrix(cholesky(Σ).L);
+    # Hint: A = cholesky(Σ).L |> Matrix;
     A = error("Complete unmix_factors: the lower Cholesky factor of Σ.");
 
-    # TODO 3: Subtract the averages from each row of Φ, then divide on the right by A'.
-    # Hint: Z = (Φ .- μ') / A';
+    # TODO 3: Subtract the averages from each row of Φ, then divide on the right by transpose(A).
+    # Hint: Z = (Φ .- transpose(μ)) / transpose(A);
     Z = error("Complete unmix_factors: compute Z.");
 
     return (μ, A, Z);
@@ -272,7 +274,7 @@ end
     mix_factors(Z::Matrix{Float64}, μ::Vector{Float64}, A::Matrix{Float64}) -> Matrix{Float64}
 
 Mix draws of the uncorrelated factors back into correlated factors (sampling step 1): multiply `Z`
-by `A'`, and add the averages `μ'` to each row.
+by `transpose(A)`, and add the averages `transpose(μ)` to each row.
 
 ### Arguments
 
@@ -287,7 +289,7 @@ by `A'`, and add the averages `μ'` to each row.
 
 ### Method
 
-Multiply `Z` by `A'`. Add `μ'` to each row of the product.
+Multiply `Z` by `transpose(A)`. Add `transpose(μ)` to each row of the product.
 
 ### Course references
 
@@ -299,8 +301,8 @@ Multiply `Z` by `A'`. Add `μ'` to each row of the product.
 """
 function mix_factors(Z::Matrix{Float64}, μ::Vector{Float64}, A::Matrix{Float64})::Matrix{Float64}
 
-    # TODO: Multiply Z by A', then add μ' to each row.
-    # Hint: Φ = μ' .+ Z * A';
+    # TODO: Multiply Z by transpose(A), then add transpose(μ) to each row.
+    # Hint: Φ = transpose(μ) .+ Z * transpose(A);
     Φ = error("Complete mix_factors: mix the draws.");
 
     return Φ;
