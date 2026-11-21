@@ -239,7 +239,10 @@ other models. Without fitting step 4, the synthetic factors are uncorrelated,
 so the covariance of two synthetic stocks keeps only the variance of each
 factor, and every covariance term between two different factors drops out.
 \slidenote{Code}{\texttt{fit\_jump\_model} in \texttt{src/Model.jl} calls
-\texttt{JumpHMM.build}; \texttt{draw\_series} calls \texttt{JumpHMM.simulate}.}
+\texttt{JumpHMM.build}; \texttt{draw\_series} calls \texttt{JumpHMM.simulate}.
+FRED records the 10-year yield and breakeven inflation to 0.01 percentage
+point, so \texttt{spread\_rate\_changes} spreads each daily change over its
+0.01 step before the model of that factor is fit.}
 \end{frame}
 
 \begin{frame}{Sampling: draw, mix, and compose}\label{fr:sampling}
