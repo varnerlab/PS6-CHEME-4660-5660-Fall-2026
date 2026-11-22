@@ -1,4 +1,4 @@
-# Load the selected track and its helpers from paths relative to this file -
+# Load the supplied code and the selected track from paths relative to this file -
 const _ROOT = @__DIR__;
 
 # Load the printing functions and the checker's functions first, so that the checker can report any later error -
@@ -58,9 +58,7 @@ else
     const _PUBLIC_CHECKS = advanced_public_checks();
 end
 
-# Load optional student helpers before the selected source file -
-# Store helper files under src/. Document each helper's purpose, inputs, and output.
-# include(joinpath(_ROOT, "src", "MyHelperFunctions.jl"));
+# Load the selected source file -
 if !isfile(_SOURCE_PATH)
     throw(ArgumentError("Selected source file is missing: $(_SOURCE_PATH)"));
 end

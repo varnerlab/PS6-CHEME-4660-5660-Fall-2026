@@ -219,7 +219,6 @@ function write_manifest(path::String, record::NamedTuple)::Nothing
     println(io, "local solution: ", record.solution);
     println(io, "tests ran: ", record.tests_ran);
     println(io, "public tests passed: $(record.passed)/$(record.total)");
-    println(io, "required function docstrings present: ", record.documented);
     println(io, "three answer blocks contain text without TODO: ", record.answers);
     println(io, "local rubric score: ", record.score);
     if record.defaults_checked
@@ -277,8 +276,7 @@ submission record.
 
 `nothing`. Prints results and next steps, and writes `MANIFEST.txt` in the
 assignment folder. A local solution run writes under `instructor/output` instead.
-After all student checks pass, the teaching team must still review the
-code, documentation, and answers.
+When every check passes, the teaching team grades the answers for a 3 or a 4.
 
 ### Notes
 
@@ -320,19 +318,6 @@ function main(setup::NamedTuple)::Nothing
     passed = number_passed(results);
     all_passed = tests_ran && !isempty(results) && passed == length(results);
 
-    # Check the docstrings -
-    documented_functions = Symbol[];
-    if track == "standard"
-        documented_functions = STANDARD_DOCUMENTED_FUNCTIONS;
-    elseif track == "advanced"
-        documented_functions = ADVANCED_DOCUMENTED_FUNCTIONS;
-    end
-    missing_docs = Symbol[];
-    if tests_ran
-        missing_docs = missing_docstrings(documented_functions);
-    end
-    documented = tests_ran && isempty(missing_docs);
-
     # Check the answers -
     response_path = joinpath("responses", titlecase(track)*".md");
     answer_issues = String[];
@@ -343,7 +328,7 @@ function main(setup::NamedTuple)::Nothing
 
     # The local rubric score -
     if all_passed
-        score = "teaching team review pending";
+        score = "3 or 4, after the teaching team grades your answers";
     else
         score = string(rubric_score(results; tests_ran=tests_ran, completion=false));
     end
@@ -384,7 +369,7 @@ function main(setup::NamedTuple)::Nothing
     mkpath(setup.output_root);
     record_path = joinpath(setup.output_root, "MANIFEST.txt");
     record = (track = track, source_name = source_name, solution = setup.solution, tests_ran = tests_ran,
-        passed = passed, total = length(results), documented = documented, answers = answers,
+        passed = passed, total = length(results), answers = answers,
         score = score, defaults_checked = defaults_checked, defaults_changed = defaults_changed,
         defaults_hash = defaults_hash, detail = setup.detail, source_path = setup.source_path);
     write_manifest(record_path, record);
@@ -397,15 +382,6 @@ function main(setup::NamedTuple)::Nothing
     end
     println("Track: ", track);
     println("Public tests: $(passed)/$(length(results)) passed");
-
-    # The docstring result -
-    if !tests_ran
-        print_terminal_text("Docstrings were not checked. Fix the setup or source error above, then run the checker again.");
-    elseif documented
-        println("Docstrings: All required functions have docstrings.");
-    else
-        print_terminal_text("Docstrings: Restore the supplied docstrings for " * join(string.(missing_docs), ", ") * ".");
-    end
 
     # A solution run stops here, because the response files are not part of the solution -
     if setup.solution
@@ -432,9 +408,6 @@ function main(setup::NamedTuple)::Nothing
     # The local rubric score, and what to do next -
     println();
     println("Local rubric score: ", score);
-    if all_passed
-        println("The teaching team must still review your code, documentation, and answers.");
-    end
     println("Wrote MANIFEST.txt. The checker does not upload your work.");
     print_next_steps();
     return nothing;

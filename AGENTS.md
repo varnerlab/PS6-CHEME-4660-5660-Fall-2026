@@ -21,6 +21,9 @@
   `instructor/make_fred_data.jl`. Never commit or print the FRED API key.
 - Student code is plain course-style Julia: documented top-level functions,
   explicit loops and if-blocks, and a comment above each step.
+- The checks grade the code, and the teaching team grades only the answers
+  (a 3 or a 4). Students write no docstrings and no helper functions, and
+  nothing grades code quality.
 - Keep instructor solutions, expected results, and numerical answers out of
   every student file. They live in `instructor/reference/`, which is not
   tracked.

@@ -87,8 +87,7 @@ package, and the four FRED series come in
 Each function's docstring gives the rule, the course material that does the
 same calculation, and the slide of the [mathematical
 companion](docs/PS6-Mathematical-Companion.pdf) with the formulas. Grading uses
-only `TRACK.txt`, your track's source and response files, `Include.jl`, and any
-helper files you add under [src](src).
+only `TRACK.txt` and your track's source and response files.
 
 ## The model
 

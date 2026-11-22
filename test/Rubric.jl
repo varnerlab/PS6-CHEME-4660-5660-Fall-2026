@@ -172,33 +172,6 @@ end
 
 
 """
-    missing_docstrings(function_names::Vector{Symbol}) -> Vector{Symbol}
-
-Find required functions that have no Julia docstring.
-
-### Arguments
-
-- `function_names`: Names of the functions required for the selected track.
-
-### Returns
-
-The names that are not defined or have no docstring in `Main`.
-"""
-function missing_docstrings(function_names::Vector{Symbol})::Vector{Symbol}
-
-    # A required function must be defined and have a docstring; student code is loaded into Main -
-    missing_names = Symbol[];
-    for name ∈ function_names
-        has_docstring = isdefined(Main, name) && Base.Docs.hasdoc(Main, name);
-        if !has_docstring
-            push!(missing_names, name);
-        end
-    end
-    return missing_names;
-end
-
-
-"""
     response_issues(path::String) -> Vector{String}
 
 Find missing or unfinished answers and describe how to fix them.
@@ -267,8 +240,8 @@ Calculate the rubric score from the check results and the teaching team's review
 
 - `results`: A vector of check records with Boolean `passed` fields.
 - `tests_ran`: Whether the student's source file loaded; `false` gives 0.
-- `completion`: Set to `true` only when the teaching team has reviewed the
-  code, documentation, and answers and found that all requirements are met.
+- `completion`: Set to `true` only when the teaching team has graded the
+  answers and found all three complete.
 
 ### Returns
 
@@ -281,8 +254,8 @@ When all checks pass, return 3 if `completion` is `false` and 4 if it is `true`.
 
 Standard has 12 checks: passing 1–6 gives 1, 7–11 gives 2, and all 12 gives
 3 or 4. Advanced has 24 checks: passing 1–12 gives 1, 13–23 gives 2, and all
-24 gives 3 or 4. The local checker prints that the teaching team review is pending when all checks pass.
-It leaves the choice between 3 and 4 to the teaching team.
+24 gives 3 or 4. The local checker prints "3 or 4" when all checks pass, and the
+teaching team chooses between 3 and 4 from the answers.
 """
 function rubric_score(results::AbstractVector{<:NamedTuple};
     tests_ran::Bool, completion::Bool)::Int
@@ -304,9 +277,3 @@ function rubric_score(results::AbstractVector{<:NamedTuple};
         return 4;
     end
 end
-
-
-# Functions that must have docstrings -
-const STANDARD_DOCUMENTED_FUNCTIONS = [:least_squares_fit, :sector_matrix, :compose_growth_rates];
-
-const ADVANCED_DOCUMENTED_FUNCTIONS = vcat(STANDARD_DOCUMENTED_FUNCTIONS, [:unmix_factors, :mix_factors, :economic_factor]);
