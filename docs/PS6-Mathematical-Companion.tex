@@ -10,7 +10,7 @@
 % order changes.
 % Settings the slides quote. Check each one after an edit of config/defaults.toml or src/Data.jl:
 %   steps_per_year = 252 (Δt = 1/252 year): slide 4.
-%   375 stocks, 11 sectors, 2,767 price days (T = 2,766): slides 4, 5, and 11.
+%   375 stocks, 11 sectors, 2,767 trading days (T = 2,766): slides 4, 5, and 11.
 %   fred_series, fred_kinds, and fred_names (four series): slides 5 and 9.
 %   number_of_states = 100, nu = 5.0, epsilon = 1.0e-4, lambda = 100.0: slide 11.
 %   number_of_paths = 10 and seed = 5660: slides 12 and 13.
@@ -86,7 +86,7 @@ day from 2014 to 2024. The daily growth rate of stock $i$, in 1/yr, is:
  g_i(t)=\frac{1}{\Delta t}\ln\left(\frac{S_i(t)}{S_i(t-1)}\right),
  \qquad \Delta t=\tfrac{1}{252}\ \text{yr}.
 \]
-The 2,767 price days give $T=2{,}766$ growth rates per stock. The growth rates
+The 2,767 trading days give $T=2{,}766$ growth rates per stock. The growth rates
 of SPY are $g_m(t)$, the market. The vector $\gb_i$ holds the $T$ growth rates
 of stock $i$.
 \slidenote{Code}{\texttt{load\_universe} computes the growth rates with
@@ -107,7 +107,7 @@ market, $K$ economic factors, and the 11 sector factors:
 \begin{center}\small
 \begin{tabular}{lccc}
 \toprule
-Market in the report & $K$ & Sectors & Step 4 \\
+Model in the report & $K$ & Sectors & Step 4 \\
 \midrule
 single index model & 0 & none & no \\
 market and sectors & 0 & 11 & no \\
@@ -117,7 +117,7 @@ market, sectors, and FRED series, with the Cholesky step & 4 & 11 & yes \\
 \bottomrule
 \end{tabular}
 \end{center}
-\slidenote{Tracks}{Standard reports the first two markets. Advanced adds the
+\slidenote{Tracks}{Standard reports the first two models. Advanced adds the
 last three, with the four FRED series of slide \pageref{fr:fred}.}
 \end{frame}
 
@@ -184,8 +184,8 @@ zero columns.}
 \end{frame}
 
 \begin{frame}{Economic factors from FRED}\label{fr:fred}
-FRED gives the level $L(t)$ of each series on each price day. A rate becomes
-its daily change, and a price becomes its growth rate, in 1/yr:
+FRED gives the level $L(t)$ of each series on each trading day. A rate becomes
+its daily change, and a price or an index becomes its growth rate, in 1/yr:
 \[
  x(t)=L(t)-L(t-1)\ \ \text{(change)},
  \qquad
@@ -237,8 +237,8 @@ Fitting step 5 fits one single-asset jump hidden Markov model to each series:
 Each model draws its paths independently of the other models, so without
 fitting step 4 the synthetic factors are uncorrelated.
 \slidenote{Code}{\texttt{fit\_jump\_model} and \texttt{draw\_series} in
-\texttt{src/Model.jl}. Every model uses the settings of the tuned SPY model of
-L13a, in \texttt{config/defaults.toml}.}
+\texttt{src/Model.jl}. Every model uses the settings in
+\texttt{config/defaults.toml}; $\epsilon$ and $\lambda$ come from the tuned SPY model of L13a.}
 \end{frame}
 
 \begin{frame}{Sampling: draw, mix, and compose}\label{fr:sampling}

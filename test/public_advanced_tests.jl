@@ -239,6 +239,6 @@ function advanced_public_checks()::Vector{NamedTuple}
     push!(checks, (name = "Economic factor: a rate becomes its daily change", test = check_factor_change_by_hand));
     push!(checks, (name = "Economic factor: a price becomes its growth rate", test = check_factor_growth_by_hand));
     push!(checks, (name = "Economic factor: constant levels give zeros, one value fewer", test = check_factor_constant_levels));
-    push!(checks, (name = "Economic factor: returns a Vector{Float64}; an unknown kind raises an ArgumentError", test = check_factor_type_and_kind));
+    push!(checks, (name = "Economic factor: returns a Vector{Float64}; an unknown kind throws an ArgumentError", test = check_factor_type_and_kind));
     return checks;
 end

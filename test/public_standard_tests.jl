@@ -248,7 +248,7 @@ function standard_public_checks()::Vector{NamedTuple}
         (name = "Least-squares fit: returns a Vector{Float64} and leaves the inputs unchanged", test = check_fit_type_and_inputs),
         (name = "Sector matrix: hand case with three stocks and two sectors", test = check_sector_matrix_by_hand),
         (name = "Sector matrix: one 1 in each row, and the sector sizes as column sums", test = check_sector_matrix_counts),
-        (name = "Sector matrix: an unknown sector raises an ArgumentError", test = check_sector_matrix_unknown),
+        (name = "Sector matrix: an unknown sector throws an ArgumentError", test = check_sector_matrix_unknown),
         (name = "Sector matrix: returns a Matrix{Float64} of size stocks × sectors, with a zero column for an empty sector", test = check_sector_matrix_type_and_inputs),
         (name = "Compose growth rates: hand case with two days", test = check_compose_by_hand),
         (name = "Compose growth rates: the fitted pieces rebuild a stock exactly", test = check_compose_rebuilds_stock),

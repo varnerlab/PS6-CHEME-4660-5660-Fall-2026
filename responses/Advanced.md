@@ -11,10 +11,11 @@ for accuracy. The synthetic market draws SPY, each sector factor, and the
 stock-specific part of each stock from separate single-asset jump hidden Markov
 models. In the real market, the sector factors of Real Estate and Utilities
 move together. Will a synthetic stock in Real Estate and a synthetic stock in
-Utilities move together as much as two real stocks do, without the Cholesky
-step and with it? Can four economic factors from FRED, such as the daily change
-in the 10-year Treasury yield, take the place of the 11 sector factors? Will
-the FRED series add anything to the sector factors? Explain your predictions.
+Utilities move together as much as two real stocks in those sectors do, without
+the Cholesky step and with it? Can four economic factors from FRED, such as the
+daily change in the 10-year Treasury yield, take the place of the 11 sector
+factors? Will the FRED series add anything to the sector factors? Explain your
+predictions.
 
 <!-- answer-1:start -->
 TODO: Answer Question 1.
@@ -22,9 +23,9 @@ TODO: Answer Question 1.
 
 ## 2. What does the Cholesky step add?
 
-Compare the rows **market and sectors** and **market and sectors, with the
-Cholesky step** with the row **real market**. In which correlation columns does
-the Cholesky step make the model match the real market, and why? Was your
+Compare two rows with the row **real market**: **market and sectors**, and
+**market and sectors, with the Cholesky step**. In which correlation columns
+does the Cholesky step make the model match the real market, and why? Was your
 prediction about the Cholesky step right?
 
 <!-- answer-2:start -->

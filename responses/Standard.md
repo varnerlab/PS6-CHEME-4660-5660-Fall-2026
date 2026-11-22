@@ -10,7 +10,7 @@ Answer this question before you write any code. Your prediction is not graded
 for accuracy. The synthetic market draws SPY, each sector factor, and the
 stock-specific part of each stock from separate single-asset jump hidden Markov
 models. Will two synthetic stocks in the same sector move together as much as
-two real stocks in the same sector? Will two stocks in different sectors?
+two real stocks in the same sector? What about two stocks in different sectors?
 Explain why.
 
 <!-- answer-1:start -->

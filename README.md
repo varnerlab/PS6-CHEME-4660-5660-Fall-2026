@@ -18,7 +18,7 @@ series, such as the daily change in the 10-year Treasury yield.
 > move together like the real market?**
 
 We'll explore this question on two tracks, and you will choose one.
-**Standard** fits the market and the sector factors, as in the example.
+**Standard** fits the market and the sector factors.
 **Advanced** adds the Cholesky step, and asks whether four economic factors
 from FRED, the economic database of the Federal Reserve Bank of St. Louis, can
 take the place of the sector factors or add to the sector factors.
@@ -57,7 +57,7 @@ package, and the four FRED series come in
    Markov models. The installation needs internet access:
 
    ```text
-   julia --project=. --startup-file=no -e 'using Pkg; Pkg.instantiate()'
+   julia --project=. --startup-file=no -e "using Pkg; Pkg.instantiate()"
    ```
 
 4. Set [TRACK.txt](TRACK.txt) to exactly `standard` or `advanced`:
@@ -90,10 +90,10 @@ only `TRACK.txt` and your track's source and response files.
 The supplied code in `src/Model.jl` follows the fitting and sampling algorithms
 of lecture L14a step by step, and calls your functions for the calculations.
 
-**The data.** The real market is SPY and 375 of its stocks in 11 sectors:
-every stock with daily prices from 2014 to 2024 and a GICS sector, with one
-ticker per company. The growth rates are daily, in units of 1/yr, as in the
-course examples.
+**The data.** The real market is SPY and 375 of its stocks in 11 sectors: every
+stock with daily prices from 2014 to 2024 and a sector of the Global Industry
+Classification Standard (GICS), with one ticker per company. The growth rates
+are daily, in units of 1/yr, as in the course examples.
 
 **The general factor model** explains the growth rate of each stock on each day
 as the sum of five parts: a baseline, a market part, an economic part, a sector
@@ -126,11 +126,11 @@ from a fixed seed, so every run draws the same synthetic markets.
 
 **The report.** The table **Real and synthetic markets** in
 `results/Report.md` has one row for the real market and one row for each
-model. Each correlation column gives the average correlation of two stocks,
-such as two different stocks in the same sector. The row **real market** gives
-one value in each column. Each model's row gives the lowest and the highest
-value over the 10 synthetic markets. A model matches the real market in a
-column when the real value falls inside that model's range.
+model. Each correlation column averages the correlation over every pair of
+stocks of one kind, such as two different stocks in the same sector. The row
+**real market** gives one value in each column. Each model's row gives the
+lowest and the highest value over the 10 synthetic markets. A model matches the
+real market in a column when the real value falls inside that model's range.
 
 ## Standard: the market and the sectors
 

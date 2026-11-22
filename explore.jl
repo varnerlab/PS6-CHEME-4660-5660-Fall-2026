@@ -1,7 +1,7 @@
 # Optional and ungraded. Edit config/explore.toml, then run from the PS6 folder:
 #   julia --project=. --startup-file=no explore.jl
 # Reruns the report with your settings and your own functions (the TRACK.txt track).
-# Results are written to results/exploration/Exploration.md; nothing here is submitted.
+# Results are written to results/exploration/Exploration.md; nothing here is graded.
 
 const _ROOT = @__DIR__;
 

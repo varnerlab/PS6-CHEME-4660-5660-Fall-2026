@@ -173,15 +173,17 @@ end
 # --- 3. Writing the report ----------------------------------------------------------------------
 
 """
-    number_text(x::Float64) -> String
+    number_text(x::Float64, digits::Int) -> String
 
-Write a number with 2 decimals. A number that rounds to zero prints as `0.00`, never `-0.00`.
+Write a number with `digits` decimals. A number that rounds to zero prints as `0.00`, never `-0.00`.
 """
-function number_text(x::Float64)::String
+function number_text(x::Float64, digits::Int)::String
 
-    # Round to 2 decimals; adding 0.0 turns -0.0 into 0.0 -
-    rounded = round(x, digits = 2) + 0.0;
-    return @sprintf("%.2f", rounded);
+    # Round to the number of decimals; adding 0.0 turns -0.0 into 0.0 -
+    rounded = round(x, digits = digits) + 0.0;
+
+    # Print exactly that many decimals, such as 0.250 for 0.25 with 3 decimals -
+    return Printf.format(Printf.Format("%.$(digits)f"), rounded);
 end
 
 """
@@ -241,7 +243,8 @@ function write_markets_table(io::IO, rows::Vector{NamedTuple}, settings::NamedTu
     end
     write_header(io, headers);
 
-    # One line per row -
+    # One line per row. The numbers have 3 decimals, because with 2 decimals a real value just outside a
+    # range can look inside it -
     for row ∈ rows
         cells = [row.label];
         if !isempty(row.problem)
@@ -253,14 +256,14 @@ function write_markets_table(io::IO, rows::Vector{NamedTuple}, settings::NamedTu
         elseif row.synthetic == false
             # The real market: one value in each column -
             for value ∈ statistic_values(row.statistics)
-                push!(cells, number_text(value));
+                push!(cells, number_text(value, 3));
             end
         else
             # A model: the lowest and the highest value over its synthetic markets -
             lowest = statistic_values(row.lowest);
             highest = statistic_values(row.highest);
             for k ∈ 1:length(lowest)
-                push!(cells, number_text(lowest[k]) * " to " * number_text(highest[k]));
+                push!(cells, number_text(lowest[k], 3) * " to " * number_text(highest[k], 3));
             end
         end
         println(io, "| ", join(cells, " | "), " |");
@@ -302,9 +305,9 @@ function write_fred_table(io::IO, rows, settings::NamedTuple)::Nothing
 
     # One line per sector -
     for row ∈ rows
-        cells = [row.sector, number_text(row.r2_market), number_text(row.r2_fred)];
+        cells = [row.sector, number_text(row.r2_market, 2), number_text(row.r2_fred, 2)];
         for loading ∈ row.loadings
-            push!(cells, number_text(loading));
+            push!(cells, number_text(loading, 2));
         end
         println(io, "| ", join(cells, " | "), " |");
     end
