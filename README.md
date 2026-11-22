@@ -181,16 +181,21 @@ Reserve Bank of St. Louis.
 
 ## Explore on your own
 
-Change any setting in `config/explore.toml`, a copy of the graded settings, and
-run:
+The exploration is optional and not graded. You will rerun the report with
+your own settings in `config/explore.toml`, a copy of the graded settings:
 
 ```text
 julia --project=. --startup-file=no explore.jl
 ```
 
-You can drop FRED series, choose other pairs of sectors, or draw more synthetic
-markets. The script writes `results/exploration/Exploration.md` with your
-functions. The exploration is not graded.
+The script uses your finished functions and writes
+`results/exploration/Exploration.md`. Try two questions:
+
+- Change the `seed`. Does each model still match the real market in the same
+  columns?
+- Choose other pairs of sectors in `pair_first` and `pair_second`. Which other
+  pairs does the row **market and sectors** miss? On the Advanced track, does
+  the Cholesky step fix those pairs too?
 
 ## Check and submit your work
 
