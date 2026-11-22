@@ -9,8 +9,8 @@
 """
     ps6_random_regression() -> Tuple{Matrix{Float64},Vector{Float64}}
 
-A fixed regression problem: 200 days, a column of ones and five random columns in `X` (the shape
-of the design matrix with SPY and four FRED series), and random values in `y`.
+A fixed regression problem: 200 days, a column of ones and five random columns in `X`, and random
+values in `y`.
 """
 function ps6_random_regression()::Tuple{Matrix{Float64},Vector{Float64}}
 

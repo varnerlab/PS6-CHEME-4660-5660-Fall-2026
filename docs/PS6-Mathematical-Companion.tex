@@ -70,8 +70,8 @@ stocks move together.
 \item \hilite{Standard: the market and the sectors.} Fitting steps 1, 2, 3,
 and 5, with SPY and the 11 sector factors.
 \item \hilite{Advanced: the Cholesky step and the FRED series.} Standard plus
-fitting step 4, which keeps the correlations between the factors, and a market
-that uses four daily economic factors in place of the 11 sector factors.
+fitting step 4, which keeps the correlations between the factors, and four
+daily economic factors, in place of the 11 sector factors and added to them.
 \end{itemize}
 \slidenote{Reading guide}{Both tracks use slides 4–\pageref{fr:residuals} and
 \pageref{fr:jump}–\pageref{fr:report}. Slides \pageref{fr:fred} and
@@ -113,11 +113,12 @@ single index model & 0 & none & no \\
 market and sectors & 0 & 11 & no \\
 market and sectors, with the Cholesky step & 0 & 11 & yes \\
 market and FRED series, with the Cholesky step & 4 & none & yes \\
+market, sectors, and FRED series, with the Cholesky step & 4 & 11 & yes \\
 \bottomrule
 \end{tabular}
 \end{center}
 \slidenote{Tracks}{Standard reports the first two markets. Advanced adds the
-last two, with the four FRED series of slide \pageref{fr:fred}.}
+last three, with the four FRED series of slide \pageref{fr:fred}.}
 \end{frame}
 
 \begin{frame}{One solve for fitting steps 1, 2, and 3}\label{fr:solve}
@@ -209,8 +210,8 @@ API but is not endorsed or certified by the Federal Reserve Bank of St.\ Louis.}
 
 \begin{frame}{Fitting step 4: unmix the factors}\label{fr:unmix}
 The factor matrix $\Phib=[\gb_m,\mathbf{x}_1,\dots,\mathbf{x}_K,\Fb]$ is
-$T\times p$: $p=12$ for the market and sectors, and $p=5$ for the market and
-FRED series. Its column averages are $\mub$, and its sample covariance matrix
+$T\times p$: $p=12$ for the market and sectors, $p=5$ for the market and FRED
+series, and $p=16$ for the market, sectors, and FRED series. Its column averages are $\mub$, and its sample covariance matrix
 is:
 \[
  \Sigmab_{\Phi}=\frac{1}{T-1}\left(\Phib-\onev\mub^{\top}\right)^{\top}\left(\Phib-\onev\mub^{\top}\right).
@@ -264,24 +265,24 @@ checker draws 10 synthetic markets from the seed 5660.}
 
 \begin{frame}{The columns of the report}\label{fr:report}
 With $\rho_{ij}$ the correlation of the growth rates of stocks $i$ and $j$ over
-the $T$ days, and $s(\cdot)$ the sample standard deviation:
+the $T$ days:
 \vspace{0.3em}
-\begin{center}\small
+\begin{center}\footnotesize
 \begin{tabular}{ll}
 \toprule
-Column & Definition \\
+Column of the report & Definition \\
 \midrule
-Same sector & average $\rho_{ij}$ over pairs $i<j$ in the same sector \\
-Different sectors & average $\rho_{ij}$ over pairs $i<j$ in different sectors \\
-Each pair of sectors & average $\rho_{ij}$ over $i$ in the first sector and $j$ in the second \\
-Median stock volatility (1/$\sqrt{\text{yr}}$) & median over the stocks of $s(\gb_i)\sqrt{\Delta t}$ \\
-R² (table FRED series) & $1-\operatorname{var}(\epsb_i)/\operatorname{var}(\gb_i)$, after fitting step 1 \\
+Average correlation, same sector & mean $\rho_{ij}$ over pairs $i<j$ in the same sector \\
+Average correlation, different sectors & mean $\rho_{ij}$ over pairs $i<j$ in different sectors \\
+Average correlation, a pair of sectors & mean $\rho_{ij}$ over $i$ in the first sector, $j$ in the second \\
+Average R² (table FRED series) & mean over a sector of $1-\operatorname{var}(\epsb_i)/\operatorname{var}(\gb_i)$ \\
 \bottomrule
 \end{tabular}
 \end{center}
 \vspace{0.3em}
-Each synthetic row averages the 10 synthetic markets. The table FRED series
-averages R² and each loading $\eta_{ik}$ over the stocks of each sector.
+The row real market gives one value in each column. Each model's row gives the
+lowest and the highest value over the 10 synthetic markets. A model matches the
+real market in a column when the real value falls inside that model's range.
 \end{frame}
 
 \begin{frame}{Summary}

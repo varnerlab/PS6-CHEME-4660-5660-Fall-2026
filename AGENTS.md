@@ -10,7 +10,10 @@
 - Two tracks. Standard: the market and the sector factors (`least_squares_fit`,
   `sector_matrix`, `compose_growth_rates`). Advanced: Standard plus the Cholesky
   step (`unmix_factors`, `mix_factors`) and four FRED series as economic factors
-  (`economic_factor`), used in place of the sector factors.
+  (`economic_factor`), used in place of the sector factors and added to them.
+- The report gives each model's lowest and highest value over the 10
+  synthetic markets. A model matches the real market in a column when the
+  real value falls inside that model's range.
 - The supplied code in `src/Model.jl` follows the lecture's fitting and sampling
   algorithms exactly. `least_squares_fit` is the one solve for fitting steps 1,
   2, and 3.

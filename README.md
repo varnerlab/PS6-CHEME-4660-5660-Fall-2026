@@ -9,23 +9,19 @@ and one model for the stock-specific part of each stock. Each model draws its
 own path, and a **factor model** adds the draws into the growth rates of each
 stock.
 
-The example also shows a gap. The models draw the sector factors
-independently, so sector factors that move together in the real market, such as
-the sector factors of Real Estate and Utilities, do not move together in the
-synthetic market. In PS6, we'll use the **general factor model** of lecture
-L14a, which adds a **Cholesky step** and **economic factors** to the example.
-The Cholesky step keeps the correlations between the factors. Each economic
-factor is a daily series, such as the daily change in the 10-year Treasury
-yield.
+In PS6, we'll use the **general factor model** of lecture L14a, which adds a
+**Cholesky step** and **economic factors** to the example. The Cholesky step
+keeps the correlations between the factors. Each economic factor is a daily
+series, such as the daily change in the 10-year Treasury yield.
 
 > **Does a synthetic market built from single-asset jump hidden Markov models
 > move together like the real market?**
 
 We'll explore this question on two tracks, and you will choose one.
-**Standard** fits the market and the sector factors. **Advanced** adds the
-Cholesky step, and asks whether four economic factors from FRED, the economic
-database of the Federal Reserve Bank of St. Louis, can take the place of the
-sector factors.
+**Standard** fits the market and the sector factors, as in the example.
+**Advanced** adds the Cholesky step, and asks whether four economic factors
+from FRED, the economic database of the Federal Reserve Bank of St. Louis, can
+take the place of the sector factors or add to the sector factors.
 
 ## Logistics
 
@@ -128,13 +124,21 @@ days, and your function `compose_growth_rates` adds the five parts into the
 growth rates of each synthetic stock. The checker draws 10 synthetic markets
 from a fixed seed, so every run draws the same synthetic markets.
 
+**The report.** The table **Real and synthetic markets** in
+`results/Report.md` has one row for the real market and one row for each
+model. Each correlation column gives the average correlation of two stocks,
+such as two different stocks in the same sector. The row **real market** gives
+one value in each column. Each model's row gives the lowest and the highest
+value over the 10 synthetic markets. A model matches the real market in a
+column when the real value falls inside that model's range.
+
 ## Standard: the market and the sectors
 
 Complete `least_squares_fit`, `sector_matrix`, and `compose_growth_rates`. Run
 the checker, and answer Questions 2 and 3 from the table **Real and synthetic
-markets**. The table compares the real market with two synthetic markets: the
-**single index model**, which has the market part and the stock-specific part
-but no sector factors, and the **market and sectors**.
+markets**. The table compares the real market with two models: the **single
+index model**, which has the market part and the stock-specific part but no
+sector factors, and the **market and sectors**.
 
 ## Advanced: the Cholesky step and the FRED series
 
@@ -165,10 +169,12 @@ We use the Brent oil price because the WTI oil price fell below zero on April
 20, 2020, and a growth rate needs a positive price.
 
 Rerun the checker. Answer Question 2 from the row **market and sectors, with
-the Cholesky step**. Answer Question 3 from the row **market and FRED series,
-with the Cholesky step**, which uses the four FRED series in place of the 11
-sector factors, and from the table **FRED series**, which gives the R² and the
-loadings of fitting step 1 for each sector.
+the Cholesky step**. Answer Question 3 from two rows and one table. The row
+**market and FRED series, with the Cholesky step** uses the four FRED series in
+place of the 11 sector factors. The row **market, sectors, and FRED series, with
+the Cholesky step** adds the four FRED series to the sector factors. The table
+**FRED series** gives the R² and the loadings of fitting step 1 for each
+sector.
 
 This product uses the FRED® API but is not endorsed or certified by the Federal
 Reserve Bank of St. Louis.

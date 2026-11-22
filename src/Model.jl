@@ -228,14 +228,14 @@ end
 """
     market_statistics(G::Matrix{Float64}, universe::NamedTuple, settings::NamedTuple) -> NamedTuple
 
-Measure how the stocks of one market move together: the numbers in one row of the table 'Real and
-synthetic markets'.
+Measure how the stocks of one market move together, real or synthetic: the numbers that the table
+'Real and synthetic markets' reports for that market.
 
 ### Arguments
 
 - `G`: The growth rates of the stocks (1/yr), days × stocks, real or synthetic.
 - `universe`: The market from `load_universe`. The function uses `sectors`.
-- `settings`: The settings from `load_config`. The function uses `pair_first`, `pair_second`, and `Δt`.
+- `settings`: The settings from `load_config`. The function uses `pair_first` and `pair_second`.
 
 ### Returns
 
@@ -244,7 +244,6 @@ synthetic markets'.
   - `different_sectors`: The average correlation of two stocks in different sectors.
   - `pairs`: For each pair of sectors, the average correlation of a stock in the first sector and a
     stock in the second sector.
-  - `median_volatility`: The median annualized volatility of the stocks (1/sqrt(yr)).
 """
 function market_statistics(G::Matrix{Float64}, universe::NamedTuple, settings::NamedTuple)::NamedTuple
 
@@ -287,20 +286,15 @@ function market_statistics(G::Matrix{Float64}, universe::NamedTuple, settings::N
         pairs[k] = pair_total / pair_count;
     end
 
-    # The annualized volatility of each stock, and the median over the stocks -
-    volatility = zeros(number_of_stocks);
-    for i ∈ 1:number_of_stocks
-        volatility[i] = std(G[:, i]) * sqrt(settings.Δt);
-    end
-
     return (same_sector = same_total / same_count, different_sectors = different_total / different_count,
-        pairs = pairs, median_volatility = median(volatility));
+        pairs = pairs);
 end
 
 """
-    average_statistics(markets::Vector{Matrix{Float64}}, universe::NamedTuple, settings::NamedTuple) -> NamedTuple
+    range_statistics(markets::Vector{Matrix{Float64}}, universe::NamedTuple, settings::NamedTuple) -> NamedTuple
 
-Average the statistics of `market_statistics` over the synthetic markets.
+Find the lowest and the highest value of each statistic of `market_statistics` over the synthetic
+markets of one model.
 
 ### Arguments
 
@@ -310,27 +304,37 @@ Average the statistics of `market_statistics` over the synthetic markets.
 
 ### Returns
 
-- A `NamedTuple` with the fields of `market_statistics`, each the average over the markets.
+- A `NamedTuple` with the fields `lowest` and `highest`. Each holds the fields of `market_statistics`:
+  `lowest` holds the lowest value of each statistic over the markets, and `highest` the highest value.
 """
-function average_statistics(markets::Vector{Matrix{Float64}}, universe::NamedTuple, settings::NamedTuple)::NamedTuple
+function range_statistics(markets::Vector{Matrix{Float64}}, universe::NamedTuple, settings::NamedTuple)::NamedTuple
 
-    # Add up the statistics of each synthetic market -
-    same_sector = 0.0;
-    different_sectors = 0.0;
-    pairs = zeros(length(settings.pair_first));
-    median_volatility = 0.0;
-    for G ∈ markets
-        statistics = market_statistics(G, universe, settings);
-        same_sector = same_sector + statistics.same_sector;
-        different_sectors = different_sectors + statistics.different_sectors;
-        pairs = pairs + statistics.pairs;
-        median_volatility = median_volatility + statistics.median_volatility;
+    # Start from the statistics of the first synthetic market -
+    first_statistics = market_statistics(markets[1], universe, settings);
+    low_same = first_statistics.same_sector;
+    high_same = first_statistics.same_sector;
+    low_different = first_statistics.different_sectors;
+    high_different = first_statistics.different_sectors;
+    low_pairs = copy(first_statistics.pairs);
+    high_pairs = copy(first_statistics.pairs);
+
+    # Keep the lowest and the highest value of each statistic over the other synthetic markets -
+    for m ∈ 2:length(markets)
+        statistics = market_statistics(markets[m], universe, settings);
+        low_same = min(low_same, statistics.same_sector);
+        high_same = max(high_same, statistics.same_sector);
+        low_different = min(low_different, statistics.different_sectors);
+        high_different = max(high_different, statistics.different_sectors);
+        for k ∈ 1:length(low_pairs)
+            low_pairs[k] = min(low_pairs[k], statistics.pairs[k]);
+            high_pairs[k] = max(high_pairs[k], statistics.pairs[k]);
+        end
     end
 
-    # Divide each total by the number of markets -
-    number_of_markets = length(markets);
-    return (same_sector = same_sector / number_of_markets, different_sectors = different_sectors / number_of_markets,
-        pairs = pairs / number_of_markets, median_volatility = median_volatility / number_of_markets);
+    # The lowest values, and the highest values -
+    lowest = (same_sector = low_same, different_sectors = low_different, pairs = low_pairs);
+    highest = (same_sector = high_same, different_sectors = high_different, pairs = high_pairs);
+    return (lowest = lowest, highest = highest);
 end
 
 """

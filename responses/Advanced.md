@@ -13,8 +13,8 @@ models. In the real market, the sector factors of Real Estate and Utilities
 move together. Will a synthetic stock in Real Estate and a synthetic stock in
 Utilities move together as much as two real stocks do, without the Cholesky
 step and with it? Can four economic factors from FRED, such as the daily change
-in the 10-year Treasury yield, take the place of the 11 sector factors? Explain
-both predictions.
+in the 10-year Treasury yield, take the place of the 11 sector factors? Will
+the FRED series add anything to the sector factors? Explain your predictions.
 
 <!-- answer-1:start -->
 TODO: Answer Question 1.
@@ -22,20 +22,24 @@ TODO: Answer Question 1.
 
 ## 2. What does the Cholesky step add?
 
-Compare the row **market and sectors, with the Cholesky step** with the rows
-**market and sectors** and **real market**. Which columns move toward the real
-market, and why? Was your prediction about the Cholesky step right?
+Compare the rows **market and sectors** and **market and sectors, with the
+Cholesky step** with the row **real market**. In which correlation columns does
+the Cholesky step make the model match the real market, and why? Was your
+prediction about the Cholesky step right?
 
 <!-- answer-2:start -->
 TODO: Answer Question 2.
 <!-- answer-2:end -->
 
-## 3. Can the FRED series take the place of the sector factors?
+## 3. Can the FRED series replace the sector factors, or add to them?
 
 Compare the row **market and FRED series, with the Cholesky step** with the
-rows **single index model**, **market and sectors, with the Cholesky step**,
-and **real market**. Can the four FRED series take the place of the 11 sector
-factors? Use the table **FRED series** to explain your answer: which sectors
+rows **market and sectors, with the Cholesky step** and **real market**. Can
+the four FRED series take the place of the 11 sector factors? Then compare the
+row **market, sectors, and FRED series, with the Cholesky step** with the row
+**market and sectors, with the Cholesky step**. Does adding the FRED series to
+the sector factors make the model match the real market in any new correlation
+column? Use the table **FRED series** to explain both answers: which sectors
 does fitting step 1 explain better with the FRED series, and by how much? Was
 your prediction about the FRED series right?
 

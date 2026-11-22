@@ -20,19 +20,21 @@ TODO: Answer Question 1.
 ## 2. What do the sector factors add?
 
 In the table **Real and synthetic markets**, compare the rows **single index
-model** and **market and sectors** with the row **real market**. What do the
-sector factors add to the synthetic market? Use the columns **Same sector** and
-**Different sectors** in your answer.
+model** and **market and sectors** with the row **real market** in the columns
+**Average correlation, same sector** and **Average correlation, different
+sectors**. In which of these columns does each model match the real market?
+What do the sector factors add to the single index model?
 
 <!-- answer-2:start -->
 TODO: Answer Question 2.
 <!-- answer-2:end -->
 
-## 3. Which pairs of sectors does the synthetic market miss?
+## 3. Which pairs of sectors does the model miss?
 
-Compare the three sector-pair columns of the row **market and sectors** with
-the row **real market**. Which pairs of sectors does the synthetic market miss,
-and why? Was your prediction in Question 1 right?
+Compare the row **market and sectors** with the row **real market** in the
+three columns for pairs of sectors, such as **Average correlation, Real Estate
+and Utilities**. In which of these columns does the row **market and sectors**
+not match the real market, and why? Was your prediction in Question 1 right?
 
 <!-- answer-3:start -->
 TODO: Answer Question 3.

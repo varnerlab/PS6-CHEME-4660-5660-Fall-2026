@@ -17,9 +17,8 @@ Solve the least-squares problem `X'X θ = X'y` for `θ`. When `X` has full colum
 step of the general factor model, the answer equals the pseudo-inverse solution `pinv(X) * y`.
 Fitting steps 1, 2, and 3 use this one solve, with a different `X` and `y` in each step:
 
-- Step 1, the market and economic loadings of stock `i`: `X` is the design matrix
-  `[1, g_m, x_1, ..., x_K]` (days × columns), `y` is the growth rates of stock `i`, and `θ` is
-  `(α_i, β_i, η_i1, ..., η_iK)`. Without the FRED series, `X` is `[1, g_m]`.
+- Step 1, the baseline and market sensitivity of stock `i`: `X` is the design matrix `[1, g_m]`
+  (days × 2), `y` is the growth rates of stock `i`, and `θ` is `(α_i, β_i)`.
 - Step 2, the sector factors on day `t`: `X` is the sector matrix `B` (stocks × sectors), `y` is the
   residual of every stock on day `t`, and `θ` is the sector factors on day `t`.
 - Step 3, the sector loadings of stock `i`: `X` is the sector factors `F` (days × sectors), `y` is the
@@ -123,14 +122,13 @@ end
     compose_growth_rates(X::Matrix{Float64}, θ::Vector{Float64}, F::Matrix{Float64},
         δ::Vector{Float64}, u::Vector{Float64}) -> Vector{Float64}
 
-Compose the growth rates of one synthetic stock (sampling step 3): the market and economic part
-`X θ`, plus the sector part `F δ`, plus the stock-specific part `u`.
+Compose the growth rates of one synthetic stock (sampling step 3): the market part `X θ`, plus
+the sector part `F δ`, plus the stock-specific part `u`.
 
 ### Arguments
 
-- `X`: The synthetic design matrix `[1, g_m, x_1, ..., x_K]`, days × columns. Without the FRED
-  series, `X` is `[1, g_m]`.
-- `θ`: The baseline, market sensitivity, and economic loadings of the stock, `(α, β, η_1, ..., η_K)`.
+- `X`: The synthetic design matrix `[1, g_m]`, days × columns.
+- `θ`: The baseline and market sensitivity of the stock, `(α, β)`.
 - `F`: The synthetic sector factors, days × sectors. `F` has zero columns when a market has no
   sector factors.
 - `δ`: The sector loadings of the stock, one per column of `F`.
@@ -153,7 +151,7 @@ and `u`.
 function compose_growth_rates(X::Matrix{Float64}, θ::Vector{Float64}, F::Matrix{Float64},
     δ::Vector{Float64}, u::Vector{Float64})::Vector{Float64}
 
-    # TODO: Add the market and economic part, the sector part, and the stock-specific part.
+    # TODO: Add the market part, the sector part, and the stock-specific part.
     # Hint: g = X * θ + F * δ + u;
     g = error("Complete compose_growth_rates: compose the growth rates.");
 

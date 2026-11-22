@@ -46,15 +46,15 @@ function real_row(universe::NamedTuple, settings::NamedTuple)::NamedTuple
 
     # Measure the real growth rates, and name the row -
     statistics = market_statistics(universe.G, universe, settings);
-    return merge((label = "real market", problem = ""), statistics);
+    return (label = "real market", problem = "", synthetic = false, statistics = statistics);
 end
 
 """
     synthetic_row(label::String, universe::NamedTuple, settings::NamedTuple; fred::Bool, sectors::Bool,
         cholesky_step::Bool) -> NamedTuple
 
-Fit one general factor model, draw `settings.number_of_paths` synthetic markets from it, and average
-the statistics of `market_statistics` over the synthetic markets.
+Fit one model, draw `settings.number_of_paths` synthetic markets from it, and find the lowest and the
+highest value of each statistic of `market_statistics` over the synthetic markets.
 
 ### Arguments
 
@@ -67,8 +67,9 @@ the statistics of `market_statistics` over the synthetic markets.
 
 ### Returns
 
-- A `NamedTuple` with `label`, an empty `problem`, and the averaged statistics. When a function throws,
-  the `NamedTuple` holds only `label` and the `UNAVAILABLE` text in `problem`.
+- A `NamedTuple` with `label`, an empty `problem`, `synthetic = true`, and the fields `lowest` and
+  `highest` of `range_statistics`. When a function throws, the `NamedTuple` holds only `label` and the
+  `UNAVAILABLE` text in `problem`.
 """
 function synthetic_row(label::String, universe::NamedTuple, settings::NamedTuple; fred::Bool, sectors::Bool,
     cholesky_step::Bool)::NamedTuple
@@ -79,11 +80,11 @@ function synthetic_row(label::String, universe::NamedTuple, settings::NamedTuple
             x = economic_factors(load_fred_levels(settings), settings);
         end
 
-        # Fit the model, draw the synthetic markets, and average their statistics -
+        # Fit the model, draw the synthetic markets, and find the range of each statistic -
         fit = fit_factor_model(universe, x; sectors = sectors);
         markets = synthetic_markets(fit, settings; cholesky_step = cholesky_step);
-        statistics = average_statistics(markets, universe, settings);
-        return merge((label = label, problem = ""), statistics);
+        ranges = range_statistics(markets, universe, settings);
+        return (label = label, problem = "", synthetic = true, lowest = ranges.lowest, highest = ranges.highest);
     catch caught
         return (label = label, problem = problem_text(caught));
     end
@@ -95,8 +96,8 @@ end
     markets_table(track::String, universe::NamedTuple, settings::NamedTuple) -> Vector{NamedTuple}
 
 Rows of the table "Real and synthetic markets": the real market, the single index model, and the market
-and sectors on every track; and, on the Advanced track, the market and sectors with the Cholesky step
-and the market and FRED series with the Cholesky step.
+and sectors on every track; and, on the Advanced track, three models with the Cholesky step: the market
+and sectors, the market and FRED series, and the market, sectors, and FRED series.
 """
 function markets_table(track::String, universe::NamedTuple, settings::NamedTuple)::Vector{NamedTuple}
 
@@ -108,12 +109,15 @@ function markets_table(track::String, universe::NamedTuple, settings::NamedTuple
     push!(rows, synthetic_row("market and sectors", universe, settings;
         fred = false, sectors = true, cholesky_step = false));
 
-    # The two models of the Advanced track, both with the Cholesky step: the sectors, and the FRED series instead -
+    # The three models of the Advanced track, all with the Cholesky step: the sectors, the FRED series in
+    # place of the sectors, and the sectors with the FRED series -
     if track == "advanced"
         push!(rows, synthetic_row("market and sectors, with the Cholesky step", universe, settings;
             fred = false, sectors = true, cholesky_step = true));
         push!(rows, synthetic_row("market and FRED series, with the Cholesky step", universe, settings;
             fred = true, sectors = false, cholesky_step = true));
+        push!(rows, synthetic_row("market, sectors, and FRED series, with the Cholesky step", universe, settings;
+            fred = true, sectors = true, cholesky_step = true));
     end
     return rows;
 end
@@ -196,56 +200,80 @@ function write_header(io::IO, headers::Vector{String})::Nothing
 end
 
 """
+    statistic_values(statistics::NamedTuple) -> Vector{Float64}
+
+Put the statistics of `market_statistics` in the order of the columns of the table "Real and synthetic
+markets": same sector, different sectors, and each pair of sectors.
+"""
+function statistic_values(statistics::NamedTuple)::Vector{Float64}
+
+    # The two sector columns, then one column for each pair of sectors -
+    values = [statistics.same_sector, statistics.different_sectors];
+    for pair_value ∈ statistics.pairs
+        push!(values, pair_value);
+    end
+    return values;
+end
+
+"""
     write_markets_table(io::IO, rows::Vector{NamedTuple}, settings::NamedTuple, number_of_days::Int) -> Nothing
 
-Write the table "Real and synthetic markets", and one line below it about what each column averages.
-A row that could not run shows its `UNAVAILABLE` text in place of its numbers.
+Write the table "Real and synthetic markets", with a paragraph above it that says what each column and
+each row holds, and when a model matches the real market. A row that could not run shows its
+`UNAVAILABLE` text in place of its numbers.
 """
 function write_markets_table(io::IO, rows::Vector{NamedTuple}, settings::NamedTuple, number_of_days::Int)::Nothing
 
-    # The heading and the columns: one column for each pair of sectors -
+    # The heading, and what each column and each row holds -
     println(io, "## Real and synthetic markets\n");
-    headers = ["Market", "Same sector", "Different sectors"];
+    println(io, "Each correlation column gives the average correlation of the daily growth rates over every pair ",
+        "of stocks of one kind: two different stocks in the same sector, two stocks in different sectors, or one ",
+        "stock in each sector of a pair. The row **real market** gives one value in each column. Each other row ",
+        "is one model, and gives the lowest and the highest value over $(settings.number_of_paths) synthetic ",
+        "markets of $(number_of_days) days, the length of the data. A model matches the real market in a column ",
+        "when the real value falls inside that model's range.\n");
+
+    # The columns: the two sector columns, then one column for each pair of sectors -
+    headers = ["Market or model", "Average correlation, same sector", "Average correlation, different sectors"];
     number_of_pairs = length(settings.pair_first);
     for k ∈ 1:number_of_pairs
-        push!(headers, "$(settings.pair_first[k]) and $(settings.pair_second[k])");
+        push!(headers, "Average correlation, $(settings.pair_first[k]) and $(settings.pair_second[k])");
     end
-    push!(headers, "Median stock volatility (1/sqrt(yr))");
     write_header(io, headers);
 
     # One line per row -
     for row ∈ rows
         cells = [row.label];
-        if isempty(row.problem)
-            push!(cells, number_text(row.same_sector));
-            push!(cells, number_text(row.different_sectors));
-            for k ∈ 1:number_of_pairs
-                push!(cells, number_text(row.pairs[k]));
-            end
-            push!(cells, number_text(row.median_volatility));
-        else
+        if !isempty(row.problem)
             # The UNAVAILABLE text fills the first number column, and the other columns stay empty -
             push!(cells, row.problem);
             for k ∈ 1:(length(headers) - 2)
                 push!(cells, "");
             end
+        elseif row.synthetic == false
+            # The real market: one value in each column -
+            for value ∈ statistic_values(row.statistics)
+                push!(cells, number_text(value));
+            end
+        else
+            # A model: the lowest and the highest value over its synthetic markets -
+            lowest = statistic_values(row.lowest);
+            highest = statistic_values(row.highest);
+            for k ∈ 1:length(lowest)
+                push!(cells, number_text(lowest[k]) * " to " * number_text(highest[k]));
+            end
         end
         println(io, "| ", join(cells, " | "), " |");
     end
-
-    # What each column averages -
-    println(io, "\nEach correlation column averages the correlation of the daily growth rates over every pair of ",
-        "stocks of one kind: two different stocks in the same sector, two stocks in different sectors, or one ",
-        "stock in each sector of a pair. Each synthetic row averages $(settings.number_of_paths) synthetic ",
-        "markets of $(number_of_days) days, the length of the data.\n");
+    println(io);
     return nothing;
 end
 
 """
     write_fred_table(io::IO, rows, settings::NamedTuple) -> Nothing
 
-Write the table "FRED series", and one line below it about what each column holds. A table that could
-not run shows its `UNAVAILABLE` text instead of rows.
+Write the table "FRED series", with a paragraph above it that says what each column holds. A table
+that could not run shows its `UNAVAILABLE` text instead of rows.
 """
 function write_fred_table(io::IO, rows, settings::NamedTuple)::Nothing
 
@@ -258,10 +286,17 @@ function write_fred_table(io::IO, rows, settings::NamedTuple)::Nothing
         return nothing;
     end
 
-    # The columns: one loading column for each FRED series -
-    headers = ["Sector", "R² with the market", "R² with the market and FRED series"];
+    # What each column holds -
+    println(io, "Each row averages over the stocks of one sector. R² is the fraction of the variance of a stock's ",
+        "daily growth rates that fitting step 1 explains, with SPY alone or with SPY and the FRED series. Each ",
+        "loading column gives the average loading of fitting step 1 on one FRED series: the change in a stock's ",
+        "growth rate (1/yr) when the economic factor of that series changes by one unit. The economic factors have ",
+        "different units, so compare loadings only within a column, across sectors.\n");
+
+    # The columns: the two R² columns, and one loading column for each FRED series -
+    headers = ["Sector", "Average R² with SPY", "Average R² with SPY and the FRED series"];
     for name ∈ settings.fred_names
-        push!(headers, "Loading on the $(name)");
+        push!(headers, "Average loading on the $(name)");
     end
     write_header(io, headers);
 
@@ -273,13 +308,7 @@ function write_fred_table(io::IO, rows, settings::NamedTuple)::Nothing
         end
         println(io, "| ", join(cells, " | "), " |");
     end
-
-    # What each column holds -
-    println(io, "\nEach row averages over the stocks of one sector. R² is the fraction of the variance of a ",
-        "stock's daily growth rates that fitting step 1 explains. Each loading column is the average loading ",
-        "of fitting step 1 on one FRED series: the change in a stock's growth rate (1/yr) when the economic ",
-        "factor of that series changes by one unit. The economic factors have different units, so compare ",
-        "loadings only within a column, across sectors.\n");
+    println(io);
     return nothing;
 end
 
@@ -291,8 +320,8 @@ the report to `path`.
 
 ### Arguments
 
-- `track`: `"standard"` (the first table, with the real market and two synthetic markets) or
-  `"advanced"` (both tables, and two more synthetic markets).
+- `track`: `"standard"` (the first table, with the real market and two models) or `"advanced"` (both
+  tables, and three more models).
 - `settings`: The settings from `load_config`.
 - `path`: The Markdown file to write.
 """
