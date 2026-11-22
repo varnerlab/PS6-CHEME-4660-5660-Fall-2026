@@ -15,9 +15,9 @@
 """
     least_squares_fit(X::Matrix{Float64}, y::Vector{Float64}) -> Vector{Float64}
 
-Find the least-squares solution `θ`, the `θ` that makes `X * θ` as close as possible to `y`, by
-solving the normal equations `transpose(X) * X * θ = transpose(X) * y`. Fitting steps 1, 2, and 3
-use this one solve, with a different `X` and `y` in each step:
+Find the `θ` that makes `X * θ` as close as possible to `y`, by solving the normal equations
+`transpose(X) * X * θ = transpose(X) * y`. Fitting steps 1, 2, and 3 use this one solve, with a
+different `X` and `y` in each step:
 
 - Step 1, the baseline and market sensitivity of stock `i`: `X` is the design matrix `[1, g_m]`
   (days × 2), `y` is the growth rates of stock `i`, and `θ` is `(α_i, β_i)`.
@@ -28,7 +28,7 @@ use this one solve, with a different `X` and `y` in each step:
 
 ### Arguments
 
-- `X`: The matrix of the problem, one row per observation and one column per unknown.
+- `X`: The known matrix: one row per observation, and one column per entry of `θ`.
 - `y`: The observations, one per row of `X`.
 
 ### Returns
@@ -37,14 +37,15 @@ use this one solve, with a different `X` and `y` in each step:
 
 ### Method
 
-Form the matrix `transpose(X) * X` and the vector `transpose(X) * y`, and solve the linear system
-with the backslash operator.
+`transpose(X)` swaps the rows and the columns of `X`, and `*` multiplies a matrix by a matrix or by
+a vector. The backslash between `(transpose(X) * X)` and `(transpose(X) * y)` solves the normal
+equations for `θ`.
 
 ### Course references
 
 - Course lecture L14a, section 'Building a General Factor Model', fitting algorithm, steps 1, 2, and 3.
 - Course example 'Estimating Single Index Models from Historical Data' (L6b), Task 1, 'Solve three
-  ways': the normal-equations line `(transpose(X̂)*X̂) \\ (transpose(X̂)*y)`.
+  ways': the line that solves the normal equations.
 - PS6 companion: slide 6, 'One solve for fitting steps 1, 2, and 3'.
 """
 function least_squares_fit(X::Matrix{Float64}, y::Vector{Float64})::Vector{Float64}
@@ -78,8 +79,9 @@ sector `s`, and `0.0` otherwise.
 
 ### Method
 
-Start from a matrix of zeros. For each stock, find the column of the stock's sector in
-`sector_names`, and set the stock's entry in that column to `1.0`.
+The supplied code starts from a matrix of zeros and visits each stock `i`. The inner loop compares
+the sector of stock `i`, `sectors[i]`, with each name in `sector_names`: `==` is `true` when two
+texts are the same. `B[i, s] = 1.0` sets the entry in row `i` and column `s` of `B`.
 
 ### Course references
 
@@ -126,17 +128,17 @@ end
     compose_growth_rates(X::Matrix{Float64}, θ::Vector{Float64}, F::Matrix{Float64},
         δ::Vector{Float64}, u::Vector{Float64}) -> Vector{Float64}
 
-Compose the growth rates of one synthetic stock (sampling step 3): the market part `X θ`, plus
-the sector part `F δ`, plus the stock-specific part `u`.
+Compose the growth rates of one synthetic stock (sampling step 3). `X * θ` gives the baseline and the
+market part, `F * δ` gives the sector part, and `u` is the stock-specific part.
 
 ### Arguments
 
-- `X`: The synthetic design matrix `[1, g_m]`, days × columns.
+- `X`: The synthetic design matrix `[1, g_m]`, days × 2.
 - `θ`: The baseline and market sensitivity of the stock, `(α, β)`.
-- `F`: The synthetic sector factors, days × sectors. `F` has zero columns when a market has no
-  sector factors.
+- `F`: The synthetic sector factors, days × sectors. `F` has zero columns when the model has no
+  sector factors, as in the single index model.
 - `δ`: The sector loadings of the stock, one per column of `F`.
-- `u`: The synthetic stock-specific growth rates of the stock, one per day (1/yr).
+- `u`: The synthetic stock-specific part of the stock, one value per day (1/yr).
 
 ### Returns
 
@@ -144,8 +146,8 @@ the sector part `F δ`, plus the stock-specific part `u`.
 
 ### Method
 
-Multiply `X` by `θ` and `F` by `δ`. Each product holds one value per day. Add the two products
-and `u`.
+`X * θ` and `F * δ` each multiply a matrix by a vector, and each gives one value per day. `+` adds
+the two products and `u`, day by day. When `F` has zero columns, `F * δ` is a vector of zeros.
 
 ### Course references
 
@@ -155,7 +157,7 @@ and `u`.
 function compose_growth_rates(X::Matrix{Float64}, θ::Vector{Float64}, F::Matrix{Float64},
     δ::Vector{Float64}, u::Vector{Float64})::Vector{Float64}
 
-    # TODO: Add the market part, the sector part, and the stock-specific part.
+    # TODO: Add the parts X * θ, F * δ, and u.
     # Replace the error line below with this line:
     #     g = X * θ + F * δ + u;
     g = error("Complete compose_growth_rates: compose the growth rates.");

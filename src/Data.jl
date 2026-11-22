@@ -17,7 +17,7 @@ const FRED_LEVELS_PATH = joinpath(@__DIR__, "..", "data", "fred-levels-2014-2024
     load_universe(settings::NamedTuple) -> NamedTuple
 
 Load the market: SPY and every stock with the full 2014 to 2024 price history and a GICS sector,
-one ticker per firm. This is the universe of the L14a example 'A Synthetic Market of Many Stocks'.
+one ticker per company. This is the universe of the L14a example 'A Synthetic Market of Many Stocks'.
 
 ### Arguments
 
@@ -51,7 +51,7 @@ function load_universe(settings::NamedTuple)::NamedTuple
         firm_of[row.Symbol] = row.CIK;
     end
 
-    # Keep every stock with the full price history and a sector, one ticker per firm. SPY has a price on
+    # Keep every stock with the full price history and a sector, one ticker per company. SPY has a price on
     # every trading day, so a stock has the full history when it has as many prices as SPY.
     # sort(collect(keys(dataset))) lists the tickers in alphabetical order, so the stocks always come in
     # the same order -
@@ -66,8 +66,8 @@ function load_universe(settings::NamedTuple)::NamedTuple
         has_history = nrow(dataset[ticker]) == number_of_prices;
         if is_stock && has_sector && has_history
 
-            # Keep the first ticker of each firm, and skip the firm's other tickers. firms_seen lists
-            # the CIK numbers of the firms kept so far -
+            # Keep the first ticker of each company, and skip the company's other tickers. firms_seen
+            # lists the CIK numbers of the companies kept so far -
             if !(firm_of[ticker] in firms_seen)
                 push!(tickers, ticker);
                 push!(firms_seen, firm_of[ticker]);
@@ -102,7 +102,8 @@ end
 """
     load_fred_levels(settings::NamedTuple) -> Matrix{Float64}
 
-Load the level of each FRED series in `settings.fred_series` on each SPY price day.
+Load the level of each FRED series in `settings.fred_series` on each trading day: each day with a
+SPY price.
 
 ### Arguments
 
@@ -110,12 +111,13 @@ Load the level of each FRED series in `settings.fred_series` on each SPY price d
 
 ### Returns
 
-- The levels, price days × series, with the columns in the order of `settings.fred_series`.
+- The levels: one row per trading day, and one column per series, in the order of
+  `settings.fred_series`.
 """
 function load_fred_levels(settings::NamedTuple)::Matrix{Float64}
 
-    # Read the FRED file into a table: one row per SPY price day, and one column per FRED series, named
-    # by its FRED code, such as DGS10 -
+    # Read the FRED file into a table: one row per trading day, and one column per FRED series, named by
+    # its FRED code, such as DGS10 -
     table = CSV.read(FRED_LEVELS_PATH, DataFrame);
 
     # Copy the column of each series in settings.fred_series, in that order. table[:, name] reads every

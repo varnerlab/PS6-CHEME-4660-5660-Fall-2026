@@ -27,7 +27,7 @@ benchmark_ticker = "SPY"
 # FRED series used as economic factors on the Advanced track: column names in data/fred-levels-2014-2024.csv.
 fred_series = ["DGS10", "T10YIE", "DCOILBRENTEU", "DTWEXBGS"]
 
-# How each FRED series becomes a daily factor: "change" for a rate (the daily change), "growth" for a price (the growth rate).
+# How each FRED series becomes a daily factor: "change" for a rate (the daily change), "growth" for a price or an index (the growth rate).
 fred_kinds = ["change", "change", "growth", "growth"]
 
 # The name of each FRED series in the report.

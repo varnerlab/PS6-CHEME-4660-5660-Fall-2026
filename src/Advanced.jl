@@ -18,12 +18,12 @@
 """
     least_squares_fit(X::Matrix{Float64}, y::Vector{Float64}) -> Vector{Float64}
 
-Find the least-squares solution `θ`, the `θ` that makes `X * θ` as close as possible to `y`, by
-solving the normal equations `transpose(X) * X * θ = transpose(X) * y`. Fitting steps 1, 2, and 3
-use this one solve, with a different `X` and `y` in each step:
+Find the `θ` that makes `X * θ` as close as possible to `y`, by solving the normal equations
+`transpose(X) * X * θ = transpose(X) * y`. Fitting steps 1, 2, and 3 use this one solve, with a
+different `X` and `y` in each step:
 
-- Step 1, the market and economic loadings of stock `i`: `X` is the design matrix
-  `[1, g_m, x_1, ..., x_K]` (days × columns), `y` is the growth rates of stock `i`, and `θ` is
+- Step 1, the baseline, market sensitivity, and economic loadings of stock `i`: `X` is the design
+  matrix `[1, g_m, x_1, ..., x_K]` (days × columns), `y` is the growth rates of stock `i`, and `θ` is
   `(α_i, β_i, η_i1, ..., η_iK)`. Without the FRED series, `X` is `[1, g_m]`.
 - Step 2, the sector factors on day `t`: `X` is the sector matrix `B` (stocks × sectors), `y` is the
   residual of every stock on day `t`, and `θ` is the sector factors on day `t`.
@@ -32,7 +32,7 @@ use this one solve, with a different `X` and `y` in each step:
 
 ### Arguments
 
-- `X`: The matrix of the problem, one row per observation and one column per unknown.
+- `X`: The known matrix: one row per observation, and one column per entry of `θ`.
 - `y`: The observations, one per row of `X`.
 
 ### Returns
@@ -41,14 +41,15 @@ use this one solve, with a different `X` and `y` in each step:
 
 ### Method
 
-Form the matrix `transpose(X) * X` and the vector `transpose(X) * y`, and solve the linear system
-with the backslash operator.
+`transpose(X)` swaps the rows and the columns of `X`, and `*` multiplies a matrix by a matrix or by
+a vector. The backslash between `(transpose(X) * X)` and `(transpose(X) * y)` solves the normal
+equations for `θ`.
 
 ### Course references
 
 - Course lecture L14a, section 'Building a General Factor Model', fitting algorithm, steps 1, 2, and 3.
 - Course example 'Estimating Single Index Models from Historical Data' (L6b), Task 1, 'Solve three
-  ways': the normal-equations line `(transpose(X̂)*X̂) \\ (transpose(X̂)*y)`.
+  ways': the line that solves the normal equations.
 - PS6 companion: slide 6, 'One solve for fitting steps 1, 2, and 3'.
 """
 function least_squares_fit(X::Matrix{Float64}, y::Vector{Float64})::Vector{Float64}
@@ -82,8 +83,9 @@ sector `s`, and `0.0` otherwise.
 
 ### Method
 
-Start from a matrix of zeros. For each stock, find the column of the stock's sector in
-`sector_names`, and set the stock's entry in that column to `1.0`.
+The supplied code starts from a matrix of zeros and visits each stock `i`. The inner loop compares
+the sector of stock `i`, `sectors[i]`, with each name in `sector_names`: `==` is `true` when two
+texts are the same. `B[i, s] = 1.0` sets the entry in row `i` and column `s` of `B`.
 
 ### Course references
 
@@ -130,18 +132,18 @@ end
     compose_growth_rates(X::Matrix{Float64}, θ::Vector{Float64}, F::Matrix{Float64},
         δ::Vector{Float64}, u::Vector{Float64}) -> Vector{Float64}
 
-Compose the growth rates of one synthetic stock (sampling step 3): the market and economic part
-`X θ`, plus the sector part `F δ`, plus the stock-specific part `u`.
+Compose the growth rates of one synthetic stock (sampling step 3). `X * θ` gives the baseline, the
+market part, and the economic part, `F * δ` gives the sector part, and `u` is the stock-specific part.
 
 ### Arguments
 
 - `X`: The synthetic design matrix `[1, g_m, x_1, ..., x_K]`, days × columns. Without the FRED
   series, `X` is `[1, g_m]`.
 - `θ`: The baseline, market sensitivity, and economic loadings of the stock, `(α, β, η_1, ..., η_K)`.
-- `F`: The synthetic sector factors, days × sectors. `F` has zero columns when a market has no
-  sector factors.
+- `F`: The synthetic sector factors, days × sectors. `F` has zero columns when the model has no
+  sector factors, as in the single index model.
 - `δ`: The sector loadings of the stock, one per column of `F`.
-- `u`: The synthetic stock-specific growth rates of the stock, one per day (1/yr).
+- `u`: The synthetic stock-specific part of the stock, one value per day (1/yr).
 
 ### Returns
 
@@ -149,8 +151,8 @@ Compose the growth rates of one synthetic stock (sampling step 3): the market an
 
 ### Method
 
-Multiply `X` by `θ` and `F` by `δ`. Each product holds one value per day. Add the two products
-and `u`.
+`X * θ` and `F * δ` each multiply a matrix by a vector, and each gives one value per day. `+` adds
+the two products and `u`, day by day. When `F` has zero columns, `F * δ` is a vector of zeros.
 
 ### Course references
 
@@ -160,7 +162,7 @@ and `u`.
 function compose_growth_rates(X::Matrix{Float64}, θ::Vector{Float64}, F::Matrix{Float64},
     δ::Vector{Float64}, u::Vector{Float64})::Vector{Float64}
 
-    # TODO: Add the market and economic part, the sector part, and the stock-specific part.
+    # TODO: Add the parts X * θ, F * δ, and u.
     # Replace the error line below with this line:
     #     g = X * θ + F * δ + u;
     g = error("Complete compose_growth_rates: compose the growth rates.");
@@ -177,7 +179,7 @@ Unmix the factors (fitting step 4): turn the correlated factors in `Φ` into unc
 ### Arguments
 
 - `Φ`: The factor matrix `[g_m, x_1, ..., x_K, F]`, days × factors: the market, the economic
-  factors, and the sector factors. A market without economic factors or without sector factors
+  factors, and the sector factors. A model without economic factors or without sector factors
   leaves those columns out.
 
 ### Returns
@@ -185,13 +187,17 @@ Unmix the factors (fitting step 4): turn the correlated factors in `Φ` into unc
 - `μ`: The average of each column of `Φ`.
 - `A`: The lower-triangular Cholesky factor of the covariance matrix of `Φ`, so that
   `A * transpose(A)` equals the covariance matrix.
-- `Z`: The uncorrelated factors, days × factors. Each column has an average of 0 and a variance of 1.
+- `Z`: The uncorrelated factors, days × factors. Each column has an average of `0` and a variance
+  of `1`, and the correlation of any two columns is `0`.
 
 ### Method
 
-Compute the average of each column of `Φ`, and the covariance matrix of `Φ`. Factor the covariance
-matrix with `cholesky`, and keep its lower factor as an ordinary matrix with `|> Matrix`. Subtract
-`transpose(μ)` from each row of `Φ`, then divide on the right by `transpose(A)` with the `/` operator.
+`mean(Φ, dims = 1)` averages each column of `Φ` and returns one row, and `vec` turns that row into
+a vector. The supplied line `Σ = Symmetric(cov(Φ))` computes the covariance matrix of `Φ`.
+`cholesky(Σ).L` is the lower Cholesky factor of `Σ`, and `|> Matrix` passes that factor to `Matrix`,
+which stores it as an ordinary matrix. In `Φ .- transpose(μ)`, the dot subtracts `μ` from every row
+of `Φ`. Dividing on the right by `transpose(A)` with `/` multiplies by the inverse of `transpose(A)`,
+without computing the inverse.
 
 ### Course references
 
@@ -228,7 +234,7 @@ end
     mix_factors(Z::Matrix{Float64}, μ::Vector{Float64}, A::Matrix{Float64}) -> Matrix{Float64}
 
 Mix draws of the uncorrelated factors back into correlated factors (sampling step 1): multiply `Z`
-by `transpose(A)`, and add the averages `transpose(μ)` to each row.
+by `transpose(A)`, and add the averages `μ` to each row.
 
 ### Arguments
 
@@ -243,7 +249,9 @@ by `transpose(A)`, and add the averages `transpose(μ)` to each row.
 
 ### Method
 
-Multiply `Z` by `transpose(A)`. Add `transpose(μ)` to each row of the product.
+Multiplying by `transpose(A)` undoes the division by `transpose(A)` in `unmix_factors`: it mixes
+the columns of `Z` back into correlated factors. In `transpose(μ) .+ Z * transpose(A)`, the dot adds
+`μ` to every row of the product.
 
 ### Course references
 
@@ -267,13 +275,14 @@ end
     economic_factor(levels::Vector{Float64}, kind::String, Δt::Float64) -> Vector{Float64}
 
 Turn a FRED series, one level per trading day, into a daily economic factor. A rate becomes its
-daily change, and a price becomes its growth rate, like the growth rates of the stocks.
+daily change, and a price or an index becomes its growth rate, like the growth rates of the stocks.
 
 ### Arguments
 
 - `levels`: The level of the series on each trading day, such as the 10-year Treasury yield
   (percent) or the Brent oil price (USD/barrel).
-- `kind`: `"change"` for a rate, or `"growth"` for a price.
+- `kind`: `"change"` for a rate, or `"growth"` for a price or an index, such as the Brent oil
+  price or the US dollar index.
 - `Δt`: One trading day, in years (`1/252`).
 
 ### Returns
@@ -286,8 +295,10 @@ daily change, and a price becomes its growth rate, like the growth rates of the 
 
 ### Method
 
-For `"change"`, `x[t]` is `levels[t+1] - levels[t]`. For `"growth"`, `x[t]` is the growth rate
-`log(levels[t+1] / levels[t]) / Δt` (1/yr).
+`levels[t+1]` is the level on the day after day `t`, and `log` is the natural logarithm. For
+`"change"`, `x[t]` is the change in the level from day `t` to day `t + 1`, in the units of the
+level. For `"growth"`, `x[t]` is the growth rate from day `t` to day `t + 1` (1/yr): the log of the
+ratio of the two levels, divided by one trading day `Δt`.
 
 ### Course references
 
@@ -314,10 +325,10 @@ function economic_factor(levels::Vector{Float64}, kind::String, Δt::Float64)::V
             #     x[t] = levels[t+1] - levels[t];
             error("Complete economic_factor: the daily change of a rate.");
         else
-            # TODO 2: The growth rate of the price from day t to day t + 1.
+            # TODO 2: The growth rate of the level from day t to day t + 1.
             # Replace the error line below with this line:
             #     x[t] = log(levels[t+1] / levels[t]) / Δt;
-            error("Complete economic_factor: the growth rate of a price.");
+            error("Complete economic_factor: the growth rate of a price or an index.");
         end
     end
 

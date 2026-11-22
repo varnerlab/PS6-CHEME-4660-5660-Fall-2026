@@ -45,22 +45,23 @@ Turn each FRED series into a daily economic factor with `economic_factor`.
 
 ### Arguments
 
-- `levels`: The levels from `load_fred_levels`, price days × series.
+- `levels`: The levels from `load_fred_levels`: one row per trading day, and one column per series.
 - `settings`: The settings from `load_config`. The function uses `fred_kinds` and `Δt`.
 
 ### Returns
 
-- The economic factors, growth-rate days × series: one row fewer than `levels`.
+- The economic factors: one row per day after the first, and one column per series. The factors have
+  one row fewer than `levels`.
 """
 function economic_factors(levels::Matrix{Float64}, settings::NamedTuple)::Matrix{Float64}
 
-    # Make room for the factors: one column per series, and one row per growth-rate day. There is one
-    # growth-rate day fewer than price days, because each growth rate needs the price of the day before -
+    # Make room for the factors: one column per series, and one row per day after the first, because each
+    # daily change or growth rate needs the level of the day before -
     number_of_series = size(levels, 2);
     x = zeros(size(levels, 1) - 1, number_of_series);
 
     # Turn column k of the levels into column k of the factors: a daily change for a rate, or a growth
-    # rate for a price, as settings.fred_kinds[k] says -
+    # rate for a price or an index, as settings.fred_kinds[k] says -
     for k ∈ 1:number_of_series
         x[:, k] = economic_factor(levels[:, k], settings.fred_kinds[k], settings.Δt);
     end
@@ -87,7 +88,8 @@ Run fitting steps 1, 2, and 3 of the general factor model. Each step calls `leas
 
 - A `NamedTuple` with the fields:
   - `X`: The design matrix `[1, g_m, x_1, ..., x_K]`, days × columns.
-  - `Θ`: The baseline, market sensitivity, and economic loadings of each stock, columns × stocks.
+  - `Θ`: The baseline, market sensitivity, and economic loadings of each stock: one row per column
+    of `X`, and one column per stock.
   - `E`: The residual of each stock after step 1, days × stocks.
   - `F`: The sector factors, days × sectors (zero columns without sectors).
   - `Δ`: The sector loadings of each stock, sectors × stocks (zero rows without sectors).
@@ -153,8 +155,9 @@ end
 """
     fit_jump_model(series::Vector{Float64}, settings::NamedTuple) -> JumpHMM.MyJumpHiddenMarkovModel
 
-Fit a single-asset jump hidden Markov model to one series, as in the L13a and L14a examples, with
-the jump settings of the tuned SPY model and no tuning.
+Fit a single-asset jump hidden Markov model to one series, as in the L13a and L14a examples. Every
+series uses the same settings: `ϵ` and `λ` come from the tuned SPY model of L13a, and the function
+does not tune them for each series.
 
 ### Arguments
 
@@ -278,7 +281,7 @@ function synthetic_markets(fit::NamedTuple, settings::NamedTuple; cholesky_step:
 
         # Split the synthetic factors in the same order as Φ. The first columns, with a new column of ones
         # in front, give the synthetic design matrix [1, g_m, x_1, ..., x_K]. The remaining columns are the
-        # synthetic sector factors; (number_of_market_columns + 1):end runs from the first of them to the last -
+        # synthetic sector factors, from column number_of_market_columns + 1 to the last column (end) -
         X_synthetic = hcat(ones(number_of_days), Φ_synthetic[:, 1:number_of_market_columns]);
         F_synthetic = Φ_synthetic[:, (number_of_market_columns + 1):end];
 
@@ -315,8 +318,8 @@ Measure how the stocks of one market move together, real or synthetic: the numbe
 - A `NamedTuple` with the fields:
   - `same_sector`: The average correlation of two different stocks in the same sector.
   - `different_sectors`: The average correlation of two stocks in different sectors.
-  - `pairs`: For each pair of sectors, the average correlation of a stock in the first sector and a
-    stock in the second sector.
+  - `pairs`: For each pair of sectors in `pair_first` and `pair_second`, the average correlation of a
+    stock in the first sector and a stock in the second sector.
 """
 function market_statistics(G::Matrix{Float64}, universe::NamedTuple, settings::NamedTuple)::NamedTuple
 
@@ -420,7 +423,7 @@ end
 """
     r_squared(g::Vector{Float64}, residual::Vector{Float64}) -> Float64
 
-The fraction of the variance of a stock's growth rates that a fit explains.
+Compute the fraction of the variance of a stock's growth rates that a fit explains.
 
 ### Arguments
 

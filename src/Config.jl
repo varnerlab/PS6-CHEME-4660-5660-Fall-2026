@@ -43,9 +43,12 @@ Read one setting from a parsed TOML file and convert it to type `T`.
 
 ### Returns
 
-- The setting converted to `T`. Throws an `ArgumentError` when the setting is
-  missing or cannot be converted. An integer setting must be written as a whole
-  number (`100`, not `100.0`).
+- The setting, converted to `T`.
+
+### Errors
+
+- An `ArgumentError` when the setting is missing or cannot be converted to `T`. An integer setting
+  must be written as a whole number (`100`, not `100.0`).
 """
 function config_setting(settings::Dict, key::String, T::Type)
 
@@ -90,8 +93,12 @@ Read one list of text values from a parsed TOML file.
 
 ### Returns
 
-- A `Vector{String}` with the entries of the list. Throws an `ArgumentError` when
-  the setting is missing, is not a list, or has an entry that is not text in quotes.
+- The entries of the list, as a `Vector{String}`.
+
+### Errors
+
+- An `ArgumentError` when the setting is missing, is not a list, or has an entry that is not text in
+  quotes.
 """
 function config_list(settings::Dict, key::String)::Vector{String}
 
@@ -115,7 +122,16 @@ end
 """
     check_setting(ok::Bool, message::String)
 
-Throw an `ArgumentError` with `message` when a setting fails a check.
+Stop with a one-sentence message when a setting fails a check.
+
+### Arguments
+
+- `ok`: `true` when the setting passes the check.
+- `message`: The message to show when the setting fails the check.
+
+### Errors
+
+- An `ArgumentError` with `message` when `ok` is `false`.
 """
 function check_setting(ok::Bool, message::String)
 
@@ -129,20 +145,33 @@ end
 """
     load_config(path::AbstractString) -> NamedTuple
 
-Read a TOML settings file and check every value.
+Read a TOML settings file and check every value. The file spells `ν`, `ϵ`, and `λ` as `nu`,
+`epsilon`, and `lambda`.
 
 ### Arguments
 
-- `path`: Location of the settings file, such as `config/defaults.toml`.
+- `path`: The location of the settings file, such as `config/defaults.toml`.
 
 ### Returns
 
-- A `NamedTuple` with the fields `Δt` (one trading day, `1/steps_per_year`, in yr),
-  `number_of_states`, `ν`, `ϵ`, and `λ` (the settings of each jump hidden Markov
-  model), `number_of_paths`, `seed`, `benchmark_ticker`, the FRED lists
-  `fred_series`, `fred_kinds`, and `fred_names`, and the sector lists `pair_first`
-  and `pair_second`. Throws an `ArgumentError` with a one-sentence message when a
-  setting is missing or not valid.
+- A `NamedTuple` with the fields:
+  - `Δt`: One trading day, `1/steps_per_year` (yr).
+  - `number_of_states`: The number of hidden states of each jump hidden Markov model.
+  - `ν`: The degrees of freedom of the Student-t distribution of each hidden state.
+  - `ϵ`: The probability that a jump episode starts on a given day.
+  - `λ`: The mean length of a jump episode (trading days).
+  - `number_of_paths`: The number of synthetic markets drawn from each model.
+  - `seed`: The seed of the random numbers, so that every run draws the same synthetic markets.
+  - `benchmark_ticker`: The ticker of the market, `"SPY"`.
+  - `fred_series`: The FRED code of each economic factor, such as `"DGS10"`.
+  - `fred_kinds`: How each FRED series becomes a daily factor: `"change"` or `"growth"`.
+  - `fred_names`: The name of each FRED series in the report.
+  - `pair_first` and `pair_second`: The pairs of sectors in the report. Pair `k` is `pair_first[k]`
+    and `pair_second[k]`.
+
+### Errors
+
+- An `ArgumentError` with a one-sentence message when a setting is missing or not valid.
 """
 function load_config(path::AbstractString)::NamedTuple
 
@@ -172,7 +201,8 @@ function load_config(path::AbstractString)::NamedTuple
     pair_first = config_list(settings, "pair_first");
     pair_second = config_list(settings, "pair_second");
 
-    # Check the single settings. The FRED file holds one row per SPY price day, so the market must be SPY -
+    # Check the single settings. The market must be SPY, because the FRED file holds one row for each
+    # trading day of SPY -
     check_setting(steps_per_year >= 1, "The steps_per_year must be at least 1.");
     check_setting(number_of_states >= 2, "The number_of_states must be at least 2.");
     check_setting(isfinite(nu) && nu > 0, "The nu must be a positive number.");
@@ -181,8 +211,9 @@ function load_config(path::AbstractString)::NamedTuple
     check_setting(number_of_paths >= 1, "The number_of_paths must be at least 1.");
     check_setting(benchmark_ticker == "SPY", "The benchmark_ticker must be \"SPY\", because the FRED file holds one row for each SPY price day.");
 
-    # Check the FRED series: at least one, each a column of the FRED file named once, each with a kind and a name.
-    # unique removes repeated names, so a list with a repeat is longer than its unique names -
+    # Check the FRED series: at least one series, each a column of the FRED file, each named only once, and
+    # each with a kind and a name. unique removes repeated names, so a list with a repeat is longer than
+    # its unique names -
     check_setting(!isempty(fred_series), "The fred_series list must name at least one series.");
     check_setting(length(unique(fred_series)) == length(fred_series), "Each series in fred_series must appear only once.");
     for series ∈ fred_series
@@ -219,13 +250,16 @@ end
 """
     config_hash(path::AbstractString) -> String
 
-Compute the SHA-256 hash of a settings file, so a run records exactly which settings it used.
+Compute the SHA-256 hash of a settings file, so that a run records exactly which settings it used.
+
+### Arguments
+
+- `path`: The location of the settings file.
 
 ### Returns
 
-- The SHA-256 hash of the file as a 64-character hex string. Windows line
-  endings are changed to `\\n` first, so a copy saved on Windows has the same
-  hash.
+- The SHA-256 hash of the file, as a string of 64 hexadecimal characters. Windows line endings are
+  changed to Unix line endings first, so that a copy saved on Windows has the same hash.
 """
 function config_hash(path::AbstractString)::String
 
