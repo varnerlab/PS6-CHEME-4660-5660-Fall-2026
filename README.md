@@ -68,8 +68,8 @@ package, and the four FRED series come in
    | Advanced | Six functions in [src/Advanced.jl](src/Advanced.jl): the same three plus `unmix_factors`, `mix_factors`, and `economic_factor` | [responses/Advanced.md](responses/Advanced.md) |
 
 5. Answer Question 1, your prediction, before you write any code.
-6. Replace each `error("Complete ...")` line with your calculation. Follow the
-   TODO hint above the line, then delete the TODO.
+6. Replace each `error("Complete ...")` line with the code that the TODO comment
+   above it gives, without the `#` in front.
 7. Run the checker as you work:
 
    ```text

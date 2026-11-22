@@ -4,21 +4,23 @@
 # in fitting steps 1, 2, and 3, and compose_growth_rates to build each synthetic stock.
 # It calls unmix_factors before it fits the jump hidden Markov models of the factors, mix_factors
 # after it draws the factors, and economic_factor to turn each FRED series into a daily factor.
-# Keep the function names, arguments, return types, and docstrings.
-# Replace each error("Complete ...") line with your calculation. The rest of each function is supplied.
+#
+# How to complete a function: each TODO comment gives the exact code. Replace the error("Complete ...")
+# line below the comment with that code, without the # in front, and keep the indentation. The rest of
+# each function is supplied. Keep the function names, arguments, return types, and docstrings.
+#
 # Save your code, then run from the PS6 folder:
 # julia --project=. --startup-file=no check_submission.jl
 #
 # The Course references at the end of each docstring name the course material that does the same
-# calculation, and the companion slide with the formulas. Copy only the lines you need, and rename
-# the variables to match this file.
+# calculation, and the companion slide with the formulas.
 
 """
     least_squares_fit(X::Matrix{Float64}, y::Vector{Float64}) -> Vector{Float64}
 
-Solve the least-squares problem `X'X θ = X'y` for `θ`. When `X` has full column rank, as in every
-step of the general factor model, the answer equals the pseudo-inverse solution `pinv(X) * y`.
-Fitting steps 1, 2, and 3 use this one solve, with a different `X` and `y` in each step:
+Find the least-squares solution `θ`, the `θ` that makes `X * θ` as close as possible to `y`, by
+solving the normal equations `transpose(X) * X * θ = transpose(X) * y`. Fitting steps 1, 2, and 3
+use this one solve, with a different `X` and `y` in each step:
 
 - Step 1, the market and economic loadings of stock `i`: `X` is the design matrix
   `[1, g_m, x_1, ..., x_K]` (days × columns), `y` is the growth rates of stock `i`, and `θ` is
@@ -52,7 +54,8 @@ with the backslash operator.
 function least_squares_fit(X::Matrix{Float64}, y::Vector{Float64})::Vector{Float64}
 
     # TODO: Solve the normal equations for θ.
-    # Hint: θ = (transpose(X) * X) \ (transpose(X) * y);
+    # Replace the error line below with this line:
+    #     θ = (transpose(X) * X) \ (transpose(X) * y);
     θ = error("Complete least_squares_fit: solve the normal equations for θ.");
 
     return θ;
@@ -102,10 +105,10 @@ function sector_matrix(sectors::Vector{String}, sector_names::Vector{String})::M
         s = 0;
         for k ∈ 1:number_of_sectors
             # TODO 1: Set s to k when sector_names[k] is the sector of stock i.
-            # Hint:
-            # if sector_names[k] == sectors[i]
-            #     s = k;
-            # end
+            # Replace the error line below with these three lines:
+            #     if sector_names[k] == sectors[i]
+            #         s = k;
+            #     end
             error("Complete sector_matrix: find the column of the stock's sector.");
         end
 
@@ -115,7 +118,8 @@ function sector_matrix(sectors::Vector{String}, sector_names::Vector{String})::M
         end
 
         # TODO 2: Set the entry of stock i in column s to 1.0.
-        # Hint: B[i, s] = 1.0;
+        # Replace the error line below with this line:
+        #     B[i, s] = 1.0;
         error("Complete sector_matrix: set B[i, s] to 1.0.");
     end
 
@@ -157,7 +161,8 @@ function compose_growth_rates(X::Matrix{Float64}, θ::Vector{Float64}, F::Matrix
     δ::Vector{Float64}, u::Vector{Float64})::Vector{Float64}
 
     # TODO: Add the market and economic part, the sector part, and the stock-specific part.
-    # Hint: g = X * θ + F * δ + u;
+    # Replace the error line below with this line:
+    #     g = X * θ + F * δ + u;
     g = error("Complete compose_growth_rates: compose the growth rates.");
 
     return g;
@@ -199,18 +204,21 @@ matrix with `cholesky`, and keep its lower factor as an ordinary matrix with `|>
 function unmix_factors(Φ::Matrix{Float64})::Tuple{Vector{Float64},Matrix{Float64},Matrix{Float64}}
 
     # TODO 1: The average of each column of Φ, as a vector.
-    # Hint: μ = vec(mean(Φ, dims = 1));
+    # Replace the error line below with this line:
+    #     μ = vec(mean(Φ, dims = 1));
     μ = error("Complete unmix_factors: the column averages of Φ.");
 
     # The covariance matrix of Φ; Symmetric tells cholesky that the matrix is symmetric -
     Σ = Symmetric(cov(Φ));
 
     # TODO 2: The lower Cholesky factor of Σ, as an ordinary matrix.
-    # Hint: A = cholesky(Σ).L |> Matrix;
+    # Replace the error line below with this line:
+    #     A = cholesky(Σ).L |> Matrix;
     A = error("Complete unmix_factors: the lower Cholesky factor of Σ.");
 
     # TODO 3: Subtract the averages from each row of Φ, then divide on the right by transpose(A).
-    # Hint: Z = (Φ .- transpose(μ)) / transpose(A);
+    # Replace the error line below with this line:
+    #     Z = (Φ .- transpose(μ)) / transpose(A);
     Z = error("Complete unmix_factors: compute Z.");
 
     return (μ, A, Z);
@@ -248,7 +256,8 @@ Multiply `Z` by `transpose(A)`. Add `transpose(μ)` to each row of the product.
 function mix_factors(Z::Matrix{Float64}, μ::Vector{Float64}, A::Matrix{Float64})::Matrix{Float64}
 
     # TODO: Multiply Z by transpose(A), then add transpose(μ) to each row.
-    # Hint: Φ = transpose(μ) .+ Z * transpose(A);
+    # Replace the error line below with this line:
+    #     Φ = transpose(μ) .+ Z * transpose(A);
     Φ = error("Complete mix_factors: mix the draws.");
 
     return Φ;
@@ -301,11 +310,13 @@ function economic_factor(levels::Vector{Float64}, kind::String, Δt::Float64)::V
     for t ∈ 1:number_of_days
         if kind == "change"
             # TODO 1: The change in the level from day t to day t + 1.
-            # Hint: x[t] = levels[t+1] - levels[t];
+            # Replace the error line below with this line:
+            #     x[t] = levels[t+1] - levels[t];
             error("Complete economic_factor: the daily change of a rate.");
         else
             # TODO 2: The growth rate of the price from day t to day t + 1.
-            # Hint: x[t] = log(levels[t+1] / levels[t]) / Δt;
+            # Replace the error line below with this line:
+            #     x[t] = log(levels[t+1] / levels[t]) / Δt;
             error("Complete economic_factor: the growth rate of a price.");
         end
     end
