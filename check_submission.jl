@@ -47,7 +47,7 @@ running checks or reporting results, even when loading the source failed.
 
 ### Errors
 
-Raises an error if an existing file cannot be removed. The checker reports
+Throws an error if an existing file cannot be removed. The checker reports
 this as a setup error.
 """
 function clear_previous_results(root::String)::Nothing
@@ -152,7 +152,7 @@ Marks missing required files as MISSING.
 
 ### Errors
 
-Raises an error if a file cannot be read or the record cannot be written.
+Throws an error if a file cannot be read or the record cannot be written.
 """
 function write_file_record(io::IO, root::String, track::String, source_path::String)::Nothing
 
@@ -206,7 +206,7 @@ SHA-256 value of each recorded file from `write_file_record`.
 
 ### Errors
 
-Raises an error if a file cannot be read or the record cannot be written.
+Throws an error if a file cannot be read or the record cannot be written.
 """
 function write_manifest(path::String, record::NamedTuple)::Nothing
 

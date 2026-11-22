@@ -118,7 +118,7 @@ end
 """
     check_sector_matrix_unknown() -> Bool
 
-A stock whose sector is not in `sector_names` raises an `ArgumentError`.
+A stock whose sector is not in `sector_names` throws an `ArgumentError`.
 """
 function check_sector_matrix_unknown()::Bool
 

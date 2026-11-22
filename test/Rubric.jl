@@ -189,7 +189,7 @@ whether an answer is correct; the teaching team reviews the answers.
 
 ### Errors
 
-An unreadable file raises a file-read error.
+An unreadable file throws a file-read error.
 """
 function response_issues(path::String)::Vector{String}
 

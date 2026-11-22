@@ -198,7 +198,7 @@ end
     check_factor_type_and_kind() -> Bool
 
 `economic_factor` returns a `Vector{Float64}` and leaves the levels unchanged, and a kind other
-than `"change"` or `"growth"` raises an `ArgumentError`.
+than `"change"` or `"growth"` throws an `ArgumentError`.
 """
 function check_factor_type_and_kind()::Bool
 
